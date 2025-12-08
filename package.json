@@ -1,0 +1,23 @@
+{
+    "name": "credity-monorepo",
+    "version": "1.0.0",
+    "description": "Credity Ecosystem Monorepo",
+    "private": true,
+    "workspaces": [
+        "credverse-gateway",
+        "CredVerseIssuer 3",
+        "CredVerseRecruiter",
+        "BlockWalletDigi"
+    ],
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "keywords": [
+        "credential",
+        "blockchain",
+        "verification",
+        "wallet"
+    ],
+    "author": "Raghav Badhwar",
+    "license": "UNLICENSED"
+}
