@@ -5,6 +5,29 @@ import { storage, VerificationRecord } from '../storage';
 
 const router = Router();
 
+/**
+ * Validate and sanitize verifier name
+ */
+function validateVerifierName(name: any): string {
+    if (typeof name !== 'string') {
+        return 'Anonymous Recruiter';
+    }
+    const trimmed = name.trim();
+    if (trimmed.length === 0 || trimmed.length > 100) {
+        return 'Anonymous Recruiter';
+    }
+    // Remove any HTML/script tags for XSS prevention
+    return trimmed.replace(/<[^>]*>/g, '');
+}
+
+/**
+ * Validate credential size to prevent DoS
+ */
+function validateCredentialSize(credential: any): boolean {
+    const size = JSON.stringify(credential).length;
+    return size <= 1024 * 1024; // 1MB limit
+}
+
 // ============== Instant Verification ==============
 
 /**
@@ -19,6 +42,25 @@ router.post('/verify/instant', async (req, res) => {
                 error: 'Provide jwt, qrData, or credential object'
             });
         }
+
+        // Validate credential size
+        if (credential && !validateCredentialSize(credential)) {
+            return res.status(400).json({
+                error: 'Credential size exceeds maximum limit'
+            });
+        }
+
+        // Validate JWT format
+        if (jwt && typeof jwt !== 'string') {
+            return res.status(400).json({ error: 'JWT must be a string' });
+        }
+
+        // Validate QR data format
+        if (qrData && typeof qrData !== 'string') {
+            return res.status(400).json({ error: 'QR data must be a string' });
+        }
+
+        const sanitizedVerifier = validateVerifierName(verifiedBy);
 
         // Run verification
         const verificationResult = await verificationEngine.verifyCredential({
@@ -44,7 +86,7 @@ router.post('/verify/instant', async (req, res) => {
             fraudScore: fraudAnalysis.score,
             recommendation: fraudAnalysis.recommendation,
             timestamp: new Date(),
-            verifiedBy,
+            verifiedBy: sanitizedVerifier,
         };
         await storage.addVerification(record);
 
@@ -67,8 +109,13 @@ router.post('/verify/qr', async (req, res) => {
     try {
         const { qrData } = req.body;
 
-        if (!qrData) {
-            return res.status(400).json({ error: 'qrData is required' });
+        if (!qrData || typeof qrData !== 'string') {
+            return res.status(400).json({ error: 'qrData string is required' });
+        }
+
+        // Limit QR data size
+        if (qrData.length > 10000) {
+            return res.status(400).json({ error: 'QR data size exceeds maximum limit' });
         }
 
         // Parse QR and extract verification token
@@ -76,7 +123,11 @@ router.post('/verify/qr', async (req, res) => {
         try {
             parsedData = JSON.parse(qrData);
         } catch {
-            parsedData = JSON.parse(Buffer.from(qrData, 'base64').toString());
+            try {
+                parsedData = JSON.parse(Buffer.from(qrData, 'base64').toString());
+            } catch {
+                return res.status(400).json({ error: 'Invalid QR data format' });
+            }
         }
 
         const verificationResult = await verificationEngine.verifyCredential({

@@ -50,16 +50,23 @@ export class BlockchainService {
     private isConfigured: boolean = false;
 
     constructor(config?: Partial<BlockchainConfig>) {
-        // Use Local Hardhat Node
-        const rpcUrl = config?.rpcUrl || 'http://127.0.0.1:8545';
-        const contractAddress = config?.contractAddress || '0x5FbDB2315678afecb367f032d93F642f64180aa3';
-        // Account #0 from Hardhat node
-        const privateKey = config?.privateKey || '0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80';
+        // Use environment variables or config parameters
+        const rpcUrl = config?.rpcUrl || process.env.BLOCKCHAIN_RPC_URL || 'http://127.0.0.1:8545';
+        const contractAddress = config?.contractAddress || process.env.REGISTRY_CONTRACT_ADDRESS || '0x5FbDB2315678afecb367f032d93F642f64180aa3';
+        
+        // SECURITY: Never hardcode private keys in production
+        // Only use environment variables for private keys
+        const privateKey = config?.privateKey || process.env.BLOCKCHAIN_PRIVATE_KEY;
+
+        if (!privateKey) {
+            console.warn('[Blockchain] WARNING: No private key configured. Running in read-only mode.');
+            console.warn('[Blockchain] Set BLOCKCHAIN_PRIVATE_KEY environment variable for write operations.');
+        }
 
         this.provider = new ethers.JsonRpcProvider(rpcUrl);
 
         if (contractAddress && contractAddress.startsWith('0x')) {
-            if (privateKey) {
+            if (privateKey && privateKey.startsWith('0x')) {
                 this.signer = new ethers.Wallet(privateKey, this.provider);
                 this.contract = new ethers.Contract(contractAddress, REGISTRY_ABI, this.signer);
             } else {

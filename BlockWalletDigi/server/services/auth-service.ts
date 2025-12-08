@@ -3,8 +3,18 @@ import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
 import { Request, Response, NextFunction } from 'express';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'credverse-jwt-secret-change-in-production';
-const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET || 'credverse-refresh-secret-change-in-production';
+// Enforce environment variables for production security
+if (!process.env.JWT_SECRET) {
+    console.error('CRITICAL SECURITY WARNING: JWT_SECRET environment variable is not set!');
+    console.error('Using a random secret for this session - tokens will not persist across restarts');
+}
+if (!process.env.JWT_REFRESH_SECRET) {
+    console.error('CRITICAL SECURITY WARNING: JWT_REFRESH_SECRET environment variable is not set!');
+    console.error('Using a random secret for this session - tokens will not persist across restarts');
+}
+
+const JWT_SECRET = process.env.JWT_SECRET || require('crypto').randomBytes(64).toString('hex');
+const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET || require('crypto').randomBytes(64).toString('hex');
 const ACCESS_TOKEN_EXPIRY = '15m';
 const REFRESH_TOKEN_EXPIRY = '7d';
 
@@ -31,6 +41,37 @@ export interface TokenPayload {
  */
 export async function hashPassword(password: string): Promise<string> {
     return bcrypt.hash(password, 12);
+}
+
+/**
+ * Validate password strength
+ */
+export function validatePassword(password: string): { valid: boolean; errors: string[] } {
+    const errors: string[] = [];
+    
+    if (password.length < 8) {
+        errors.push('Password must be at least 8 characters long');
+    }
+    if (password.length > 128) {
+        errors.push('Password must not exceed 128 characters');
+    }
+    if (!/[a-z]/.test(password)) {
+        errors.push('Password must contain at least one lowercase letter');
+    }
+    if (!/[A-Z]/.test(password)) {
+        errors.push('Password must contain at least one uppercase letter');
+    }
+    if (!/[0-9]/.test(password)) {
+        errors.push('Password must contain at least one number');
+    }
+    if (!/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)) {
+        errors.push('Password must contain at least one special character');
+    }
+    
+    return {
+        valid: errors.length === 0,
+        errors
+    };
 }
 
 /**

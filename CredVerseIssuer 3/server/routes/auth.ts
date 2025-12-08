@@ -10,6 +10,7 @@ import {
     invalidateAccessToken,
     authMiddleware,
     checkRateLimit,
+    validatePassword,
     AuthUser,
 } from '../services/auth-service';
 
@@ -24,6 +25,25 @@ router.post('/auth/register', async (req, res) => {
 
         if (!username || !password) {
             return res.status(400).json({ error: 'Username and password required' });
+        }
+
+        // Validate username length
+        if (username.length < 3 || username.length > 50) {
+            return res.status(400).json({ error: 'Username must be between 3 and 50 characters' });
+        }
+
+        // Validate email format if provided
+        if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+            return res.status(400).json({ error: 'Invalid email format' });
+        }
+
+        // Validate password strength
+        const passwordValidation = validatePassword(password);
+        if (!passwordValidation.valid) {
+            return res.status(400).json({ 
+                error: 'Password does not meet security requirements',
+                details: passwordValidation.errors 
+            });
         }
 
         // Rate limit registration
