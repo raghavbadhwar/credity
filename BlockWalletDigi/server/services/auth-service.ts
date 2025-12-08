@@ -3,10 +3,26 @@ import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
 import { Request, Response, NextFunction } from 'express';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'credverse-jwt-secret-change-in-production';
-const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET || 'credverse-refresh-secret-change-in-production';
+// Security: Require secrets from environment - fail fast if not set
+const JWT_SECRET = process.env.JWT_SECRET;
+const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET;
 const ACCESS_TOKEN_EXPIRY = '15m';
 const REFRESH_TOKEN_EXPIRY = '7d';
+const JWT_ALGORITHM = 'HS256' as const;
+
+if (!JWT_SECRET || !JWT_REFRESH_SECRET) {
+    console.error('FATAL: JWT_SECRET and JWT_REFRESH_SECRET must be set in environment variables');
+    if (process.env.NODE_ENV === 'production') {
+        process.exit(1);
+    }
+}
+
+// Fallback for development only (logged warning)
+const EFFECTIVE_JWT_SECRET = JWT_SECRET || 'dev-only-secret-not-for-production';
+const EFFECTIVE_JWT_REFRESH_SECRET = JWT_REFRESH_SECRET || 'dev-only-refresh-secret-not-for-production';
+if (!JWT_SECRET) {
+    console.warn('WARNING: Using development JWT secrets. Set JWT_SECRET for production.');
+}
 
 // In-memory token storage (use Redis in production)
 const refreshTokens = new Map<string, { userId: number; expiresAt: Date }>();
@@ -24,6 +40,42 @@ export interface TokenPayload {
     username: string;
     role: string;
     type: 'access' | 'refresh';
+}
+
+/**
+ * Password strength validation
+ */
+export interface PasswordValidationResult {
+    isValid: boolean;
+    errors: string[];
+}
+
+export function validatePasswordStrength(password: string): PasswordValidationResult {
+    const errors: string[] = [];
+
+    if (password.length < 8) {
+        errors.push('Password must be at least 8 characters long');
+    }
+    if (password.length > 128) {
+        errors.push('Password must not exceed 128 characters');
+    }
+    if (!/[A-Z]/.test(password)) {
+        errors.push('Password must contain at least one uppercase letter');
+    }
+    if (!/[a-z]/.test(password)) {
+        errors.push('Password must contain at least one lowercase letter');
+    }
+    if (!/[0-9]/.test(password)) {
+        errors.push('Password must contain at least one number');
+    }
+    if (!/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)) {
+        errors.push('Password must contain at least one special character');
+    }
+
+    return {
+        isValid: errors.length === 0,
+        errors,
+    };
 }
 
 /**
@@ -50,7 +102,7 @@ export function generateAccessToken(user: AuthUser): string {
         role: user.role,
         type: 'access',
     };
-    return jwt.sign(payload, JWT_SECRET, { expiresIn: ACCESS_TOKEN_EXPIRY });
+    return jwt.sign(payload, EFFECTIVE_JWT_SECRET, { expiresIn: ACCESS_TOKEN_EXPIRY, algorithm: JWT_ALGORITHM });
 }
 
 /**
@@ -63,7 +115,7 @@ export function generateRefreshToken(user: AuthUser): string {
         role: user.role,
         type: 'refresh',
     };
-    const token = jwt.sign(payload, JWT_REFRESH_SECRET, { expiresIn: REFRESH_TOKEN_EXPIRY });
+    const token = jwt.sign(payload, EFFECTIVE_JWT_REFRESH_SECRET, { expiresIn: REFRESH_TOKEN_EXPIRY, algorithm: JWT_ALGORITHM });
 
     // Store refresh token
     refreshTokens.set(token, {
@@ -82,7 +134,7 @@ export function verifyAccessToken(token: string): TokenPayload | null {
         if (invalidatedTokens.has(token)) {
             return null;
         }
-        const decoded = jwt.verify(token, JWT_SECRET) as TokenPayload;
+        const decoded = jwt.verify(token, EFFECTIVE_JWT_SECRET, { algorithms: [JWT_ALGORITHM] }) as TokenPayload;
         if (decoded.type !== 'access') {
             return null;
         }
@@ -100,7 +152,7 @@ export function verifyRefreshToken(token: string): TokenPayload | null {
         if (!refreshTokens.has(token)) {
             return null;
         }
-        const decoded = jwt.verify(token, JWT_REFRESH_SECRET) as TokenPayload;
+        const decoded = jwt.verify(token, EFFECTIVE_JWT_REFRESH_SECRET, { algorithms: [JWT_ALGORITHM] }) as TokenPayload;
         if (decoded.type !== 'refresh') {
             return null;
         }
