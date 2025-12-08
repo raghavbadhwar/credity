@@ -10,6 +10,11 @@ import sharingRoutes from "./routes/sharing";
 import notificationsRoutes from "./routes/notifications";
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Health check endpoint for Railway
+  app.get("/api/health", (_req, res) => {
+    res.status(200).json({ status: "ok", timestamp: new Date().toISOString() });
+  });
+
   // prefix all routes with /api
   app.use("/api", authRoutes);          // Authentication
   app.use("/api", walletRoutes);        // Wallet Core & DID

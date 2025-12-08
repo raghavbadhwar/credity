@@ -8,6 +8,11 @@ export async function registerRoutes(
   httpServer: Server,
   app: Express
 ): Promise<Server> {
+  // Health check endpoint for Railway
+  app.get("/api/health", (_req, res) => {
+    res.status(200).json({ status: "ok", timestamp: new Date().toISOString() });
+  });
+
   // Verification routes
   app.use("/api", verificationRoutes);
   app.use("/api", analyticsRoutes);
