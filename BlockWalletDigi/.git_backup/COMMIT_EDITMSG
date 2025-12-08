@@ -1,0 +1,9 @@
+Update certificate pages to match the overall wallet theme
+
+Refactors the Credential Detail view to use a modern digital card design, integrate with the app's theme, and improve metadata display.
+
+Replit-Commit-Author: Agent
+Replit-Commit-Session-Id: b8240644-0763-4e5b-9130-4c5f7646de77
+Replit-Commit-Checkpoint-Type: full_checkpoint
+Replit-Commit-Event-Id: 1ae4b4d1-ea43-4e24-8e46-3a9d556dc73f
+Replit-Commit-Screenshot-Url: https://storage.googleapis.com/screenshot-production-us-central1/e7beaa14-0f02-44eb-8f5a-25c9177854de/b8240644-0763-4e5b-9130-4c5f7646de77/ohEfmIw

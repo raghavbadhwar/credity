@@ -1,0 +1,9 @@
+Fix import issues with React hooks in toast notification system
+
+Corrected the import of `useState` and `useEffect` in `use-toast.ts` from `React` namespace to direct imports.
+
+Replit-Commit-Author: Agent
+Replit-Commit-Session-Id: fddafe3f-c213-46e4-9be4-f1e3a799d240
+Replit-Commit-Checkpoint-Type: full_checkpoint
+Replit-Commit-Event-Id: 0be7bb91-5334-4de5-b558-25d645b6fce7
+Replit-Commit-Screenshot-Url: https://storage.googleapis.com/screenshot-production-us-central1/a89f34d2-c570-44be-815a-58d75cca554e/fddafe3f-c213-46e4-9be4-f1e3a799d240/z32pgOy
