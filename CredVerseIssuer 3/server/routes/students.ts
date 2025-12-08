@@ -45,7 +45,7 @@ router.get("/students/:id", async (req, res) => {
         const studentId = req.params.id;
         
         // Validate ID format to prevent injection
-        if (!/^[a-zA-Z0-9\-_]+$/.test(studentId)) {
+        if (!/^[a-zA-Z0-9_-]+$/.test(studentId)) {
             return res.status(400).json({ message: "Invalid student ID format" });
         }
         
@@ -184,7 +184,7 @@ router.put("/students/:id", async (req, res) => {
         const studentId = req.params.id;
         
         // Validate ID format
-        if (!/^[a-zA-Z0-9\-_]+$/.test(studentId)) {
+        if (!/^[a-zA-Z0-9_-]+$/.test(studentId)) {
             return res.status(400).json({ message: "Invalid student ID format" });
         }
 
@@ -231,7 +231,7 @@ router.delete("/students/:id", async (req, res) => {
         const studentId = req.params.id;
         
         // Validate ID format
-        if (!/^[a-zA-Z0-9\-_]+$/.test(studentId)) {
+        if (!/^[a-zA-Z0-9_-]+$/.test(studentId)) {
             return res.status(400).json({ message: "Invalid student ID format" });
         }
         

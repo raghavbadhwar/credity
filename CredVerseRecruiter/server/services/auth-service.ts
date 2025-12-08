@@ -13,8 +13,8 @@ if (!process.env.JWT_REFRESH_SECRET) {
     console.error('Using a random secret for this session - tokens will not persist across restarts');
 }
 
-const JWT_SECRET = process.env.JWT_SECRET || require('crypto').randomBytes(64).toString('hex');
-const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET || require('crypto').randomBytes(64).toString('hex');
+const JWT_SECRET = process.env.JWT_SECRET || crypto.randomBytes(64).toString('hex');
+const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET || crypto.randomBytes(64).toString('hex');
 const ACCESS_TOKEN_EXPIRY = '15m';
 const REFRESH_TOKEN_EXPIRY = '7d';
 

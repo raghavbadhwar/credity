@@ -2,7 +2,7 @@
 pragma solidity ^0.8.19;
 
 import "@openzeppelin/contracts/access/AccessControl.sol";
-import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
+import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 
 contract CredVerseRegistry is AccessControl, ReentrancyGuard {
     bytes32 public constant ISSUER_ROLE = keccak256("ISSUER_ROLE");

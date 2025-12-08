@@ -16,8 +16,9 @@ function validateVerifierName(name: any): string {
     if (trimmed.length === 0 || trimmed.length > 100) {
         return 'Anonymous Recruiter';
     }
-    // Remove any HTML/script tags for XSS prevention
-    return trimmed.replace(/<[^>]*>/g, '');
+    // Allow only alphanumeric characters, spaces, and basic punctuation for XSS prevention
+    // This removes all HTML/script tags and special characters that could be used for injection
+    return trimmed.replace(/[^a-zA-Z0-9\s\-_.@]/g, '');
 }
 
 /**
