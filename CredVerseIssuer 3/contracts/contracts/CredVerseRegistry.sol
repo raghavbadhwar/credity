@@ -3,13 +3,14 @@ pragma solidity ^0.8.19;
 
 import "@openzeppelin/contracts/access/AccessControl.sol";
 import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
+import "@openzeppelin/contracts/utils/Pausable.sol";
 
 /**
  * @title CredVerseRegistry
- * @dev Secure credential registry with role-based access control
+ * @dev Secure credential registry with role-based access control and emergency pause
  * @notice This contract manages issuer registration, credential anchoring, and revocation
  */
-contract CredVerseRegistry is AccessControl, ReentrancyGuard {
+contract CredVerseRegistry is AccessControl, ReentrancyGuard, Pausable {
     bytes32 public constant ISSUER_ROLE = keccak256("ISSUER_ROLE");
 
     struct Issuer {
@@ -41,9 +42,24 @@ contract CredVerseRegistry is AccessControl, ReentrancyGuard {
     error AnchorAlreadyExists(bytes32 rootHash);
     error InvalidAddress();
     error InvalidHash();
+    error ContractPaused();
 
     constructor() {
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
+    }
+
+    /**
+     * @dev Pause the contract - only admin can call
+     */
+    function pause() external onlyRole(DEFAULT_ADMIN_ROLE) {
+        _pause();
+    }
+
+    /**
+     * @dev Unpause the contract - only admin can call
+     */
+    function unpause() external onlyRole(DEFAULT_ADMIN_ROLE) {
+        _unpause();
     }
 
     /**
@@ -69,7 +85,7 @@ contract CredVerseRegistry is AccessControl, ReentrancyGuard {
         address _issuerAddress, 
         string calldata _did, 
         string calldata _domain
-    ) external onlyRole(DEFAULT_ADMIN_ROLE) nonReentrant {
+    ) external onlyRole(DEFAULT_ADMIN_ROLE) nonReentrant whenNotPaused {
         if (_issuerAddress == address(0)) {
             revert InvalidAddress();
         }
@@ -91,7 +107,7 @@ contract CredVerseRegistry is AccessControl, ReentrancyGuard {
      * @dev Revoke an issuer's ability to anchor or revoke credentials
      * @param _issuerAddress Address of the issuer to revoke
      */
-    function revokeIssuer(address _issuerAddress) external onlyRole(DEFAULT_ADMIN_ROLE) nonReentrant {
+    function revokeIssuer(address _issuerAddress) external onlyRole(DEFAULT_ADMIN_ROLE) nonReentrant whenNotPaused {
         if (!issuers[_issuerAddress].isRegistered) {
             revert IssuerNotRegistered(_issuerAddress);
         }
@@ -105,7 +121,7 @@ contract CredVerseRegistry is AccessControl, ReentrancyGuard {
      * @dev Anchor a credential hash on-chain
      * @param _rootHash The hash of the credential to anchor
      */
-    function anchorCredential(bytes32 _rootHash) external onlyRole(ISSUER_ROLE) onlyActiveIssuer nonReentrant {
+    function anchorCredential(bytes32 _rootHash) external onlyRole(ISSUER_ROLE) onlyActiveIssuer nonReentrant whenNotPaused {
         if (_rootHash == bytes32(0)) {
             revert InvalidHash();
         }
@@ -126,7 +142,7 @@ contract CredVerseRegistry is AccessControl, ReentrancyGuard {
      * @dev Revoke a credential
      * @param _credentialHash The hash of the credential to revoke
      */
-    function revokeCredential(bytes32 _credentialHash) external onlyRole(ISSUER_ROLE) onlyActiveIssuer nonReentrant {
+    function revokeCredential(bytes32 _credentialHash) external onlyRole(ISSUER_ROLE) onlyActiveIssuer nonReentrant whenNotPaused {
         if (_credentialHash == bytes32(0)) {
             revert InvalidHash();
         }

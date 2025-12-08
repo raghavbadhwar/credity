@@ -2,6 +2,15 @@ import express, { type Request, Response, NextFunction } from "express";
 import helmet from "helmet";
 import cors from "cors";
 import { errorHandler } from "./middleware/error-handler";
+import {
+  apiRateLimiter,
+  hppProtection,
+  sanitizationMiddleware,
+  requestIdMiddleware,
+  additionalSecurityHeaders,
+  suspiciousRequestDetector,
+  ipBlocklistMiddleware,
+} from "./middleware/security";
 import { registerRoutes } from "./routes";
 import { serveStatic } from "./static";
 import { createServer } from "http";
@@ -47,6 +56,15 @@ app.use(
 );
 
 app.use(express.urlencoded({ extended: false, limit: '10mb' }));
+
+// Advanced security middleware
+app.use(requestIdMiddleware);
+app.use(ipBlocklistMiddleware);
+app.use(hppProtection);
+app.use(sanitizationMiddleware);
+app.use(suspiciousRequestDetector);
+app.use(additionalSecurityHeaders);
+app.use('/api', apiRateLimiter);
 
 export function log(message: string, source = "express") {
   const formattedTime = new Date().toLocaleTimeString("en-US", {

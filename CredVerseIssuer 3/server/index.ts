@@ -2,6 +2,15 @@ import express, { type Request, Response, NextFunction } from "express";
 import helmet from "helmet";
 import cors from "cors";
 import { errorHandler } from "./middleware/error-handler";
+import {
+  apiRateLimiter,
+  hppProtection,
+  sanitizationMiddleware,
+  requestIdMiddleware,
+  additionalSecurityHeaders,
+  suspiciousRequestDetector,
+  ipBlocklistMiddleware,
+} from "./middleware/security";
 import { registerRoutes } from "./routes";
 import { serveStatic } from "./static";
 import { createServer } from "http";
@@ -48,6 +57,15 @@ app.use(
 );
 
 app.use(express.urlencoded({ extended: false, limit: '10mb' }));
+
+// Advanced security middleware
+app.use(requestIdMiddleware);           // Add request ID for audit logging
+app.use(ipBlocklistMiddleware);         // Block banned IPs
+app.use(hppProtection);                 // Prevent HTTP Parameter Pollution
+app.use(sanitizationMiddleware);        // Sanitize all input
+app.use(suspiciousRequestDetector);     // Detect SQL injection, XSS, etc.
+app.use(additionalSecurityHeaders);     // Additional security headers
+app.use('/api', apiRateLimiter);        // Rate limit API routes
 
 export function log(message: string, source = "express") {
   const formattedTime = new Date().toLocaleTimeString("en-US", {
