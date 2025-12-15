@@ -1,17 +1,9 @@
 import { type InsertCredential, type Credential } from "@shared/schema";
 import { storage } from "../storage";
 import { blockchainService } from "./blockchain-service";
+import { signVcJwt, getIssuerPublicKey } from "./vc-signer";
 import { randomUUID } from "crypto";
 
-// Mock signer for MVP
-// In production, use Veramo or similar DID library
-async function signJwt(payload: any, issuerDid: string): Promise<string> {
-    const header = { alg: "ES256", typ: "JWT" };
-    const encodedHeader = Buffer.from(JSON.stringify(header)).toString("base64url");
-    const encodedPayload = Buffer.from(JSON.stringify(payload)).toString("base64url");
-    const signature = "sig_" + randomUUID().replace(/-/g, '');
-    return `${encodedHeader}.${encodedPayload}.${signature}`;
-}
 
 export class IssuanceService {
     // In-memory offer storage (token -> credentialId)
@@ -55,7 +47,7 @@ export class IssuanceService {
             },
         };
 
-        const vcJwt = await signJwt(vcPayload, vcPayload.iss);
+        const vcJwt = await signVcJwt(vcPayload, vcPayload.iss);
 
         // Create credential in database
         const credential = await storage.createCredential({
@@ -105,6 +97,22 @@ export class IssuanceService {
             }).catch(e => console.error("[Issuance] Webhook failed:", e));
         }
 
+        // Email Notification
+        if (recipient.email) {
+            try {
+                const { emailService } = await import('./email');
+                await emailService.sendCredentialNotification({
+                    to: recipient.email,
+                    recipientName: recipient.name || 'Student',
+                    credentialType: template.name,
+                    issuerName: issuer.name,
+                    viewLink: `${process.env.APP_URL || 'http://localhost:5002'}/credential/${credential.id}`
+                });
+            } catch (e) {
+                console.error("[Issuance] Email notification failed:", e);
+            }
+        }
+
         // Log the issuance activity
         await storage.createActivityLog({
             tenantId,
@@ -140,11 +148,31 @@ export class IssuanceService {
         templateId: string,
         issuerId: string,
         recipientsData: any[]
-    ): Promise<{ jobId: string; total: number }> {
-        const jobId = randomUUID();
+    ): Promise<{ jobId: string; total: number; queued: boolean }> {
         const total = recipientsData.length;
 
-        console.log(`[Issuance] Starting bulk issuance job ${jobId} for ${total} credentials`);
+        // Try to use Redis queue if available
+        try {
+            const { addBulkIssuanceJob, isQueueAvailable } = await import('./queue-service');
+
+            if (isQueueAvailable()) {
+                const result = await addBulkIssuanceJob({
+                    tenantId,
+                    templateId,
+                    issuerId,
+                    recipients: recipientsData,
+                });
+
+                console.log(`[Issuance] Bulk job ${result.jobId} queued for ${total} credentials`);
+                return { jobId: result.jobId, total, queued: true };
+            }
+        } catch (e) {
+            console.log('[Issuance] Queue service not available, using fallback');
+        }
+
+        // Fallback: process in background with setTimeout
+        const jobId = randomUUID();
+        console.log(`[Issuance] Starting bulk issuance job ${jobId} for ${total} credentials (in-memory)`);
 
         // Process in background
         setTimeout(async () => {
@@ -178,7 +206,7 @@ export class IssuanceService {
             });
         }, 100);
 
-        return { jobId, total };
+        return { jobId, total, queued: false };
     }
 
     async revokeCredential(credentialId: string, reason: string): Promise<void> {

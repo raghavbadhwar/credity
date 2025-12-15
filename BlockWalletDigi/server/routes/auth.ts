@@ -8,6 +8,7 @@ import {
     refreshAccessToken,
     invalidateRefreshToken,
     invalidateAccessToken,
+    verifyAccessToken,
     authMiddleware,
     checkRateLimit,
     AuthUser,
@@ -281,6 +282,38 @@ router.post('/auth/change-password', authMiddleware, async (req, res) => {
         res.json({ success: true, message: 'Password updated' });
     } catch (error) {
         res.status(500).json({ error: 'Failed to change password' });
+    }
+});
+
+/**
+ * Verify token - Cross-app token validation endpoint
+ * Used by other CredVerse apps to validate tokens from this app
+ */
+router.post('/auth/verify-token', (req, res) => {
+    try {
+        const { token } = req.body;
+
+        if (!token) {
+            return res.status(400).json({ valid: false, error: 'Token required' });
+        }
+
+        const payload = verifyAccessToken(token);
+
+        if (!payload) {
+            return res.status(401).json({ valid: false, error: 'Invalid or expired token' });
+        }
+
+        res.json({
+            valid: true,
+            user: {
+                userId: payload.userId,
+                username: payload.username,
+                role: payload.role,
+            },
+            app: 'wallet',
+        });
+    } catch (error) {
+        res.status(500).json({ valid: false, error: 'Token verification failed' });
     }
 });
 

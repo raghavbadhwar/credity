@@ -193,7 +193,7 @@ export default function CredentialDetail() {
               <div className="grid grid-cols-2 gap-6 pt-4 border-t border-white/20">
                 <div>
                   <p className="text-white/60 text-xs uppercase">Recipient</p>
-                  <p className="text-lg font-semibold">{credential.data?.recipient || "John Doe"}</p>
+                  <p className="text-lg font-semibold">{typeof credential.data?.recipient === 'object' ? credential.data?.recipient?.name : credential.data?.recipient || "John Doe"}</p>
                 </div>
                 <div>
                   <p className="text-white/60 text-xs uppercase">Issued On</p>
@@ -300,10 +300,10 @@ export default function CredentialDetail() {
                 <Eye className="w-4 h-4 text-primary" /> Credential Data
               </h3>
               <div className="grid md:grid-cols-2 gap-4">
-                {Object.entries(credential.data || {}).map(([key, value]) => (
+                {Object.entries(credential.data || {}).filter(([key]) => key !== 'recipient').map(([key, value]) => (
                   <div key={key} className="p-3 bg-secondary/50 rounded-lg">
                     <p className="text-xs text-muted-foreground uppercase mb-1">{key.replace(/_/g, ' ')}</p>
-                    <p className="font-medium">{String(value)}</p>
+                    <p className="font-medium">{typeof value === 'object' ? JSON.stringify(value) : String(value)}</p>
                   </div>
                 ))}
               </div>

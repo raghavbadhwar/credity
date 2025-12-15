@@ -9,6 +9,8 @@ module.exports = {
                 enabled: true,
                 runs: 200,
             },
+            // Force use of solcjs (WASM) to avoid macOS native binary issues
+            viaIR: false,
         },
     },
     networks: {

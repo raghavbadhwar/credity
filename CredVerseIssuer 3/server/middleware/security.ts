@@ -24,6 +24,7 @@ export const apiRateLimiter = rateLimit({
     },
     standardHeaders: true,
     legacyHeaders: false,
+    validate: false, // Disable IPv6 key generator validation
     keyGenerator: (req: Request) => {
         // Use X-Forwarded-For if behind a proxy, otherwise use IP
         return (req.headers['x-forwarded-for'] as string)?.split(',')[0] || req.ip || 'unknown';
@@ -42,6 +43,7 @@ export const authRateLimiter = rateLimit({
     },
     standardHeaders: true,
     legacyHeaders: false,
+    validate: false,
     skipSuccessfulRequests: true, // Don't count successful logins
 });
 
@@ -57,6 +59,7 @@ export const issuanceRateLimiter = rateLimit({
     },
     standardHeaders: true,
     legacyHeaders: false,
+    validate: false,
 });
 
 // =============================================================================

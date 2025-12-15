@@ -15,11 +15,23 @@ import activityLogsRoutes from "./routes/activityLogs";
 import digilockerRoutes from "./routes/digilocker";
 import authRoutes from "./routes/auth";
 import publicRoutes from "./routes/public";
+import twoFactorRoutes from "./routes/two-factor";
+import { initQueueService, startIssuanceWorker } from "./services/queue-service";
+import { issuanceService } from "./services/issuance";
 
 export async function registerRoutes(
   httpServer: Server,
   app: Express
 ): Promise<Server> {
+  // Initialize queue service for bulk operations
+  const queueAvailable = await initQueueService();
+  if (queueAvailable) {
+    // Start the worker to process bulk issuance jobs
+    startIssuanceWorker(async (tenantId, templateId, issuerId, recipient, data) => {
+      await issuanceService.issueCredential(tenantId, templateId, issuerId, recipient, data);
+    });
+  }
+
   // Health check endpoint for Railway
   app.get("/api/health", (_req, res) => {
     res.status(200).json({ status: "ok", timestamp: new Date().toISOString() });
@@ -30,6 +42,7 @@ export async function registerRoutes(
   app.use("/api/v1/public", publicRoutes); // Mount public routes
   // auth routes first
   app.use("/api/v1", authRoutes);
+  app.use("/api/v1", twoFactorRoutes); // 2FA routes
   app.use("/api/v1", registryRoutes);
   app.use("/api/v1", templateRoutes);
   app.use("/api/v1", issuanceRoutes);

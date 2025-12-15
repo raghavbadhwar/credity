@@ -8,12 +8,18 @@ import {
     refreshAccessToken,
     invalidateRefreshToken,
     invalidateAccessToken,
+    verifyAccessToken,
     authMiddleware,
     checkRateLimit,
     AuthUser,
 } from '../services/auth-service';
+import { isTwoFactorEnabled, getTwoFactorStatus } from '../services/two-factor';
+import crypto from 'crypto';
 
 const router = Router();
+
+// Temporary pending tokens for 2FA flow (map of pending token -> userId)
+const pendingTwoFactorTokens = new Map<string, { userId: string; expiresAt: Date }>();
 
 /**
  * Register a new user
@@ -81,6 +87,7 @@ router.post('/auth/register', async (req, res) => {
 
 /**
  * Login with username/password
+ * If 2FA is enabled, returns a pending token instead of access tokens
  */
 router.post('/auth/login', async (req, res) => {
     try {
@@ -107,7 +114,32 @@ router.post('/auth/login', async (req, res) => {
             return res.status(401).json({ error: 'Invalid credentials' });
         }
 
-        // Generate tokens
+        // Check if 2FA is enabled
+        if (isTwoFactorEnabled(user.id)) {
+            // Generate pending token for 2FA verification
+            const pendingToken = crypto.randomBytes(32).toString('hex');
+            pendingTwoFactorTokens.set(pendingToken, {
+                userId: user.id,
+                expiresAt: new Date(Date.now() + 5 * 60 * 1000), // 5 minutes
+            });
+
+            // Clean up expired tokens
+            Array.from(pendingTwoFactorTokens.entries()).forEach(([token, data]) => {
+                if (data.expiresAt < new Date()) {
+                    pendingTwoFactorTokens.delete(token);
+                }
+            });
+
+            return res.json({
+                success: true,
+                requires2FA: true,
+                pendingToken,
+                userId: user.id,
+                message: 'Please enter your 2FA code to complete login',
+            });
+        }
+
+        // No 2FA - generate tokens directly
         const authUser: AuthUser = {
             id: user.id,
             username: user.username,
@@ -119,6 +151,7 @@ router.post('/auth/login', async (req, res) => {
 
         res.json({
             success: true,
+            requires2FA: false,
             user: {
                 id: user.id,
                 username: user.username,
@@ -135,6 +168,9 @@ router.post('/auth/login', async (req, res) => {
         res.status(500).json({ error: 'Login failed' });
     }
 });
+
+// Export pending tokens map for 2FA routes
+export { pendingTwoFactorTokens };
 
 /**
  * Refresh access token
@@ -207,6 +243,38 @@ router.get('/auth/me', authMiddleware, async (req, res) => {
         });
     } catch (error) {
         res.status(500).json({ error: 'Failed to get profile' });
+    }
+});
+
+/**
+ * Verify token - Cross-app token validation endpoint
+ * Used by other CredVerse apps to validate tokens from this app
+ */
+router.post('/auth/verify-token', (req, res) => {
+    try {
+        const { token } = req.body;
+
+        if (!token) {
+            return res.status(400).json({ valid: false, error: 'Token required' });
+        }
+
+        const payload = verifyAccessToken(token);
+
+        if (!payload) {
+            return res.status(401).json({ valid: false, error: 'Invalid or expired token' });
+        }
+
+        res.json({
+            valid: true,
+            user: {
+                userId: payload.userId,
+                username: payload.username,
+                role: payload.role,
+            },
+            app: 'issuer',
+        });
+    } catch (error) {
+        res.status(500).json({ valid: false, error: 'Token verification failed' });
     }
 });
 

@@ -1,3 +1,10 @@
+// Initialize Sentry BEFORE importing anything else
+import { initSentry, sentryErrorHandler } from "./services/sentry";
+initSentry('credverse-wallet');
+
+// Initialize PostHog Analytics
+import { initAnalytics } from "./services/analytics";
+initAnalytics();
 import express, { type Request, Response, NextFunction } from "express";
 import helmet from "helmet";
 import cors from "cors";
@@ -31,7 +38,14 @@ app.use(helmet({
 }));
 
 // CORS configuration
-const allowedOrigins = process.env.ALLOWED_ORIGINS?.split(',') || ['http://localhost:5000', 'http://localhost:3000'];
+const allowedOrigins = process.env.ALLOWED_ORIGINS?.split(',') || [
+  'http://localhost:5000',
+  'http://localhost:5001',
+  'http://localhost:5002',
+  'http://localhost:5003',
+  'http://localhost:5173',
+  'http://localhost:3000'
+];
 app.use(cors({
   origin: (origin, callback) => {
     if (!origin) return callback(null, true);
@@ -104,7 +118,10 @@ app.use((req, res, next) => {
 });
 
 (async () => {
-  await registerRoutes(app);
+  await registerRoutes(httpServer, app);
+
+  // Sentry error handler (must be before other error handlers)
+  app.use(sentryErrorHandler);
 
   // Global Error Handler
   app.use(errorHandler);

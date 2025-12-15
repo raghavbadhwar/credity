@@ -25,7 +25,7 @@ export default function Issuance() {
     name: "",
     email: "",
     studentId: "",
-    credentialType: "degree-2025",
+    credentialType: "template-1",
     credentialName: "Bachelor of Technology",
     major: ""
   });
@@ -37,17 +37,18 @@ export default function Issuance() {
 
   const handleSelectChange = (val: string) => {
     let credName = "Bachelor of Technology";
-    if (val === 'grade-card') credName = "Semester Grade Card";
-    if (val === 'completion') credName = "Certificate of Completion";
-    if (val === 'medical-report') credName = "Medical Lab Report";
-    if (val === 'iso-cert') credName = "ISO 9001:2015 Certificate";
-    if (val === 'work-pass') credName = "Employee Work Authorization";
+    if (val === 'template-2') credName = "Semester Grade Card";
+    if (val === 'template-3') credName = "Certificate of Completion";
+    if (val === 'template-4') credName = "Medical Lab Report";
+    if (val === 'template-5') credName = "ISO 9001:2015 Certificate";
+    if (val === 'template-6') credName = "Employee Work Authorization";
 
     setFormData(prev => ({ ...prev, credentialType: val, credentialName: credName }));
   };
 
   const handleSectorChange = (val: string) => {
-    setFormData(prev => ({ ...prev, sector: val, credentialType: '', credentialName: 'Select Template' }));
+    const defaultTemplate = val === 'education' ? 'template-1' : val === 'healthcare' ? 'template-4' : val === 'corporate' ? 'template-6' : 'template-5';
+    setFormData(prev => ({ ...prev, sector: val, credentialType: defaultTemplate, credentialName: 'Select Template' }));
   };
 
   const issueMutation = useMutation({
@@ -60,7 +61,7 @@ export default function Issuance() {
         },
         body: JSON.stringify({
           templateId: formData.credentialType,
-          issuerId: UNIVERSITY_DID,
+          issuerId: "issuer-1",
           recipient: {
             name: formData.name,
             email: formData.email,
@@ -76,30 +77,58 @@ export default function Issuance() {
       if (!res.ok) throw new Error("Failed to issue credential");
       return res.json();
     },
-    onSuccess: (data) => {
+    onSuccess: async (data) => {
       // Also add to local store for immediate UI update
       const newRecord = {
         id: formData.studentId,
+        credentialId: data.id, // Store the actual credential UUID
         name: formData.name,
         credential: formData.credentialName + (formData.major ? ` in ${formData.major}` : ""),
         date: format(new Date(), "MMM dd, yyyy"),
         status: "Issued" as const,
         issuer: "Admin User",
         department: formData.sector === "education" ? "Engineering" : formData.sector === "healthcare" ? "Pathology" : "HR",
-        txHash: "0x" + Math.random().toString(16).slice(2, 10) + "..." + Math.random().toString(16).slice(2, 6)
+        txHash: data.txHash || ("0x" + Math.random().toString(16).slice(2, 10) + "..." + Math.random().toString(16).slice(2, 6))
       };
       addRecord(newRecord);
 
-      toast({
-        title: "Credential Issued & Anchored",
-        description: (
-          <div className="flex flex-col gap-1">
-            <span>Credential anchored to Polygon PoS.</span>
-            <span className="font-mono text-xs opacity-80">ID: {data.id}</span>
-          </div>
-        ),
-        duration: 5000,
-      });
+      // Auto-create offer for easy wallet import
+      try {
+        const offerRes = await fetch(`/api/v1/credentials/${data.id}/offer`, {
+          method: 'POST',
+          headers: { 'x-api-key': 'demo-api-key' },
+        });
+        if (offerRes.ok) {
+          const offerData = await offerRes.json();
+          await navigator.clipboard.writeText(offerData.offerUrl);
+
+          toast({
+            title: "Credential Issued & Anchored ✓",
+            description: (
+              <div className="flex flex-col gap-2">
+                <span>TX: <code className="text-xs">{data.txHash?.slice(0, 12)}...</code></span>
+                <div className="bg-muted p-2 rounded mt-1">
+                  <p className="text-xs font-semibold mb-1">Wallet URL (copied!):</p>
+                  <code className="text-xs break-all">{offerData.offerUrl}</code>
+                </div>
+                <span className="text-xs text-muted-foreground">Paste this in Wallet → Receive</span>
+              </div>
+            ),
+            duration: 20000,
+          });
+        }
+      } catch (e) {
+        toast({
+          title: "Credential Issued & Anchored",
+          description: (
+            <div className="flex flex-col gap-1">
+              <span>Credential anchored to blockchain.</span>
+              <span className="font-mono text-xs opacity-80">ID: {data.id}</span>
+            </div>
+          ),
+          duration: 5000,
+        });
+      }
 
       // Reset form partially
       setFormData(prev => ({ ...prev, name: "", email: "", studentId: "" }));
@@ -175,27 +204,24 @@ export default function Issuance() {
                       <SelectContent>
                         {formData.sector === 'education' && (
                           <>
-                            <SelectItem value="degree-2025">Degree Certificate 2025</SelectItem>
-                            <SelectItem value="grade-card">Semester Grade Card</SelectItem>
-                            <SelectItem value="completion">Course Completion</SelectItem>
+                            <SelectItem value="template-1">Degree Certificate 2025</SelectItem>
+                            <SelectItem value="template-2">Semester Grade Card</SelectItem>
+                            <SelectItem value="template-3">Course Completion</SelectItem>
                           </>
                         )}
                         {formData.sector === 'healthcare' && (
                           <>
-                            <SelectItem value="medical-report">Medical Lab Report</SelectItem>
-                            <SelectItem value="vaccine-cert">Vaccination Record</SelectItem>
+                            <SelectItem value="template-4">Medical Lab Report</SelectItem>
                           </>
                         )}
                         {formData.sector === 'corporate' && (
                           <>
-                            <SelectItem value="work-pass">Employee Work Pass</SelectItem>
-                            <SelectItem value="experience-cert">Experience Certificate</SelectItem>
+                            <SelectItem value="template-6">Employee ID Card</SelectItem>
                           </>
                         )}
                         {formData.sector === 'manufacturing' && (
                           <>
-                            <SelectItem value="iso-cert">ISO Compliance Certificate</SelectItem>
-                            <SelectItem value="safety-cert">Safety Audit Pass</SelectItem>
+                            <SelectItem value="template-5">ISO 9001 Compliance</SelectItem>
                           </>
                         )}
                       </SelectContent>

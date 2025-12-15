@@ -169,29 +169,53 @@ router.post('/wallet/offer/claim', async (req, res) => {
         }
 
         const data = await response.json();
-        // Expected format: { credential: { ... }, vcJwt: string }
+        // Expected format: { credential: { tenantId, templateId, issuerId, recipient, credentialData, vcJwt, ... }, vcJwt: string }
 
-        if (!data.credential || !data.vcJwt) {
+        if (!data.credential && !data.vcJwt) {
             throw new Error("Invalid response format from Issuer");
         }
 
-        const credData = data.credential;
+        const credData = data.credential || {};
+        const vcJwt = data.vcJwt || credData.vcJwt;
+
+        // Extract issuer info - try to get issuer name from storage or use ID
+        let issuerName = 'External Issuer';
+        if (credData.issuerId) {
+            try {
+                const issuerRes = await fetch(`http://localhost:5001/api/v1/public/registry/issuers/${credData.issuerId}`);
+                if (issuerRes.ok) {
+                    const issuerData = await issuerRes.json();
+                    issuerName = issuerData.name || issuerName;
+                }
+            } catch (e) {
+                console.log('[Wallet] Could not fetch issuer info');
+            }
+        }
+
+        // Determine credential type from template or data
+        const credType = credData.credentialData?.credentialName || 'Verified Credential';
 
         // Store in wallet
         const stored = await walletService.storeCredential(userId, {
-            type: ['VerifiableCredential', 'Imported'], // Could parse from VC payload
-            issuer: credData.issuerId || 'External Issuer',
-            issuanceDate: new Date(),
-            data: credData.credentialData || {},
-            jwt: data.vcJwt,
-            category: 'other' // Default category
+            type: ['VerifiableCredential', credType],
+            issuer: issuerName,
+            issuanceDate: credData.createdAt ? new Date(credData.createdAt) : new Date(),
+            data: {
+                ...credData.credentialData,
+                recipient: credData.recipient,
+                credentialId: credData.id,
+                txHash: credData.txHash,
+                blockNumber: credData.blockNumber,
+            },
+            jwt: vcJwt,
+            category: 'academic' // Default category
         });
 
         // Log activity
         await storage.createActivity({
             userId,
             type: 'credential_imported',
-            description: `Claimed credential via Offer`,
+            description: `Claimed ${credType} from ${issuerName}`,
         });
 
         res.json({
@@ -205,6 +229,7 @@ router.post('/wallet/offer/claim', async (req, res) => {
         res.status(500).json({ error: error.message || 'Failed to claim offer' });
     }
 });
+
 // ============== Demo Data ==============
 
 /**

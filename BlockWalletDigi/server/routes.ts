@@ -1,5 +1,5 @@
 import type { Express } from "express";
-import { createServer, type Server } from "http";
+import { type Server } from "http";
 import { storage } from "./storage";
 import userRoutes from "./routes/user";
 import digilockerRoutes from "./routes/digilocker";
@@ -9,7 +9,10 @@ import credentialsRoutes from "./routes/credentials";
 import sharingRoutes from "./routes/sharing";
 import notificationsRoutes from "./routes/notifications";
 
-export async function registerRoutes(app: Express): Promise<Server> {
+export async function registerRoutes(
+  httpServer: Server,
+  app: Express
+): Promise<Server> {
   // Health check endpoint for Railway
   app.get("/api/health", (_req, res) => {
     res.status(200).json({ status: "ok", timestamp: new Date().toISOString() });
@@ -23,8 +26,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.use("/api", notificationsRoutes); // Inbox & Activity
   app.use("/api", userRoutes);          // User Management
   app.use("/api", digilockerRoutes);    // DigiLocker Integration
-
-  const httpServer = createServer(app);
 
   return httpServer;
 }

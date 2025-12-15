@@ -1,0 +1,24 @@
+{
+    "name": "@credverse/shared-auth",
+    "version": "1.0.0",
+    "description": "Shared authentication utilities for CredVerse applications",
+    "main": "dist/index.js",
+    "types": "dist/index.d.ts",
+    "scripts": {
+        "build": "tsc",
+        "dev": "tsc --watch"
+    },
+    "dependencies": {
+        "bcryptjs": "^3.0.3",
+        "jsonwebtoken": "^9.0.3"
+    },
+    "devDependencies": {
+        "@types/bcryptjs": "^2.4.6",
+        "@types/express": "^5.0.6",
+        "@types/jsonwebtoken": "^9.0.10",
+        "typescript": "^5.6.3"
+    },
+    "peerDependencies": {
+        "express": "^4.0.0"
+    }
+}

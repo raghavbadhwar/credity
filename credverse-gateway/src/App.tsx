@@ -3,6 +3,13 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Loader2, ArrowRight, ShieldCheck, Wallet, UserCheck, LayoutGrid } from 'lucide-react';
 
+// Portal URLs - configurable via environment variables
+const PORTAL_URLS = {
+  issuer: import.meta.env.VITE_ISSUER_URL || 'http://localhost:5001',
+  wallet: import.meta.env.VITE_WALLET_URL || 'http://localhost:5002',
+  recruiter: import.meta.env.VITE_RECRUITER_URL || 'http://localhost:5003',
+};
+
 function App() {
   const [loading, setLoading] = useState(false);
   const [authenticated, setAuthenticated] = useState(false);
@@ -128,7 +135,7 @@ function App() {
                     color="text-blue-600"
                     bg="bg-blue-50"
                     hover="hover:border-blue-200 hover:bg-blue-50/50"
-                    onClick={() => window.location.href = 'http://localhost:5001'}
+                    onClick={() => window.location.href = PORTAL_URLS.issuer}
                   />
                   <RoleButton
                     title="BlockWallet"
@@ -137,7 +144,7 @@ function App() {
                     color="text-purple-600"
                     bg="bg-purple-50"
                     hover="hover:border-purple-200 hover:bg-purple-50/50"
-                    onClick={() => window.location.href = 'http://localhost:5002'}
+                    onClick={() => window.location.href = PORTAL_URLS.wallet}
                   />
                   <RoleButton
                     title="Recruiter Portal"
@@ -146,7 +153,7 @@ function App() {
                     color="text-emerald-600"
                     bg="bg-emerald-50"
                     hover="hover:border-emerald-200 hover:bg-emerald-50/50"
-                    onClick={() => window.location.href = 'http://localhost:5003'}
+                    onClick={() => window.location.href = PORTAL_URLS.recruiter}
                   />
                 </div>
 
