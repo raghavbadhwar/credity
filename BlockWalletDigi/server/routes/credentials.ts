@@ -4,17 +4,43 @@ import { storage } from '../storage';
 import { insertCredentialSchema } from "@shared/schema";
 import { authMiddleware } from '../services/auth-service';
 
-// Allowed hosts for SSRF protection
-const ALLOWED_ISSUER_HOSTS = (process.env.ALLOWED_ISSUER_HOSTS || 'localhost,127.0.0.1').split(',').map(h => h.trim().toLowerCase());
+// Allowed hosts for SSRF protection - empty by default in production to require explicit configuration
+const DEFAULT_ALLOWED_HOSTS = process.env.NODE_ENV === 'production' ? '' : 'localhost,127.0.0.1';
+const ALLOWED_ISSUER_HOSTS = (process.env.ALLOWED_ISSUER_HOSTS || DEFAULT_ALLOWED_HOSTS).split(',').map(h => h.trim().toLowerCase()).filter(h => h.length > 0);
 
 function isAllowedUrl(urlString: string): boolean {
     try {
-        const url = new URL(urlString);
-        const hostname = url.hostname.toLowerCase();
-        // Only allow HTTPS in production, and check against allowlist
-        if (process.env.NODE_ENV === 'production' && url.protocol !== 'https:') {
+        // In production, ALLOWED_ISSUER_HOSTS must be explicitly configured
+        if (process.env.NODE_ENV === 'production' && ALLOWED_ISSUER_HOSTS.length === 0) {
+            console.error('[Security] ALLOWED_ISSUER_HOSTS not configured in production');
             return false;
         }
+
+        const url = new URL(urlString);
+        const hostname = url.hostname.toLowerCase();
+        
+        // Block internal/private IP ranges
+        const blockedPatterns = [
+            /^10\./,                    // 10.0.0.0/8
+            /^172\.(1[6-9]|2[0-9]|3[01])\./, // 172.16.0.0/12
+            /^192\.168\./,              // 192.168.0.0/16
+            /^169\.254\./,              // Link-local
+            /^127\./,                   // Loopback (in production)
+            /^0\./,                     // This network
+        ];
+
+        // In production, block internal IP ranges
+        if (process.env.NODE_ENV === 'production') {
+            if (blockedPatterns.some(pattern => pattern.test(hostname))) {
+                console.warn(`[Security] Blocked internal IP access attempt: ${hostname}`);
+                return false;
+            }
+            // Only allow HTTPS in production
+            if (url.protocol !== 'https:') {
+                return false;
+            }
+        }
+        
         return ALLOWED_ISSUER_HOSTS.some(allowed => 
             hostname === allowed || hostname.endsWith('.' + allowed)
         );
@@ -184,9 +210,10 @@ router.post('/wallet/offer/claim', authMiddleware, async (req, res) => {
 
         console.log(`[Wallet] Claiming offer from: ${url}`);
 
-        // Fetch credential from Issuer with timeout
+        // Fetch credential from Issuer with timeout (configurable, default 5s)
+        const timeoutMs = parseInt(process.env.CREDENTIAL_FETCH_TIMEOUT_MS || '5000', 10);
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+        const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
 
         try {
             const response = await fetch(url, { signal: controller.signal });
