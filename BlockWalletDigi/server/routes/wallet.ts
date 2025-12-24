@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { walletService } from '../services/wallet-service';
 import { didService } from '../services/did-service';
 import { storage } from '../storage';
+import { authMiddleware } from '../services/auth-service';
 
 const router = Router();
 
@@ -10,10 +11,9 @@ const router = Router();
 /**
  * Initialize wallet for user (creates DID automatically)
  */
-router.post('/wallet/init', async (req, res) => {
+router.post('/wallet/init', authMiddleware, async (req, res) => {
     try {
-        const { userId } = req.body;
-        if (!userId) return res.status(400).json({ error: 'userId required' });
+        const userId = req.user!.userId;
 
         // Get or create user
         let user = await storage.getUser(userId);
@@ -55,9 +55,9 @@ router.post('/wallet/init', async (req, res) => {
 /**
  * Get wallet status
  */
-router.get('/wallet/status', async (req, res) => {
+router.get('/wallet/status', authMiddleware, async (req, res) => {
     try {
-        const userId = parseInt(req.query.userId as string) || 1;
+        const userId = req.user!.userId;
         const wallet = await walletService.getOrCreateWallet(userId);
         const stats = await walletService.getWalletStats(userId);
 
@@ -77,13 +77,9 @@ router.get('/wallet/status', async (req, res) => {
 /**
  * Create a new DID for user (Manual)
  */
-router.post('/did/create', async (req, res) => {
+router.post('/did/create', authMiddleware, async (req, res) => {
     try {
-        const { userId } = req.body;
-
-        if (!userId) {
-            return res.status(400).json({ error: 'userId is required' });
-        }
+        const userId = req.user!.userId;
 
         // Create new DID
         const didKeyPair = await didService.createDID();
@@ -138,9 +134,9 @@ router.get('/did/resolve/:did', async (req, res) => {
 /**
  * Create wallet backup
  */
-router.post('/wallet/backup', async (req, res) => {
+router.post('/wallet/backup', authMiddleware, async (req, res) => {
     try {
-        const userId = parseInt(req.body.userId) || 1;
+        const userId = req.user!.userId;
         const { backupData, backupKey } = await walletService.createBackup(userId);
 
         await storage.createActivity({
@@ -164,7 +160,7 @@ router.post('/wallet/backup', async (req, res) => {
 /**
  * Restore from backup
  */
-router.post('/wallet/restore', async (req, res) => {
+router.post('/wallet/restore', authMiddleware, async (req, res) => {
     try {
         const { backupData, backupKey } = req.body;
 

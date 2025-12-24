@@ -46,14 +46,14 @@ export const authRateLimiter = rateLimit({
 });
 
 /**
- * Credential issuance rate limiter
+ * Verification rate limiter
  * Limits: 50 requests per hour per IP
  */
-export const issuanceRateLimiter = rateLimit({
+export const verificationRateLimiter = rateLimit({
     windowMs: 60 * 60 * 1000, // 1 hour
     max: 50,
     message: {
-        error: 'Too many credential issuance requests, please try again later',
+        error: 'Too many verification requests, please try again later',
     },
     standardHeaders: true,
     legacyHeaders: false,
@@ -260,7 +260,7 @@ export function ipBlocklistMiddleware(req: Request, res: Response, next: NextFun
 export const securityMiddleware = {
     apiRateLimiter,
     authRateLimiter,
-    issuanceRateLimiter,
+    verificationRateLimiter,
     hppProtection,
     sanitizationMiddleware,
     requestIdMiddleware,
