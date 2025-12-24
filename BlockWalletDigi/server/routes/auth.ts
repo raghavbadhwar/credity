@@ -10,6 +10,7 @@ import {
     invalidateAccessToken,
     authMiddleware,
     checkRateLimit,
+    validatePasswordStrength,
     AuthUser,
 } from '../services/auth-service';
 
@@ -24,6 +25,12 @@ router.post('/auth/register', async (req, res) => {
 
         if (!username || !password) {
             return res.status(400).json({ error: 'Username and password required' });
+        }
+
+        // Validate password strength
+        const passwordValidation = validatePasswordStrength(password);
+        if (!passwordValidation.isValid) {
+            return res.status(400).json({ error: 'Password too weak', details: passwordValidation.errors });
         }
 
         // Rate limit registration
@@ -102,13 +109,12 @@ router.post('/auth/login', async (req, res) => {
         // Verify password
         const passwordHash = (user as any).passwordHash;
         if (!passwordHash) {
-            // Legacy user without password, allow login for demo
-            console.log('[Auth] Legacy user login (no password)');
-        } else {
-            const valid = await comparePassword(password, passwordHash);
-            if (!valid) {
-                return res.status(401).json({ error: 'Invalid credentials' });
-            }
+            // Users without password must set a password first
+            return res.status(401).json({ error: 'Invalid credentials' });
+        }
+        const valid = await comparePassword(password, passwordHash);
+        if (!valid) {
+            return res.status(401).json({ error: 'Invalid credentials' });
         }
 
         // Generate tokens

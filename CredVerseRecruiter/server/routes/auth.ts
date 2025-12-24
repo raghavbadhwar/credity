@@ -10,6 +10,7 @@ import {
     invalidateAccessToken,
     authMiddleware,
     checkRateLimit,
+    validatePasswordStrength,
     AuthUser,
 } from '../services/auth-service';
 
@@ -24,6 +25,12 @@ router.post('/auth/register', async (req, res) => {
 
         if (!username || !password) {
             return res.status(400).json({ error: 'Username and password required' });
+        }
+
+        // Validate password strength
+        const passwordValidation = validatePasswordStrength(password);
+        if (!passwordValidation.isValid) {
+            return res.status(400).json({ error: 'Password too weak', details: passwordValidation.errors });
         }
 
         // Rate limit registration

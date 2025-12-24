@@ -9,6 +9,7 @@ import {
     getCredentialOffer,
     registerWebhook,
 } from '../services/credential-push-service';
+import { authMiddleware } from '../services/auth-service';
 
 const router = Router();
 
@@ -17,9 +18,9 @@ const router = Router();
 /**
  * Get pending credential offers for wallet
  */
-router.get('/inbox', async (req, res) => {
+router.get('/inbox', authMiddleware, async (req, res) => {
     try {
-        const userId = parseInt(req.query.userId as string) || 1;
+        const userId = req.user!.userId;
 
         // Get user's DID
         const wallet = await walletService.getOrCreateWallet(userId, '');
@@ -47,10 +48,10 @@ router.get('/inbox', async (req, res) => {
 /**
  * Accept a credential offer
  */
-router.post('/inbox/:offerId/accept', async (req, res) => {
+router.post('/inbox/:offerId/accept', authMiddleware, async (req, res) => {
     try {
         const { offerId } = req.params;
-        const userId = parseInt(req.body.userId) || 1;
+        const userId = req.user!.userId;
 
         // Get user's DID
         const wallet = await walletService.getOrCreateWallet(userId, '');
@@ -90,10 +91,10 @@ router.post('/inbox/:offerId/accept', async (req, res) => {
 /**
  * Reject a credential offer
  */
-router.post('/inbox/:offerId/reject', async (req, res) => {
+router.post('/inbox/:offerId/reject', authMiddleware, async (req, res) => {
     try {
         const { offerId } = req.params;
-        const userId = parseInt(req.body.userId) || 1;
+        const userId = req.user!.userId;
 
         const wallet = await walletService.getOrCreateWallet(userId, '');
         if (!wallet?.did) {
@@ -111,10 +112,10 @@ router.post('/inbox/:offerId/reject', async (req, res) => {
 /**
  * Get details of a specific offer
  */
-router.get('/inbox/:offerId', async (req, res) => {
+router.get('/inbox/:offerId', authMiddleware, async (req, res) => {
     try {
         const { offerId } = req.params;
-        const userId = parseInt(req.query.userId as string) || 1;
+        const userId = req.user!.userId;
 
         const wallet = await walletService.getOrCreateWallet(userId, '');
         const offer = getCredentialOffer(offerId);
@@ -143,11 +144,12 @@ router.get('/inbox/:offerId', async (req, res) => {
 /**
  * Register webhook for push notifications
  */
-router.post('/webhook/register', async (req, res) => {
+router.post('/webhook/register', authMiddleware, async (req, res) => {
     try {
-        const { userId, webhookUrl, events } = req.body;
+        const userId = req.user!.userId;
+        const { webhookUrl, events } = req.body;
 
-        const wallet = await walletService.getOrCreateWallet(userId || 1, '');
+        const wallet = await walletService.getOrCreateWallet(userId, '');
         if (!wallet?.did) {
             return res.status(400).json({ error: 'Wallet not initialized' });
         }
@@ -206,9 +208,9 @@ router.post('/push', async (req, res) => {
 /**
  * Get notifications
  */
-router.get('/wallet/notifications', async (req, res) => {
+router.get('/wallet/notifications', authMiddleware, async (req, res) => {
     try {
-        const userId = parseInt(req.query.userId as string) || 1;
+        const userId = req.user!.userId;
         const notifications = await walletService.getNotifications(userId);
 
         res.json({
@@ -224,10 +226,10 @@ router.get('/wallet/notifications', async (req, res) => {
 /**
  * Mark notification as read
  */
-router.post('/wallet/notifications/:id/read', async (req, res) => {
+router.post('/wallet/notifications/:id/read', authMiddleware, async (req, res) => {
     try {
         const { id } = req.params;
-        const userId = parseInt(req.body.userId) || 1;
+        const userId = req.user!.userId;
 
         await walletService.markNotificationRead(userId, id);
 
@@ -241,9 +243,9 @@ router.post('/wallet/notifications/:id/read', async (req, res) => {
 /**
  * Get activity feed
  */
-router.get('/activity', async (req, res) => {
+router.get('/activity', authMiddleware, async (req, res) => {
     try {
-        const userId = parseInt(req.query.userId as string) || 1;
+        const userId = req.user!.userId;
         const activities = await storage.listActivities(userId);
         res.json(activities);
     } catch (error) {

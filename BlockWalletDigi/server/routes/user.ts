@@ -1,13 +1,13 @@
 import { Router } from "express";
 import { storage } from "../storage";
 import { insertUserSchema } from "@shared/schema";
+import { authMiddleware } from "../services/auth-service";
 
 const router = Router();
 
 // Get current user profile
-router.get("/user", async (req, res) => {
-    // TODO: Get userId from session/auth
-    const userId = 1;
+router.get("/user", authMiddleware, async (req, res) => {
+    const userId = req.user!.userId;
     const user = await storage.getUser(userId);
 
     if (!user) {
@@ -18,10 +18,9 @@ router.get("/user", async (req, res) => {
 });
 
 // Update user profile
-router.patch("/user", async (req, res) => {
+router.patch("/user", authMiddleware, async (req, res) => {
     try {
-        // TODO: Get userId from session/auth
-        const userId = 1;
+        const userId = req.user!.userId;
 
         const parseResult = insertUserSchema.partial().safeParse(req.body);
 
@@ -37,9 +36,8 @@ router.patch("/user", async (req, res) => {
 });
 
 // Get user activity
-router.get("/activity", async (req, res) => {
-    // TODO: Get userId from session/auth
-    const userId = 1;
+router.get("/activity", authMiddleware, async (req, res) => {
+    const userId = req.user!.userId;
     const activities = await storage.listActivities(userId);
     res.json(activities);
 });

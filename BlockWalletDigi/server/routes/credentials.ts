@@ -2,6 +2,26 @@ import { Router } from 'express';
 import { walletService } from '../services/wallet-service';
 import { storage } from '../storage';
 import { insertCredentialSchema } from "@shared/schema";
+import { authMiddleware } from '../services/auth-service';
+
+// Allowed hosts for SSRF protection
+const ALLOWED_ISSUER_HOSTS = (process.env.ALLOWED_ISSUER_HOSTS || 'localhost,127.0.0.1').split(',').map(h => h.trim().toLowerCase());
+
+function isAllowedUrl(urlString: string): boolean {
+    try {
+        const url = new URL(urlString);
+        const hostname = url.hostname.toLowerCase();
+        // Only allow HTTPS in production, and check against allowlist
+        if (process.env.NODE_ENV === 'production' && url.protocol !== 'https:') {
+            return false;
+        }
+        return ALLOWED_ISSUER_HOSTS.some(allowed => 
+            hostname === allowed || hostname.endsWith('.' + allowed)
+        );
+    } catch {
+        return false;
+    }
+}
 
 const router = Router();
 
@@ -10,9 +30,9 @@ const router = Router();
 /**
  * List all credentials
  */
-router.get('/wallet/credentials', async (req, res) => {
+router.get('/wallet/credentials', authMiddleware, async (req, res) => {
     try {
-        const userId = parseInt(req.query.userId as string) || 1;
+        const userId = req.user!.userId;
         const category = req.query.category as string;
 
         let credentials;
@@ -32,9 +52,9 @@ router.get('/wallet/credentials', async (req, res) => {
 /**
  * Get single credential details
  */
-router.get('/wallet/credentials/:id', async (req, res) => {
+router.get('/wallet/credentials/:id', authMiddleware, async (req, res) => {
     try {
-        const userId = parseInt(req.query.userId as string) || 1;
+        const userId = req.user!.userId;
         const { id } = req.params;
 
         const credentials = await walletService.getCredentials(userId);
@@ -63,11 +83,12 @@ router.get('/wallet/credentials/:id', async (req, res) => {
 /**
  * Store a new credential
  */
-router.post('/wallet/credentials', async (req, res) => {
+router.post('/wallet/credentials', authMiddleware, async (req, res) => {
     try {
-        const { userId, credential } = req.body;
-        if (!userId || !credential) {
-            return res.status(400).json({ error: 'userId and credential required' });
+        const userId = req.user!.userId;
+        const { credential } = req.body;
+        if (!credential) {
+            return res.status(400).json({ error: 'credential required' });
         }
 
         const stored = await walletService.storeCredential(userId, {
@@ -111,13 +132,10 @@ router.post('/wallet/credentials', async (req, res) => {
 /**
  * Import a credential (VC-JWT)
  */
-router.post('/credentials/import', async (req, res) => {
+router.post('/credentials/import', authMiddleware, async (req, res) => {
     try {
-        const { userId, jwt: vcJwt, type, issuer, data } = req.body;
-
-        if (!userId) {
-            return res.status(400).json({ error: 'userId is required' });
-        }
+        const userId = req.user!.userId;
+        const { jwt: vcJwt, type, issuer, data } = req.body;
 
         // In production, we would decode and validate the VC-JWT
         // For MVP, we accept the credential data directly
@@ -147,72 +165,91 @@ router.post('/credentials/import', async (req, res) => {
         res.status(500).json({ error: 'Failed to import credential' });
     }
 });
-// ... import endpoint ...
 
 /**
  * Claim a credential from an Offer URL
  */
-router.post('/wallet/offer/claim', async (req, res) => {
+router.post('/wallet/offer/claim', authMiddleware, async (req, res) => {
     try {
-        const { userId, url } = req.body;
-        if (!userId || !url) {
-            return res.status(400).json({ error: 'userId and url required' });
+        const userId = req.user!.userId;
+        const { url } = req.body;
+        if (!url) {
+            return res.status(400).json({ error: 'url required' });
+        }
+
+        // SSRF Protection: Validate URL against allowlist
+        if (!isAllowedUrl(url)) {
+            return res.status(400).json({ error: 'URL not allowed. Only trusted issuer domains are permitted.' });
         }
 
         console.log(`[Wallet] Claiming offer from: ${url}`);
 
-        // Fetch credential from Issuer
-        const response = await fetch(url);
-        if (!response.ok) {
-            const errText = await response.text();
-            throw new Error(`Failed to fetch offer: ${response.status} ${errText}`);
+        // Fetch credential from Issuer with timeout
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+
+        try {
+            const response = await fetch(url, { signal: controller.signal });
+            clearTimeout(timeoutId);
+
+            if (!response.ok) {
+                const errText = await response.text();
+                throw new Error(`Failed to fetch offer: ${response.status} ${errText}`);
+            }
+
+            const data = await response.json();
+            // Expected format: { credential: { ... }, vcJwt: string }
+
+            if (!data.credential || !data.vcJwt) {
+                throw new Error("Invalid response format from Issuer");
+            }
+
+            const credData = data.credential;
+
+            // Store in wallet
+            const stored = await walletService.storeCredential(userId, {
+                type: ['VerifiableCredential', 'Imported'], // Could parse from VC payload
+                issuer: credData.issuerId || 'External Issuer',
+                issuanceDate: new Date(),
+                data: credData.credentialData || {},
+                jwt: data.vcJwt,
+                category: 'other' // Default category
+            });
+
+            // Log activity
+            await storage.createActivity({
+                userId,
+                type: 'credential_imported',
+                description: `Claimed credential via Offer`,
+            });
+
+            res.json({
+                success: true,
+                credential: stored,
+                message: 'Credential claimed successfully'
+            });
+        } catch (fetchError: any) {
+            clearTimeout(timeoutId);
+            if (fetchError.name === 'AbortError') {
+                throw new Error('Request timeout while fetching offer');
+            }
+            throw fetchError;
         }
-
-        const data = await response.json();
-        // Expected format: { credential: { ... }, vcJwt: string }
-
-        if (!data.credential || !data.vcJwt) {
-            throw new Error("Invalid response format from Issuer");
-        }
-
-        const credData = data.credential;
-
-        // Store in wallet
-        const stored = await walletService.storeCredential(userId, {
-            type: ['VerifiableCredential', 'Imported'], // Could parse from VC payload
-            issuer: credData.issuerId || 'External Issuer',
-            issuanceDate: new Date(),
-            data: credData.credentialData || {},
-            jwt: data.vcJwt,
-            category: 'other' // Default category
-        });
-
-        // Log activity
-        await storage.createActivity({
-            userId,
-            type: 'credential_imported',
-            description: `Claimed credential via Offer`,
-        });
-
-        res.json({
-            success: true,
-            credential: stored,
-            message: 'Credential claimed successfully'
-        });
 
     } catch (error: any) {
         console.error('[Wallet] Claim offer error:', error);
         res.status(500).json({ error: error.message || 'Failed to claim offer' });
     }
 });
+
 // ============== Demo Data ==============
 
 /**
  * Add sample credentials for demo
  */
-router.post('/wallet/demo/populate', async (req, res) => {
+router.post('/wallet/demo/populate', authMiddleware, async (req, res) => {
     try {
-        const userId = parseInt(req.body.userId) || 1;
+        const userId = req.user!.userId;
 
         // Add sample credentials
         const sampleCredentials = [

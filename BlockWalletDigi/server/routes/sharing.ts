@@ -3,6 +3,7 @@ import { walletService } from '../services/wallet-service';
 import { qrService } from '../services/qr-service';
 import { selectiveDisclosureService } from '../services/selective-disclosure';
 import { storage } from '../storage';
+import { authMiddleware } from '../services/auth-service';
 
 const router = Router();
 
@@ -11,12 +12,13 @@ const router = Router();
 /**
  * Create a share (QR, link, email, etc.)
  */
-router.post('/wallet/share', async (req, res) => {
+router.post('/wallet/share', authMiddleware, async (req, res) => {
     try {
-        const { userId, credentialId, shareType, disclosedFields, expiryMinutes, recipientInfo, purpose } = req.body;
+        const userId = req.user!.userId;
+        const { credentialId, shareType, disclosedFields, expiryMinutes, recipientInfo, purpose } = req.body;
 
-        if (!userId || !credentialId) {
-            return res.status(400).json({ error: 'userId and credentialId required' });
+        if (!credentialId) {
+            return res.status(400).json({ error: 'credentialId required' });
         }
 
         const share = await walletService.createShare(userId, credentialId, {
@@ -62,7 +64,7 @@ router.post('/wallet/share', async (req, res) => {
 /**
  * Generate QR code for credential sharing (Direct endpoint)
  */
-router.post('/credentials/:id/qr', async (req, res) => {
+router.post('/credentials/:id/qr', authMiddleware, async (req, res) => {
     try {
         const credentialId = parseInt(req.params.id);
         const { expiryMinutes = 5, disclosedFields } = req.body;
@@ -70,6 +72,11 @@ router.post('/credentials/:id/qr', async (req, res) => {
         const credential = await storage.getCredential(credentialId);
         if (!credential) {
             return res.status(404).json({ error: 'Credential not found' });
+        }
+
+        // Authorization check: ensure user owns this credential
+        if (credential.userId !== req.user!.userId) {
+            return res.status(403).json({ error: 'Access denied' });
         }
 
         const qrPayload = qrService.generateQRPayload(
@@ -201,10 +208,10 @@ router.get('/share/verify/:shareId', async (req, res) => {
 /**
  * Revoke a share
  */
-router.post('/wallet/share/:shareId/revoke', async (req, res) => {
+router.post('/wallet/share/:shareId/revoke', authMiddleware, async (req, res) => {
     try {
         const { shareId } = req.params;
-        const userId = parseInt(req.body.userId) || 1;
+        const userId = req.user!.userId;
 
         const revoked = await walletService.revokeShare(userId, shareId);
 
@@ -228,9 +235,9 @@ router.post('/wallet/share/:shareId/revoke', async (req, res) => {
 /**
  * Get share history
  */
-router.get('/wallet/shares', async (req, res) => {
+router.get('/wallet/shares', authMiddleware, async (req, res) => {
     try {
-        const userId = parseInt(req.query.userId as string) || 1;
+        const userId = req.user!.userId;
         const credentialId = req.query.credentialId as string;
 
         const shares = await walletService.getShareHistory(userId, credentialId);
@@ -247,9 +254,9 @@ router.get('/wallet/shares', async (req, res) => {
 /**
  * Get available fields for selective disclosure
  */
-router.get('/wallet/credentials/:id/fields', async (req, res) => {
+router.get('/wallet/credentials/:id/fields', authMiddleware, async (req, res) => {
     try {
-        const userId = parseInt(req.query.userId as string) || 1;
+        const userId = req.user!.userId;
         const { id } = req.params;
 
         const credentials = await walletService.getCredentials(userId);
@@ -272,7 +279,7 @@ router.get('/wallet/credentials/:id/fields', async (req, res) => {
 /**
  * Create selective disclosure token
  */
-router.post('/credentials/:id/disclose', async (req, res) => {
+router.post('/credentials/:id/disclose', authMiddleware, async (req, res) => {
     try {
         const credentialId = parseInt(req.params.id);
         const { requestedFields, purpose, requesterDID, expiryMinutes = 30 } = req.body;
@@ -280,6 +287,11 @@ router.post('/credentials/:id/disclose', async (req, res) => {
         const credential = await storage.getCredential(credentialId);
         if (!credential) {
             return res.status(404).json({ error: 'Credential not found' });
+        }
+
+        // Authorization check: ensure user owns this credential
+        if (credential.userId !== req.user!.userId) {
+            return res.status(403).json({ error: 'Access denied' });
         }
 
         if (!requestedFields || !Array.isArray(requestedFields)) {
@@ -331,9 +343,9 @@ router.post('/credentials/:id/disclose', async (req, res) => {
 /**
  * Get consent logs
  */
-router.get('/wallet/consent-logs', async (req, res) => {
+router.get('/wallet/consent-logs', authMiddleware, async (req, res) => {
     try {
-        const userId = parseInt(req.query.userId as string) || 1;
+        const userId = req.user!.userId;
         const credentialId = req.query.credentialId as string;
 
         const logs = await walletService.getConsentLogs(userId, credentialId);
