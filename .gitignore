@@ -8,3 +8,30 @@ build
 coverage
 tmp
 .gemini
+
+# Python
+__pycache__
+*.py[cod]
+*$py.class
+*.so
+.Python
+develop-eggs/
+eggs/
+.eggs/
+*.egg-info/
+*.egg
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+htmlcov/
+.coverage
+.coverage.*
+
+# Virtual environments
+venv/
+.venv/
+ENV/
+
+# Database
+*.db
+*.sqlite3
