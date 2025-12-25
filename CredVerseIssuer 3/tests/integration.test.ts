@@ -61,3 +61,19 @@ describe('Auth Integration API', () => {
         expect(res.status).toBe(401);
     });
 });
+
+describe('Registry issuer lookup', () => {
+    it('returns issuer details by DID without scanning entire registry', async () => {
+        const did = encodeURIComponent("did:key:z6MkhaXgBZDvotDkL5257faiztiGiC2QtKLGpbnn3Zua2F72");
+        const res = await request(app).get(`/api/v1/registry/public/issuers/did/${did}`);
+
+        expect(res.status).toBe(200);
+        expect(res.body).toMatchObject({
+            id: "issuer-1",
+            did: "did:key:z6MkhaXgBZDvotDkL5257faiztiGiC2QtKLGpbnn3Zua2F72",
+            name: "Demo University",
+            domain: "university.edu",
+            trustStatus: "trusted"
+        });
+    });
+});
