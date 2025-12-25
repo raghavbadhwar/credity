@@ -181,8 +181,7 @@ export class MemStorage implements IStorage {
       meta: { logo: "https://via.placeholder.com/50", description: "Official Demo University Issuer" },
       tenantId: tenantId
     };
-    this.issuers.set(demoIssuer.id, demoIssuer);
-    this.issuersByDid.set(demoIssuer.did!, demoIssuer);
+    this.storeIssuer(demoIssuer);
 
     // Seed Template Designs
     const sampleTemplates: Omit<TemplateDesign, "id" | "createdAt" | "updatedAt">[] = [
@@ -281,15 +280,12 @@ export class MemStorage implements IStorage {
     const issuer: Issuer = {
       ...insertIssuer,
       id,
+      did: insertIssuer.did ?? null,
       trustStatus: insertIssuer.trustStatus ?? "pending",
       meta: insertIssuer.meta ?? null,
       createdAt: insertIssuer.createdAt ?? new Date()
     };
-    this.issuers.set(id, issuer);
-    if (issuer.did) {
-      this.issuersByDid.set(issuer.did, issuer);
-    }
-    return issuer;
+    return this.storeIssuer(issuer);
   }
 
   async listIssuers(tenantId: string): Promise<Issuer[]> {
@@ -364,6 +360,18 @@ export class MemStorage implements IStorage {
       (credential as any).credentialHash = data.credentialHash;
       this.credentials.set(id, credential);
     }
+  }
+
+  private storeIssuer(issuer: Issuer): Issuer {
+    const existing = this.issuers.get(issuer.id);
+    if (existing?.did && existing.did !== issuer.did) {
+      this.issuersByDid.delete(existing.did);
+    }
+    this.issuers.set(issuer.id, issuer);
+    if (issuer.did) {
+      this.issuersByDid.set(issuer.did, issuer);
+    }
+    return issuer;
   }
 
   async createActivityLog(data: { tenantId: string; type: string; title: string; description: string; metadata?: any }): Promise<void> {
