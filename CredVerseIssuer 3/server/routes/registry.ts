@@ -27,13 +27,17 @@ router.get("/registry/public/issuers/:id", async (req, res) => {
 
 router.get("/registry/public/issuers/did/:did", async (req, res) => {
     try {
-        // We need a storage method for this, or list and filter (inefficient but okay for MVP)
-        // MVP: List all issuers and find
-        // TODO: Add getIssuerByDid to storage
-        // For now, assuming direct DB query isn't exposed in storage interface easily without editing storage.ts
-        // I'll try to implement it or scan.
-        // Assuming issuer ID lookup is primary for now.
-        res.status(501).json({ message: "Not implemented yet" });
+        const did = decodeURIComponent(req.params.did);
+        const issuer = await storage.getIssuerByDid(did);
+        if (!issuer) return res.status(404).json({ message: "Issuer not found" });
+        res.json({
+            id: issuer.id,
+            name: issuer.name,
+            domain: issuer.domain,
+            did: issuer.did,
+            trustStatus: issuer.trustStatus,
+            meta: issuer.meta
+        });
     } catch (error) {
         res.status(500).json({ message: "Internal Server Error" });
     }

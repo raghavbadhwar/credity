@@ -78,6 +78,7 @@ export interface IStorage {
 
   // Issuer
   getIssuer(id: string): Promise<Issuer | undefined>;
+  getIssuerByDid(did: string): Promise<Issuer | undefined>;
   createIssuer(issuer: InsertIssuer): Promise<Issuer>;
   listIssuers(tenantId: string): Promise<Issuer[]>;
 
@@ -97,6 +98,7 @@ export class MemStorage implements IStorage {
   private tenants: Map<string, Tenant>;
   private apiKeys: Map<string, ApiKey>;
   private issuers: Map<string, Issuer>;
+  private issuersByDid: Map<string, Issuer>;
   private templates: Map<string, Template>;
   private credentials: Map<string, Credential>;
 
@@ -112,6 +114,7 @@ export class MemStorage implements IStorage {
     this.tenants = new Map();
     this.apiKeys = new Map();
     this.issuers = new Map();
+    this.issuersByDid = new Map();
     this.templates = new Map();
     this.credentials = new Map();
     this.students = new Map();
@@ -178,7 +181,7 @@ export class MemStorage implements IStorage {
       meta: { logo: "https://via.placeholder.com/50", description: "Official Demo University Issuer" },
       tenantId: tenantId
     };
-    this.issuers.set(demoIssuer.id, demoIssuer);
+    this.storeIssuer(demoIssuer);
 
     // Seed Template Designs
     const sampleTemplates: Omit<TemplateDesign, "id" | "createdAt" | "updatedAt">[] = [
@@ -269,18 +272,20 @@ export class MemStorage implements IStorage {
   }
 
   async getIssuerByDid(did: string): Promise<Issuer | undefined> {
-    return Array.from(this.issuers.values()).find(i => i.did === did);
+    return this.issuersByDid.get(did);
   }
 
   async createIssuer(insertIssuer: InsertIssuer): Promise<Issuer> {
     const id = randomUUID();
     const issuer: Issuer = {
+      ...insertIssuer,
+      id,
       did: insertIssuer.did ?? null,
-      trustStatus: "pending",
-      meta: insertIssuer.meta ?? null
+      trustStatus: insertIssuer.trustStatus ?? "pending",
+      meta: insertIssuer.meta ?? null,
+      createdAt: insertIssuer.createdAt ?? new Date()
     };
-    this.issuers.set(id, issuer);
-    return issuer;
+    return this.storeIssuer(issuer);
   }
 
   async listIssuers(tenantId: string): Promise<Issuer[]> {
@@ -355,6 +360,18 @@ export class MemStorage implements IStorage {
       (credential as any).credentialHash = data.credentialHash;
       this.credentials.set(id, credential);
     }
+  }
+
+  private storeIssuer(issuer: Issuer): Issuer {
+    const existing = this.issuers.get(issuer.id);
+    if (existing?.did && existing.did !== issuer.did) {
+      this.issuersByDid.delete(existing.did);
+    }
+    this.issuers.set(issuer.id, issuer);
+    if (issuer.did) {
+      this.issuersByDid.set(issuer.did, issuer);
+    }
+    return issuer;
   }
 
   async createActivityLog(data: { tenantId: string; type: string; title: string; description: string; metadata?: any }): Promise<void> {
