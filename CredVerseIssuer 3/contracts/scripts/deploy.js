@@ -25,7 +25,15 @@ async function main() {
 
     console.log("\n=== Deployment Summary ===");
     console.log(`Contract Address: ${address}`);
-    console.log(`Explorer: https://sepolia.etherscan.io/address/${address}`);
+
+    let explorerUrl = `https://sepolia.etherscan.io/address/${address}`;
+    if (hre.network.name === 'polygon') {
+        explorerUrl = `https://polygonscan.com/address/${address}`;
+    } else if (hre.network.name === 'mainnet') {
+        explorerUrl = `https://etherscan.io/address/${address}`;
+    }
+
+    console.log(`Explorer: ${explorerUrl}`);
     console.log("\nAdd this to your .env file:");
     console.log(`REGISTRY_CONTRACT_ADDRESS=${address}`);
 }

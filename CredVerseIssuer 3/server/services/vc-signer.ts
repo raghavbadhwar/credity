@@ -15,7 +15,16 @@ interface IssuerKeyStore {
 const issuerKeys = new Map<string, IssuerKeyStore>();
 
 // Encryption key for private key storage
-const ISSUER_KEY_ENCRYPTION = process.env.ISSUER_KEY_ENCRYPTION || '0'.repeat(64);
+const ISSUER_KEY_ENCRYPTION = process.env.ISSUER_KEY_ENCRYPTION;
+
+if (!ISSUER_KEY_ENCRYPTION) {
+    if (process.env.NODE_ENV === 'production') {
+        throw new Error('FATAL: ISSUER_KEY_ENCRYPTION must be set in production');
+    }
+    console.warn('[VCSigner] WARNING: Using default unsafe encryption key. Set ISSUER_KEY_ENCRYPTION for production.');
+}
+
+const EFFECTIVE_ENCRYPTION_KEY = ISSUER_KEY_ENCRYPTION || '0'.repeat(64);
 
 /**
  * Get or create issuer keypair
@@ -26,7 +35,7 @@ export function getOrCreateIssuerKey(issuerId: string): { publicKey: string; pri
     if (!keyStore) {
         // Generate new keypair for issuer
         const keyPair = generateEd25519KeyPair();
-        const encryptedPrivateKey = encrypt(keyPair.privateKey, ISSUER_KEY_ENCRYPTION);
+        const encryptedPrivateKey = encrypt(keyPair.privateKey, EFFECTIVE_ENCRYPTION_KEY);
 
         keyStore = {
             publicKey: keyPair.publicKey,
@@ -39,7 +48,7 @@ export function getOrCreateIssuerKey(issuerId: string): { publicKey: string; pri
     }
 
     // Decrypt private key for signing
-    const privateKey = decrypt(keyStore.encryptedPrivateKey, ISSUER_KEY_ENCRYPTION);
+    const privateKey = decrypt(keyStore.encryptedPrivateKey, EFFECTIVE_ENCRYPTION_KEY);
 
     return {
         publicKey: keyStore.publicKey,

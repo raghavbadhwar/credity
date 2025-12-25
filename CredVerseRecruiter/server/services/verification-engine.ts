@@ -268,36 +268,52 @@ export class VerificationEngine {
      * In demo mode, we accept JWTs from trusted issuers without cryptographic verification
      */
     private async verifySignature(credential: any): Promise<VerificationCheck> {
-        // Get issuer DID
-        const issuer = credential.issuer?.id || credential.iss;
-        const isValidDid = issuer && issuer.startsWith('did:');
+        // Get issuer identifier (could be DID or plain name)
+        const issuer = credential.issuer?.id || credential.iss || credential.issuer;
+        const isValidDid = typeof issuer === 'string' && issuer.startsWith('did:');
 
-        // Check if issuer is trusted (from registry)
-        const trustedIssuer = this.issuerRegistry.get(issuer) || this.issuerRegistry.get(issuer?.toLowerCase());
+        // Check if issuer is trusted (from registry) – supports DID or name lookup
+        const trustedIssuer = typeof issuer === 'string' ? (this.issuerRegistry.get(issuer) || this.issuerRegistry.get(issuer.toLowerCase())) : undefined;
 
-        // Check for proof or signature field
+        // Detect presence of cryptographic proof
         const hasProof = credential.proof || credential.signature;
 
-        // In demo mode: Accept JWTs from trusted issuers
-        // JWT credentials don't have embedded proof - the signature is part of the JWT token itself
+        // Demo mode: accept JWTs from trusted issuers OR raw credentials with a proof field
         const isDemoMode = process.env.NODE_ENV !== 'production';
         const isJwtCredential = credential.vc || credential.sub; // JWT payloads have vc or sub
 
-        if (isDemoMode && trustedIssuer && isJwtCredential && isValidDid) {
-            return {
-                name: 'Signature Validation',
-                status: 'passed',
-                message: 'JWT from trusted issuer (Demo Mode)',
-                details: {
-                    proofType: 'jwt',
-                    issuer,
-                    trustedIssuer: trustedIssuer.name,
-                    mode: 'demo'
-                },
-            };
+        if (isDemoMode && trustedIssuer) {
+            // If JWT credential with DID issuer, accept as before
+            if (isJwtCredential && isValidDid) {
+                return {
+                    name: 'Signature Validation',
+                    status: 'passed',
+                    message: 'JWT from trusted issuer (Demo Mode)',
+                    details: {
+                        proofType: 'jwt',
+                        issuer,
+                        trustedIssuer: trustedIssuer.name,
+                        mode: 'demo'
+                    },
+                };
+            }
+            // If raw credential includes a proof object, accept it in demo mode
+            if (hasProof) {
+                return {
+                    name: 'Signature Validation',
+                    status: 'passed',
+                    message: 'Proof present in credential (Demo Mode)',
+                    details: {
+                        proofType: credential.proof?.type ?? 'unknown',
+                        issuer,
+                        trustedIssuer: trustedIssuer.name,
+                        mode: 'demo'
+                    },
+                };
+            }
         }
 
-        // Production: Require actual proof
+        // Production mode: require valid DID and proof
         return {
             name: 'Signature Validation',
             status: (hasProof && isValidDid) ? 'passed' : 'failed',

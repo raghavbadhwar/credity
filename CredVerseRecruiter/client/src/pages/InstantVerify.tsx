@@ -54,6 +54,7 @@ export default function InstantVerify() {
   const { toast } = useToast();
   const [viewState, setViewState] = useState<ViewState>("idle");
   const [jwtInput, setJwtInput] = useState("");
+  const [linkInput, setLinkInput] = useState("");
   const [verificationResult, setVerificationResult] = useState<VerificationResult | null>(null);
   const [fraudAnalysis, setFraudAnalysis] = useState<FraudAnalysis | null>(null);
   const [record, setRecord] = useState<VerificationRecord | null>(null);
@@ -81,6 +82,30 @@ export default function InstantVerify() {
     },
     onError: () => {
       toast({ title: 'Verification failed', variant: 'destructive' });
+      setViewState("idle");
+    },
+  });
+
+  // Link verification mutation
+  const verifyLinkMutation = useMutation({
+    mutationFn: async (link: string) => {
+      const response = await fetch('/api/verify/link', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ link }),
+      });
+      if (!response.ok) throw new Error('Link verification failed');
+      return response.json();
+    },
+    onSuccess: (data) => {
+      setVerificationResult(data.verification);
+      setFraudAnalysis(data.fraud);
+      setRecord(data.record);
+      setViewState("result");
+      toast({ title: 'Link Verification Complete', description: `Status: ${data.verification.status}` });
+    },
+    onError: () => {
+      toast({ title: 'Link verification failed', variant: 'destructive' });
       setViewState("idle");
     },
   });
@@ -143,6 +168,23 @@ export default function InstantVerify() {
     simulateMutation.mutate();
   };
 
+  const handleVerifyLink = () => {
+    setViewState("verifying");
+    setProgress(0);
+
+    const interval = setInterval(() => {
+      setProgress(p => {
+        if (p >= 95) {
+          clearInterval(interval);
+          return 95;
+        }
+        return p + 5;
+      });
+    }, 100);
+
+    verifyLinkMutation.mutate(linkInput);
+  };
+
   const reset = () => {
     setViewState("idle");
     setVerificationResult(null);
@@ -150,6 +192,7 @@ export default function InstantVerify() {
     setRecord(null);
     setProgress(0);
     setJwtInput("");
+    setLinkInput("");
   };
 
   const getStatusColor = (status: string) => {
@@ -239,10 +282,18 @@ export default function InstantVerify() {
                   <TabsContent value="link" className="space-y-4">
                     <div className="space-y-2">
                       <Label>Credential URL</Label>
-                      <Input placeholder="https://credverse.io/verify/..." />
+                      <Input
+                        placeholder="http://localhost:5001/api/v1/public/issuance/offer/consume?token=..."
+                        value={linkInput}
+                        onChange={(e) => setLinkInput(e.target.value)}
+                      />
                     </div>
-                    <Button className="w-full" onClick={handleSimulate}>
-                      Verify Link
+                    <Button
+                      className="w-full"
+                      onClick={handleVerifyLink}
+                      disabled={!linkInput.trim() || verifyLinkMutation.isPending}
+                    >
+                      {verifyLinkMutation.isPending ? 'Verifying...' : 'Verify Link'}
                     </Button>
                   </TabsContent>
                 </Tabs>
@@ -320,20 +371,20 @@ export default function InstantVerify() {
                   className="h-full"
                 >
                   <Card className={`h-full border-t-4 shadow-xl overflow-hidden flex flex-col ${verificationResult.status === 'verified' ? 'border-t-emerald-500' :
-                      verificationResult.status === 'suspicious' ? 'border-t-amber-500' :
-                        'border-t-red-500'
+                    verificationResult.status === 'suspicious' ? 'border-t-amber-500' :
+                      'border-t-red-500'
                     }`}>
                     {/* Header */}
                     <div className={`p-6 text-center border-b ${verificationResult.status === 'verified' ? 'bg-emerald-50/50 border-emerald-100' :
-                        verificationResult.status === 'suspicious' ? 'bg-amber-50/50 border-amber-100' :
-                          'bg-red-50/50 border-red-100'
+                      verificationResult.status === 'suspicious' ? 'bg-amber-50/50 border-amber-100' :
+                        'bg-red-50/50 border-red-100'
                       }`}>
                       <motion.div
                         initial={{ scale: 0.8, opacity: 0 }}
                         animate={{ scale: 1, opacity: 1 }}
                         className={`w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 ${verificationResult.status === 'verified' ? 'bg-emerald-100 text-emerald-600' :
-                            verificationResult.status === 'suspicious' ? 'bg-amber-100 text-amber-600' :
-                              'bg-red-100 text-red-600'
+                          verificationResult.status === 'suspicious' ? 'bg-amber-100 text-amber-600' :
+                            'bg-red-100 text-red-600'
                           }`}
                       >
                         {verificationResult.status === 'verified' ? <CheckCircle className="w-8 h-8" /> :
@@ -341,8 +392,8 @@ export default function InstantVerify() {
                             <AlertOctagon className="w-8 h-8" />}
                       </motion.div>
                       <h2 className={`text-2xl font-bold ${verificationResult.status === 'verified' ? 'text-emerald-900' :
-                          verificationResult.status === 'suspicious' ? 'text-amber-900' :
-                            'text-red-900'
+                        verificationResult.status === 'suspicious' ? 'text-amber-900' :
+                          'text-red-900'
                         }`}>
                         {verificationResult.status === 'verified' ? 'Credential Verified' :
                           verificationResult.status === 'suspicious' ? 'Review Required' :

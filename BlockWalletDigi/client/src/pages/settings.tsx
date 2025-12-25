@@ -44,6 +44,23 @@ interface ActivityItem {
   timestamp: string;
 }
 
+interface WalletStats {
+  totalCredentials: number;
+  activeShares: number;
+  totalVerifications: number;
+}
+
+interface WalletStatusData {
+  did?: string;
+  stats?: WalletStats;
+  lastSync?: string;
+}
+
+interface NotifData {
+  notifications?: any[];
+  unreadCount?: number;
+}
+
 export default function SettingsPage() {
   const { toast } = useToast();
   const [, setLocation] = useLocation();
@@ -79,13 +96,13 @@ export default function SettingsPage() {
   }, [notificationsEnabled, shareAlertsEnabled, biometricEnabled]);
 
   // Get wallet status
-  const { data: walletStatus } = useQuery({
+  const { data: walletStatus } = useQuery<WalletStatusData>({
     queryKey: ['/api/wallet/status'],
     refetchInterval: 30000,
   });
 
   // Get notifications count
-  const { data: notifData } = useQuery({
+  const { data: notifData } = useQuery<NotifData>({
     queryKey: ['/api/wallet/notifications'],
   });
 

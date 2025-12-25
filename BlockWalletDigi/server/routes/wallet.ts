@@ -22,6 +22,7 @@ router.post('/wallet/init', async (req, res) => {
             user = await storage.createUser({
                 username: `user_${userId}`,
                 name: 'Wallet User',
+                password: 'wallet-auto-generated', // Auto-init wallets use passkey/DID auth
             });
         }
 

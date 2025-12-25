@@ -13,5 +13,8 @@
         "wallet"
     ],
     "author": "Raghav Badhwar",
-    "license": "UNLICENSED"
+    "license": "UNLICENSED",
+    "dependencies": {
+        "ogl": "^1.0.11"
+    }
 }

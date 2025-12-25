@@ -176,7 +176,8 @@ export class MemStorage implements IStorage {
       domain: "university.edu",
       trustStatus: "trusted",
       meta: { logo: "https://via.placeholder.com/50", description: "Official Demo University Issuer" },
-      tenantId: tenantId
+      tenantId: tenantId,
+      createdAt: new Date()
     };
     this.issuers.set(demoIssuer.id, demoIssuer);
 
@@ -275,9 +276,14 @@ export class MemStorage implements IStorage {
   async createIssuer(insertIssuer: InsertIssuer): Promise<Issuer> {
     const id = randomUUID();
     const issuer: Issuer = {
+      id,
+      name: insertIssuer.name,
+      tenantId: insertIssuer.tenantId,
+      domain: insertIssuer.domain,
       did: insertIssuer.did ?? null,
       trustStatus: "pending",
-      meta: insertIssuer.meta ?? null
+      meta: insertIssuer.meta ?? null,
+      createdAt: new Date()
     };
     this.issuers.set(id, issuer);
     return issuer;
@@ -327,7 +333,10 @@ export class MemStorage implements IStorage {
       vcJwt: insertCredential.vcJwt ?? null,
       ipfsHash: insertCredential.ipfsHash ?? null,
       anchorId: insertCredential.anchorId ?? null,
-      revoked: false
+      revoked: false,
+      txHash: null,
+      blockNumber: null,
+      credentialHash: null
     };
     this.credentials.set(id, credential);
     return credential;

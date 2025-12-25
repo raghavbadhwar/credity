@@ -236,8 +236,8 @@ export class WalletService {
         accessInfo: { ip: string; userAgent: string; location?: string; organization?: string }
     ): Promise<{ valid: boolean; credential?: Partial<StoredCredential>; error?: string }> {
         // Find share across all wallets
-        for (const [userId, wallet] of wallets) {
-            const share = wallet.shares.find(s => s.id === shareId || s.token === shareId);
+        for (const [userId, wallet] of Array.from(wallets.entries())) {
+            const share = wallet.shares.find((s: ShareRecord) => s.id === shareId || s.token === shareId);
 
             if (share) {
                 if (share.revoked) {
@@ -259,7 +259,7 @@ export class WalletService {
                 });
 
                 // Get credential with selective disclosure
-                const credential = wallet.credentials.find(c => c.id === share.credentialId);
+                const credential = wallet.credentials.find((c: StoredCredential) => c.id === share.credentialId);
                 if (!credential) {
                     return { valid: false, error: 'Credential not found' };
                 }

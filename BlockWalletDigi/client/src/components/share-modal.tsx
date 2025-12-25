@@ -26,6 +26,10 @@ interface ShareResult {
   expiry: string;
 }
 
+interface FieldsData {
+  fields?: string[];
+}
+
 export function ShareModal({ credential, open, onOpenChange }: ShareModalProps) {
   const { toast } = useToast();
   const [copied, setCopied] = useState(false);
@@ -36,7 +40,7 @@ export function ShareModal({ credential, open, onOpenChange }: ShareModalProps) 
   const [qrCodeUrl, setQrCodeUrl] = useState<string | null>(null);
 
   // Get available fields for selective disclosure
-  const { data: fieldsData } = useQuery({
+  const { data: fieldsData } = useQuery<FieldsData>({
     queryKey: [`/api/wallet/credentials/${credential?.id}/fields`],
     enabled: !!credential?.id && open,
   });

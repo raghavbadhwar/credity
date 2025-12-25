@@ -153,84 +153,140 @@ router.get('/verify/bulk/:jobId', async (req, res) => {
  * Simulate a verification for demo purposes
  */
 router.post('/verify/simulate', async (req, res) => {
+    // Generate realistic sample credential
+    const issuers = [
+        'Stanford University',
+        'Delhi University',
+        'IIT Bombay',
+        'Harvard University',
+        'MIT',
+        'Unknown Institution',
+    ];
+
+    const names = [
+        'Arjun Sharma',
+        'Priya Patel',
+        'John Smith',
+        'Maria Garcia',
+        'Wei Zhang',
+    ];
+
+    const degrees = [
+        'Bachelor of Computer Science',
+        'Master of Business Administration',
+        'Bachelor of Engineering',
+        'Doctor of Philosophy',
+    ];
+
+    const randomIssuer = issuers[Math.floor(Math.random() * issuers.length)];
+    const randomName = names[Math.floor(Math.random() * names.length)];
+    const randomDegree = degrees[Math.floor(Math.random() * degrees.length)];
+
+    const sampleCredential = {
+        '@context': ['https://www.w3.org/2018/credentials/v1'],
+        type: ['VerifiableCredential', 'UniversityDegreeCredential'],
+        issuer: randomIssuer,
+        issuanceDate: new Date(Date.now() - Math.random() * 365 * 24 * 60 * 60 * 1000).toISOString(),
+        credentialSubject: {
+            id: `did:key:z6Mk${Math.random().toString(36).slice(2, 10)}`,
+            name: randomName,
+            degree: randomDegree,
+            graduationYear: 2020 + Math.floor(Math.random() * 4),
+        },
+        proof: {
+            type: 'Ed25519Signature2020',
+            created: new Date().toISOString(),
+            proofValue: 'simulated-proof',
+        },
+    };
+
+    const verificationResult = await verificationEngine.verifyCredential({ raw: sampleCredential });
+    const fraudAnalysis = await fraudDetector.analyzeCredential(sampleCredential);
+    const record: VerificationRecord = {
+        id: verificationResult.verificationId,
+        credentialType: 'UniversityDegreeCredential',
+        issuer: randomIssuer,
+        subject: randomName,
+        status: verificationResult.status,
+        riskScore: verificationResult.riskScore,
+        fraudScore: fraudAnalysis.score,
+        recommendation: fraudAnalysis.recommendation,
+        timestamp: new Date(),
+        verifiedBy: 'Demo User',
+    };
+    await storage.addVerification(record);
+
+    res.json({
+        success: true,
+        message: 'Simulated verification created',
+        verification: verificationResult,
+        fraud: fraudAnalysis,
+        record,
+    });
+});
+
+
+
+
+
+// New route: Verify credential via link URL
+router.post('/verify/link', async (req, res) => {
     try {
-        // Generate realistic sample credential
-        const issuers = [
-            'Stanford University',
-            'Delhi University',
-            'IIT Bombay',
-            'Harvard University',
-            'MIT',
-            'Unknown Institution',
-        ];
+        const { link } = req.body;
+        if (!link) {
+            return res.status(400).json({ error: 'Link URL is required' });
+        }
+        // Fetch credential from the provided URL (expects JSON)
+        const response = await fetch(link);
+        if (!response.ok) {
+            return res.status(400).json({ error: `Failed to fetch credential from link (status ${response.status})` });
+        }
+        const payload = await response.json();
 
-        const names = [
-            'Arjun Sharma',
-            'Priya Patel',
-            'John Smith',
-            'Maria Garcia',
-            'Wei Zhang',
-        ];
+        let verificationResult;
+        let credentialData;
 
-        const degrees = [
-            'Bachelor of Computer Science',
-            'Master of Business Administration',
-            'Bachelor of Engineering',
-            'Doctor of Philosophy',
-        ];
+        // Handle wrapper response (from Issuer offer/consume) which often contains vcJwt or a credential object
+        if (payload.vcJwt) {
+            verificationResult = await verificationEngine.verifyCredential({ jwt: payload.vcJwt });
+            // Parse JWT for fraud/storage
+            const parts = payload.vcJwt.split('.');
+            if (parts.length === 3) {
+                const decoded = JSON.parse(Buffer.from(parts[1], 'base64url').toString());
+                // If it's a VC JWT, the credential data is usually in 'vc' claim
+                credentialData = decoded.vc || decoded;
+            }
+        } else if (payload.credential) {
+            verificationResult = await verificationEngine.verifyCredential({ raw: payload.credential });
+            credentialData = payload.credential;
+        } else {
+            // Fallback to raw payload (if it's a direct VC)
+            verificationResult = await verificationEngine.verifyCredential({ raw: payload });
+            credentialData = payload;
+        }
 
-        const randomIssuer = issuers[Math.floor(Math.random() * issuers.length)];
-        const randomName = names[Math.floor(Math.random() * names.length)];
-        const randomDegree = degrees[Math.floor(Math.random() * degrees.length)];
+        if (!credentialData) credentialData = {};
 
-        const sampleCredential = {
-            '@context': ['https://www.w3.org/2018/credentials/v1'],
-            type: ['VerifiableCredential', 'UniversityDegreeCredential'],
-            issuer: randomIssuer,
-            issuanceDate: new Date(Date.now() - Math.random() * 365 * 24 * 60 * 60 * 1000).toISOString(),
-            credentialSubject: {
-                id: `did:key:z6Mk${Math.random().toString(36).slice(2, 10)}`,
-                name: randomName,
-                degree: randomDegree,
-                graduationYear: 2020 + Math.floor(Math.random() * 4),
-            },
-            proof: {
-                type: 'Ed25519Signature2020',
-                created: new Date().toISOString(),
-                proofValue: 'simulated-proof',
-            },
-        };
-
-        const verificationResult = await verificationEngine.verifyCredential({
-            raw: sampleCredential,
-        });
-
-        const fraudAnalysis = await fraudDetector.analyzeCredential(sampleCredential);
-
+        // Run fraud analysis on the fetched credential data
+        const fraudAnalysis = await fraudDetector.analyzeCredential(credentialData);
+        // Store verification record
         const record: VerificationRecord = {
             id: verificationResult.verificationId,
-            credentialType: 'UniversityDegreeCredential',
-            issuer: randomIssuer,
-            subject: randomName,
+            credentialType: credentialData.type?.[0] || 'Unknown',
+            issuer: credentialData.issuer?.name || credentialData.issuer || 'Unknown',
+            subject: credentialData.credentialSubject?.name || 'Unknown',
             status: verificationResult.status,
             riskScore: verificationResult.riskScore,
             fraudScore: fraudAnalysis.score,
             recommendation: fraudAnalysis.recommendation,
             timestamp: new Date(),
-            verifiedBy: 'Demo User',
+            verifiedBy: 'Link Verification',
         };
         await storage.addVerification(record);
-
-        res.json({
-            success: true,
-            message: 'Simulated verification created',
-            verification: verificationResult,
-            fraud: fraudAnalysis,
-            record,
-        });
+        res.json({ success: true, verification: verificationResult, fraud: fraudAnalysis, record });
     } catch (error) {
-        console.error('Simulate verification error:', error);
-        res.status(500).json({ error: 'Simulation failed' });
+        console.error('Link verification error:', error);
+        res.status(500).json({ error: 'Link verification failed' });
     }
 });
 

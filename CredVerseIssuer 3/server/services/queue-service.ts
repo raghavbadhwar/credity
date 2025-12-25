@@ -7,7 +7,7 @@ import IORedis from 'ioredis';
  */
 
 // Redis connection configuration
-const REDIS_URL = process.env.REDIS_URL || 'redis://localhost:6379';
+const REDIS_URL = process.env.REDIS_URL; // No fallback - require explicit configuration
 
 let redisConnection: IORedis | null = null;
 let issuanceQueue: Queue | null = null;
@@ -43,15 +43,31 @@ export interface JobResult {
  * Initialize the queue service
  */
 export async function initQueueService(): Promise<boolean> {
+    // Skip Redis if not configured
+    if (!REDIS_URL) {
+        console.log('[Queue] REDIS_URL not configured, using in-memory processing');
+        return false;
+    }
+
     try {
         // Create Redis connection
         redisConnection = new IORedis(REDIS_URL, {
             maxRetriesPerRequest: null,
             enableReadyCheck: false,
+            retryStrategy: (times) => {
+                if (times > 3) return null; // Stop retrying after 3 attempts
+                return Math.min(times * 200, 1000);
+            },
         });
 
-        // Test connection
-        await redisConnection.ping();
+        // Test connection with timeout
+        const pingResult = await Promise.race([
+            redisConnection.ping(),
+            new Promise((_, reject) => setTimeout(() => reject(new Error('Redis connection timeout')), 3000))
+        ]);
+
+        if (pingResult !== 'PONG') throw new Error('Redis ping failed');
+
         console.log('[Queue] Connected to Redis');
 
         // Create the issuance queue
@@ -76,7 +92,12 @@ export async function initQueueService(): Promise<boolean> {
         console.log('[Queue] Queue service initialized');
         return true;
     } catch (error) {
-        console.warn('[Queue] Redis not available, falling back to in-memory processing:', error);
+        console.warn('[Queue] Redis not available, falling back to in-memory processing');
+        // Clean up failed connection
+        if (redisConnection) {
+            redisConnection.disconnect();
+            redisConnection = null;
+        }
         return false;
     }
 }
