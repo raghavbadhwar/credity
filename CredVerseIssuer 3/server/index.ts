@@ -31,10 +31,13 @@ declare module "http" {
   }
 }
 
-// Security headers
+// Security headers - disable CSP in development for Vite HMR compatibility
+const isDev = process.env.NODE_ENV !== 'production';
 app.use(helmet({
-  contentSecurityPolicy: process.env.NODE_ENV === 'production' ? undefined : false,
+  contentSecurityPolicy: isDev ? false : undefined,
   crossOriginEmbedderPolicy: false,
+  crossOriginOpenerPolicy: isDev ? false : undefined,
+  crossOriginResourcePolicy: isDev ? false : undefined,
 }));
 
 // CORS configuration

@@ -1,28 +1,44 @@
-# Credity Monorepo - Railway Deployment
+# CredVerse - Railway Deployment
 
-This is a monorepo with multiple apps. To deploy on Railway:
+This is a monorepo with 4 services. Deploy each service separately on Railway.
 
-## Option 1: Deploy Individual Apps (Recommended)
+## Quick Start
 
-1. In Railway, click on your service
-2. Go to **Settings** → **Build** section
-3. Set **Root Directory** to one of:
-   - `CredVerseIssuer 3` (Issuer Dashboard)
-   - `CredVerseRecruiter` (Recruiter Portal)
-   - `BlockWalletDigi` (Student Wallet)
-   - `credverse-gateway` (Landing Page)
-4. Click **Deploy** to redeploy
+### 1. Create Services in Railway
 
-## Option 2: Deploy via CLI
+For each service, create a new service from GitHub and set:
 
-```bash
-# Install Railway CLI
-npm install -g @railway/cli
+| Service | Root Directory |
+|---------|----------------|
+| Issuer | `CredVerseIssuer 3` |
+| Wallet | `BlockWalletDigi` |
+| Recruiter | `CredVerseRecruiter` |
+| Gateway | `credverse-gateway` |
 
-# Login
-railway login
+### 2. Add Environment Variables
 
-# Deploy specific app
-cd "CredVerseIssuer 3"
-railway up
+**Required for ALL services:**
+```env
+NODE_ENV=production
+JWT_SECRET=<64-char-secret>
+JWT_REFRESH_SECRET=<64-char-secret>
+ALLOWED_ORIGINS=https://your-issuer.up.railway.app,https://your-wallet.up.railway.app,...
 ```
+
+Generate secrets:
+```bash
+node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
+```
+
+### 3. Deploy
+
+Railway auto-deploys on push. Each service has `railway.toml` pre-configured.
+
+## Detailed Guide
+
+See **[DEPLOYMENT.md](./DEPLOYMENT.md)** for:
+- Complete environment variable reference
+- Database setup
+- Custom domains
+- Monitoring setup
+- Troubleshooting

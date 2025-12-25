@@ -29,8 +29,17 @@ export function initAuth(authConfig: Partial<AuthConfig>): void {
         ...authConfig,
     };
 
-    if (!authConfig.jwtSecret) {
-        console.warn('WARNING: Using development JWT secrets. Set JWT_SECRET for production.');
+    if (process.env.NODE_ENV === 'production') {
+        if (!config.jwtSecret || config.jwtSecret === 'dev-only-secret-not-for-production') {
+            throw new Error('SECURITY CRITICAL: JWT_SECRET must be set to a strong value in production.');
+        }
+        if (!config.jwtRefreshSecret || config.jwtRefreshSecret === 'dev-only-refresh-secret-not-for-production') {
+            throw new Error('SECURITY CRITICAL: JWT_REFRESH_SECRET must be set to a strong value in production.');
+        }
+    } else {
+        if (!authConfig.jwtSecret) {
+            console.warn('WARNING: Using development JWT secrets. Set JWT_SECRET for production.');
+        }
     }
 }
 

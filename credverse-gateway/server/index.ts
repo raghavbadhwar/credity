@@ -18,20 +18,22 @@ import { initGoogleOAuth } from './services/google';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
+import { setupSecurity } from '@credverse/shared-auth';
+
 const app = express();
 const httpServer = createServer(app);
 
-// Middleware
-app.use(cors({
-    origin: [
+// Use shared security (Cors, Helmet, Rate Limit, etc)
+setupSecurity(app, {
+    allowedOrigins: [
         'http://localhost:5173',
         'http://localhost:5000',
         'http://localhost:5001',
         'http://localhost:5002',
         'http://localhost:5003',
-    ],
-    credentials: true,
-}));
+    ]
+});
+
 app.use(express.json());
 app.use(cookieParser());
 

@@ -1,10 +1,11 @@
-/**
- * Authentication routes for CredVerse Gateway
- * Includes JWT SSO for cross-app authentication
- */
 import { Router } from 'express';
 import crypto from 'crypto';
-import jwt from 'jsonwebtoken';
+import {
+    initAuth,
+    generateAccessToken,
+    verifyAccessToken,
+    type AuthUser
+} from '@credverse/shared-auth';
 import {
     getAuthorizationUrl,
     exchangeCodeForTokens,
@@ -15,9 +16,11 @@ import {
 
 const router = Router();
 
-// JWT Configuration - same secret as other apps for cross-app SSO
-const JWT_SECRET = process.env.JWT_SECRET || 'credverse-dev-jwt-secret-2024';
-const JWT_EXPIRES_IN = '7d';
+// Initialize shared auth
+initAuth({
+    jwtSecret: process.env.JWT_SECRET || 'credverse-dev-jwt-secret-2024',
+    app: 'gateway'
+});
 
 // In-memory session storage (use Redis in production)
 const sessions = new Map<string, { user: GoogleUser; jwtToken: string; createdAt: Date }>();
@@ -27,29 +30,19 @@ const pendingStates = new Map<string, { createdAt: Date }>();
  * Generate JWT for cross-app SSO
  */
 function generateSSOToken(user: GoogleUser): string {
-    return jwt.sign(
-        {
-            sub: user.id,
-            email: user.email,
-            name: user.name,
-            picture: user.picture,
-            role: 'user',
-            app: 'gateway',
-        },
-        JWT_SECRET,
-        { expiresIn: JWT_EXPIRES_IN }
-    );
+    const authUser: AuthUser = {
+        id: user.id,
+        username: user.email,
+        role: 'user'
+    };
+    return generateAccessToken(authUser);
 }
 
 /**
  * Verify SSO token
  */
 function verifySSOToken(token: string): any {
-    try {
-        return jwt.verify(token, JWT_SECRET);
-    } catch {
-        return null;
-    }
+    return verifyAccessToken(token);
 }
 
 /**

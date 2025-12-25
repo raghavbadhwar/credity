@@ -19,10 +19,15 @@ import twoFactorRoutes from "./routes/two-factor";
 import { initQueueService, startIssuanceWorker } from "./services/queue-service";
 import { issuanceService } from "./services/issuance";
 
+import { setupSecurity } from "@credverse/shared-auth";
+
 export async function registerRoutes(
   httpServer: Server,
   app: Express
 ): Promise<Server> {
+  // Apply shared security middleware (Helmet, CORS, Rate Limit, WAF)
+  setupSecurity(app);
+
   // Initialize queue service for bulk operations
   const queueAvailable = await initQueueService();
   if (queueAvailable) {

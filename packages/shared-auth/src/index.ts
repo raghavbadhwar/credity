@@ -42,3 +42,14 @@ export {
     requireRole,
     checkRateLimit,
 } from './middleware';
+
+// Security middleware
+export {
+    setupSecurity,
+    apiRateLimiter,
+    authRateLimiter,
+    sanitizeInput,
+    deepSanitize,
+    sanitizationMiddleware,
+    suspiciousRequestDetector,
+} from './security';

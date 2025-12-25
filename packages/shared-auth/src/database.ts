@@ -16,7 +16,10 @@ export function initDatabase(): ReturnType<typeof drizzle> | null {
     const databaseUrl = process.env.DATABASE_URL;
 
     if (!databaseUrl) {
-        console.warn('[Database] DATABASE_URL not set, using in-memory storage');
+        if (process.env.NODE_ENV === 'production') {
+            throw new Error('[Database] CRITICAL: DATABASE_URL is not set in production');
+        }
+        console.warn('[Database] DATABASE_URL not set, using in-memory storage (DEV only)');
         return null;
     }
 
@@ -26,10 +29,12 @@ export function initDatabase(): ReturnType<typeof drizzle> | null {
             max: 10,
             idleTimeoutMillis: 30000,
             connectionTimeoutMillis: 2000,
+            ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : undefined, // Enforce SSL in prod
         });
 
         pool.on('error', (err) => {
             console.error('[Database] Unexpected error on idle client', err);
+            process.exit(-1); // Fail fast
         });
 
         db = drizzle(pool);

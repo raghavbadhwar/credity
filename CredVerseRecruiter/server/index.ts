@@ -9,15 +9,7 @@ import express, { type Request, Response, NextFunction } from "express";
 import helmet from "helmet";
 import cors from "cors";
 import { errorHandler } from "./middleware/error-handler";
-import {
-  apiRateLimiter,
-  hppProtection,
-  sanitizationMiddleware,
-  requestIdMiddleware,
-  additionalSecurityHeaders,
-  suspiciousRequestDetector,
-  ipBlocklistMiddleware,
-} from "./middleware/security";
+import { setupSecurity } from "@credverse/shared-auth";
 import { registerRoutes } from "./routes";
 import { serveStatic } from "./static";
 import { createServer } from "http";
@@ -31,13 +23,7 @@ declare module "http" {
   }
 }
 
-// Security headers
-app.use(helmet({
-  contentSecurityPolicy: process.env.NODE_ENV === 'production' ? undefined : false,
-  crossOriginEmbedderPolicy: false,
-}));
-
-// CORS configuration
+// Setup shared security
 const allowedOrigins = process.env.ALLOWED_ORIGINS?.split(',') || [
   'http://localhost:5000',
   'http://localhost:5001',
@@ -46,19 +32,8 @@ const allowedOrigins = process.env.ALLOWED_ORIGINS?.split(',') || [
   'http://localhost:5173',
   'http://localhost:3000'
 ];
-app.use(cors({
-  origin: (origin, callback) => {
-    if (!origin) return callback(null, true);
-    if (allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      callback(new Error('Not allowed by CORS'));
-    }
-  },
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-API-Key'],
-}));
+
+setupSecurity(app, { allowedOrigins });
 
 app.use(
   express.json({
@@ -70,15 +45,6 @@ app.use(
 );
 
 app.use(express.urlencoded({ extended: false, limit: '10mb' }));
-
-// Advanced security middleware
-app.use(requestIdMiddleware);
-app.use(ipBlocklistMiddleware);
-app.use(hppProtection);
-app.use(sanitizationMiddleware);
-app.use(suspiciousRequestDetector);
-app.use(additionalSecurityHeaders);
-app.use('/api', apiRateLimiter);
 
 export function log(message: string, source = "express") {
   const formattedTime = new Date().toLocaleTimeString("en-US", {

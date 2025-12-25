@@ -12,7 +12,7 @@ import {
     authMiddleware,
     checkRateLimit,
     AuthUser,
-} from '../services/auth-service';
+} from '@credverse/shared-auth';
 import { isTwoFactorEnabled, getTwoFactorStatus } from '../services/two-factor';
 import crypto from 'crypto';
 
@@ -204,7 +204,7 @@ router.post('/auth/refresh', (req, res) => {
 /**
  * Logout - invalidate tokens
  */
-router.post('/auth/logout', authMiddleware, (req, res) => {
+router.post('/auth/logout', authMiddleware as any, (req, res) => {
     try {
         const { refreshToken } = req.body;
         const authHeader = req.headers.authorization;
@@ -227,9 +227,9 @@ router.post('/auth/logout', authMiddleware, (req, res) => {
 /**
  * Get current user profile
  */
-router.get('/auth/me', authMiddleware, async (req, res) => {
+router.get('/auth/me', authMiddleware as any, async (req, res) => {
     try {
-        const user = await storage.getUser(req.user!.userId);
+        const user = await storage.getUser((req as any).user!.userId);
         if (!user) {
             return res.status(404).json({ error: 'User not found' });
         }

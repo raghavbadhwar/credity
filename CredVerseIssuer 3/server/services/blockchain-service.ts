@@ -65,11 +65,34 @@ export class BlockchainService {
             } else {
                 this.contract = new ethers.Contract(contractAddress, REGISTRY_ABI, this.provider);
             }
-            this.isConfigured = true;
-            console.log(`[Blockchain] Configured with ${contractAddress} on ${rpcUrl}`);
+            // Don't set isConfigured here - validate contract first
+            console.log(`[Blockchain] Attempting to configure with ${contractAddress} on ${rpcUrl}`);
+
+            // Async validation - check if contract is actually deployed
+            this.validateContract(contractAddress, rpcUrl).catch(() => { });
         } else {
             // Create a dummy contract for development
             this.contract = new ethers.Contract(ethers.ZeroAddress, REGISTRY_ABI, this.provider);
+            console.log(`[Blockchain] Running in simulation mode (no contract address)`);
+        }
+    }
+
+    /**
+     * Validate that the contract is actually deployed
+     */
+    private async validateContract(address: string, rpcUrl: string): Promise<void> {
+        try {
+            const code = await this.provider.getCode(address);
+            if (code === '0x' || code === '') {
+                console.log(`[Blockchain] Contract NOT deployed at ${address} - using simulation mode`);
+                this.isConfigured = false;
+            } else {
+                console.log(`[Blockchain] Contract verified at ${address} on ${rpcUrl}`);
+                this.isConfigured = true;
+            }
+        } catch (error: any) {
+            console.log(`[Blockchain] RPC unreachable (${error.message}) - using simulation mode`);
+            this.isConfigured = false;
         }
     }
 
