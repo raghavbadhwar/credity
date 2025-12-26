@@ -12,6 +12,8 @@ Built with scalability, security, and user experience at its core, CredVerse bri
 
 📘 **[Read the Product Requirements Document (PRD)](./PRD.md)**
 
+🔍 **[Read the Strategic Analysis & Changes Document](./CHANGES.md)** — Competitive analysis, user workflows, and strategic recommendations
+
 This monorepo is organized into four distinct, powerful pillars:
 
 ### 1. 🏛️ [CredVerse Issuer](./CredVerseIssuer%203)
