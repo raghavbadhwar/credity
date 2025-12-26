@@ -10,6 +10,8 @@ Built with scalability, security, and user experience at its core, CredVerse bri
 
 ## 🏗️ Project Architecture
 
+📘 **[Read the Product Requirements Document (PRD)](./PRD.md)**
+
 This monorepo is organized into four distinct, powerful pillars:
 
 ### 1. 🏛️ [CredVerse Issuer](./CredVerseIssuer%203)
