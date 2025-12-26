@@ -10,7 +10,7 @@ Built with scalability, security, and user experience at its core, CredVerse bri
 
 ## 🏗️ Project Architecture
 
-🌟 **[Read the Master Strategic Plan (Raghav Badhwar)](./Raghav_Badhwar_Master_Plan.md)** — The definitive vision, business strategy, and execution roadmap.
+🌟 **[Read the Master Strategic Plan (Raghav Badhwar)](./Raghav_Badhwar.md)** — The definitive vision, tech stack, business strategy, 90-day execution plan, and investor pitch deck.
 
 📘 **[Read the Product Requirements Document (PRD)](./PRD.md)**
 
