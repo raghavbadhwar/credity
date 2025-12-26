@@ -1,14 +1,15 @@
 import { Link, useLocation } from "wouter";
 import { cn } from "@/lib/utils";
-import { 
-  LayoutDashboard, 
-  ScanLine, 
-  Files, 
-  Building2, 
-  ShieldCheck, 
+import {
+  LayoutDashboard,
+  ScanLine,
+  Files,
+  Building2,
+  ShieldCheck,
   Settings,
   LogOut,
-  Menu
+  Menu,
+  BarChart3
 } from "lucide-react";
 import logo from "@assets/generated_images/minimalist_abstract_logo_for_credverse.png";
 import { Button } from "@/components/ui/button";
@@ -20,6 +21,7 @@ const sidebarItems = [
   { icon: LayoutDashboard, label: "Insights", href: "/" },
   { icon: ScanLine, label: "Instant Verify", href: "/verify" },
   { icon: Files, label: "Bulk Verification", href: "/bulk" },
+  { icon: BarChart3, label: "Claims Dashboard", href: "/claims" },
   { icon: Building2, label: "Issuer Directory", href: "/directory" },
   { icon: Settings, label: "Admin Console", href: "/admin" },
 ];
@@ -37,7 +39,7 @@ export function Sidebar() {
         </div>
         <span className="font-bold text-lg tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-white to-white/80">CredVerse</span>
       </div>
-      
+
       <ScrollArea className="flex-1 py-6">
         <nav className="grid gap-2 px-4">
           {sidebarItems.map((item, index) => {
@@ -47,8 +49,8 @@ export function Sidebar() {
                 <div
                   className={cn(
                     "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200 cursor-pointer group relative overflow-hidden",
-                    isActive 
-                      ? "bg-sidebar-primary text-sidebar-primary-foreground shadow-md shadow-primary/20" 
+                    isActive
+                      ? "bg-sidebar-primary text-sidebar-primary-foreground shadow-md shadow-primary/20"
                       : "text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground hover:pl-4"
                   )}
                   onClick={() => setOpen(false)}

@@ -26,6 +26,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { DashboardSkeleton, CredentialCardSkeleton, StatsCardSkeleton } from "@/components/ui/skeletons";
 import { ScanQRButton } from "@/components/qr-scanner";
 import { ErrorBoundary } from "@/components/error-boundary";
+import { TrustScoreCard } from "@/components/trust-score-card";
 
 interface WalletCredential {
   id: string;
@@ -204,6 +205,9 @@ export default function Dashboard() {
                 )}
               </div>
             </motion.div>
+
+            {/* Trust Score Card */}
+            <TrustScoreCard />
 
             {/* Quick Access Buttons */}
             <div className="grid grid-cols-4 gap-4">

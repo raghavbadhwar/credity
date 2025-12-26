@@ -5,11 +5,13 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { QrCode, Download, ArrowRight, Loader2, CheckCircle2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useBiometrics } from "@/hooks/use-biometrics";
 
 export default function ReceiveCredential() {
   const [step, setStep] = useState<"input" | "scanning" | "processing" | "success">("input");
   const [url, setUrl] = useState("");
   const { toast } = useToast();
+  const { requestBiometricVerification } = useBiometrics();
 
   const handleProcess = async () => {
     if (!url && step === 'input') {
@@ -20,6 +22,18 @@ export default function ReceiveCredential() {
     // If scanning, we might simulate a URL or use one passed from scanner
     // For now, if url is empty during scan simulation, we mock it or fail
     const targetUrl = url || "http://localhost:5001/api/v1/public/issuance/offer/consume?token=demo";
+
+    // 1. Verify Biometrics before claiming
+    try {
+      const verified = await requestBiometricVerification('1', 'claim_submit');
+      if (!verified) {
+        toast({ title: "Authentication Failed", description: "Biometric verification required to add credentials", variant: "destructive" });
+        return;
+      }
+    } catch (e) {
+      toast({ title: "Error", description: "Biometric verification unavailable", variant: "destructive" });
+      return;
+    }
 
     setStep("processing");
 

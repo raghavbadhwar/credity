@@ -13,6 +13,9 @@ import ProfilePage from "@/pages/profile";
 import SettingsPage from "@/pages/settings";
 import DigitalID from "@/pages/digital-id";
 import CredentialDetail from "@/pages/credential-detail";
+import ConnectionsPage from "@/pages/connections";
+import BusinessDashboard from "@/pages/business-dashboard";
+import IdentityVerification from "@/pages/identity-verification";
 
 function Router() {
   return (
@@ -25,6 +28,9 @@ function Router() {
       <Route path="/settings" component={SettingsPage} />
       <Route path="/id" component={DigitalID} />
       <Route path="/credential/:id" component={CredentialDetail} />
+      <Route path="/connections" component={ConnectionsPage} />
+      <Route path="/business" component={BusinessDashboard} />
+      <Route path="/verify" component={IdentityVerification} />
       <Route component={NotFound} />
     </Switch>
   );

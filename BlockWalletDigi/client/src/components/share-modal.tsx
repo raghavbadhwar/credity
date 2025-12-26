@@ -12,6 +12,7 @@ import { Credential } from "@shared/schema";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import QRCode from "qrcode";
+import { useBiometrics } from "@/hooks/use-biometrics";
 
 interface ShareModalProps {
   credential: Credential | null;
@@ -53,6 +54,25 @@ export function ShareModal({ credential, open, onOpenChange }: ShareModalProps) 
       setSelectedFields([]);
     }
   }, [open]);
+
+  // Biometrics hook
+  const { requestBiometricVerification } = useBiometrics();
+
+  const handleShareClick = async () => {
+    try {
+      // PROMPT BIOMETRIC AUTH
+      const verified = await requestBiometricVerification('1', 'credential_share');
+      if (!verified) {
+        toast({ title: 'Authentication Failed', description: 'Biometric verification required to share credentials', variant: 'destructive' });
+        return;
+      }
+
+      shareMutation.mutate();
+    } catch (err) {
+      console.error(err);
+      toast({ title: 'Error', description: 'Could not verify biometrics', variant: 'destructive' });
+    }
+  };
 
   // Create share mutation
   const shareMutation = useMutation({
@@ -245,7 +265,7 @@ export function ShareModal({ credential, open, onOpenChange }: ShareModalProps) 
 
             <Button
               className="w-full"
-              onClick={() => shareMutation.mutate()}
+              onClick={handleShareClick}
               disabled={shareMutation.isPending}
             >
               {shareMutation.isPending ? (

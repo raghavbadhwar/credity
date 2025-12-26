@@ -5,19 +5,24 @@
 
 :root {
   /* CredVerse Palette - Light Mode */
-  --background: 210 20% 98%; /* #F7F9FC Soft White */
-  --foreground: 0 0% 0%; /* #000000 Deep Black */
+  --background: 210 20% 98%;
+  /* #F7F9FC Soft White */
+  --foreground: 0 0% 0%;
+  /* #000000 Deep Black */
 
-  --card: 0 0% 100%; /* #FFFFFF */
+  --card: 0 0% 100%;
+  /* #FFFFFF */
   --card-foreground: 0 0% 0%;
 
   --popover: 0 0% 100%;
   --popover-foreground: 0 0% 0%;
 
-  --primary: 220 100% 50%; /* #0055FF Primary Blue */
+  --primary: 220 100% 50%;
+  /* #0055FF Primary Blue */
   --primary-foreground: 0 0% 100%;
 
-  --secondary: 216 33% 96%; /* #F0F4FA */
+  --secondary: 216 33% 96%;
+  /* #F0F4FA */
   --secondary-foreground: 0 0% 0%;
 
   --muted: 210 40% 96.1%;
@@ -38,16 +43,20 @@
 
 .dark {
   /* CredVerse Palette - Dark Mode */
-  --background: 222 47% 11%; /* Deep Navy/Black */
-  --foreground: 210 40% 98%; /* Soft White Text */
+  --background: 222 47% 11%;
+  /* Deep Navy/Black */
+  --foreground: 210 40% 98%;
+  /* Soft White Text */
 
-  --card: 222 47% 13%; /* Slightly lighter than BG */
+  --card: 222 47% 13%;
+  /* Slightly lighter than BG */
   --card-foreground: 210 40% 98%;
 
   --popover: 222 47% 13%;
   --popover-foreground: 210 40% 98%;
 
-  --primary: 217 91% 60%; /* Brighter Blue for Dark Mode */
+  --primary: 217 91% 60%;
+  /* Brighter Blue for Dark Mode */
   --primary-foreground: 222 47.4% 11.2%;
 
   --secondary: 217 33% 17%;
@@ -69,7 +78,7 @@
 
 @theme inline {
   --font-sans: "Inter", sans-serif;
-  
+
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
@@ -107,6 +116,7 @@
   * {
     @apply border-border;
   }
+
   body {
     @apply font-sans antialiased bg-background text-foreground;
   }
@@ -114,12 +124,14 @@
 
 @layer utilities {
   .glass-card {
-     @apply bg-card/80 backdrop-blur-md border border-border shadow-sm dark:bg-card/50;
+    @apply bg-card/80 backdrop-blur-md border border-border shadow-sm dark:bg-card/50;
   }
+
   .card-hover {
     @apply transition-all duration-300 hover:-translate-y-1 hover:shadow-lg cursor-pointer;
   }
+
   .pulse-verified {
-    @apply animate-[pulse_2s_cubic-bezier(0.4,0,0.6,1)_infinite];
+    @apply animate-[pulse_2s_cubic-bezier(0.4, 0, 0.6, 1)_infinite];
   }
 }

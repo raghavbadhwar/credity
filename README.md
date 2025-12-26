@@ -1,53 +1,102 @@
-# Credity Ecosystem
+# 🌐 CredVerse Ecosystem
 
-Welcome to the **Credity** monorepo, a comprehensive blockchain-powered credentialing infrastructure. This repository houses the core components of the ecosystem, designed to facilitate secure, verifiable, and decentralized credential issuance and verification.
+**The Ultimate Blockchain-Powered Credentialing Infrastructure**
 
-## 📂 Project Structure
+Welcome to the **CredVerse** monorepo (formerly Credity). This repository houses a suite of cutting-edge, interconnected applications designed to revolutionize how digital credentials are issued, stored, and verified. 
 
-This monorepo contains the following independent modules:
-
-### 1. [CredVerse Issuer](./CredVerseIssuer%203)
-The **University/Issuer Dashboard**.
-- **Purpose**: Allows institutions to issue verifiable credentials (VCs) to students.
-- **Tech Stack**: Node.js, Express, React, PostgreSQL, Blockchain integration.
-- **Key Features**: Student management, credential visualization, blockchain anchoring.
-
-### 2. [CredVerse Recruiter](./CredVerseRecruiter)
-The **Employer/Verifier Portal**.
-- **Purpose**: Enables recruiters and organizations to verify the authenticity of credentials.
-- **Tech Stack**: Node.js, Express, React.
-- **Key Features**: Instant verification, bulk verification, fraud detection.
-
-### 3. [BlockWalletDigi](./BlockWalletDigi)
-The **Digital Wallet** for Students/Holders.
-- **Purpose**: A secure wallet for users to store, manage, and share their digital credentials.
-- **Tech Stack**: Node.js, Express, React.
-- **Key Features**: Privacy-preserving sharing, integration with DigiLocker (simulated/actual).
-
-### 4. [CredVerse Gateway](./credverse-gateway)
-The **Public Gateway Interface**.
-- **Purpose**: The front-facing gateway for the ecosystem.
-- **Tech Stack**: React, Vite, Tailwind CSS.
-
-## 🚀 Getting Started
-
-Each project is self-contained. Please refer to the `README.md` within each subdirectory for specific installation and running instructions.
-
-### General Prerequisites
-- **Node.js**: v18+ recommended
-- **npm** or **yarn**
-- **PostgreSQL** (for backend services)
-
-### Quick Links
-- [Issuer Dashboard](./CredVerseIssuer%203)
-- [Recruiter Portal](./CredVerseRecruiter)
-- [Wallet App](./BlockWalletDigi)
-
-## 📄 License
-
-**All Rights Reserved**.
-
-This software is **proprietary** and confidential. Unauthorized copying, distribution, or use of this file, via any medium, is strictly prohibited.
+Built with scalability, security, and user experience at its core, CredVerse bridges the gap between traditional institutions and the decentralized web.
 
 ---
-*Built with ❤️ by Raghav Badhwar*
+
+## 🏗️ Project Architecture
+
+This monorepo is organized into four distinct, powerful pillars:
+
+### 1. 🏛️ [CredVerse Issuer](./CredVerseIssuer%203)
+*The Institutional Command Center*
+- **Role**: Enabling Universities and Institutions to issue tamper-proof Verifiable Credentials (VCs).
+- **Core Technology**: 
+  - **DIDs & VCs**: Standards-compliant credential issuance.
+  - **Blockchain Anchoring**: Immutable proof of issuance on-chain.
+- **Key Features**: 
+  - Student implementation & management.
+  - Custom credential schema designer.
+  - Analytics dashboard for issuance metrics.
+
+### 2. 💼 [CredVerse Recruiter](./CredVerseRecruiter)
+*The Verification Intelligence Hub*
+- **Role**: Empowering employers to instantly verify candidate credentials with zero trust.
+- **Core Technology**:
+  - **Zero-Knowledge Proofs (ZKP)**: Verify attributes without revealing sensitive data.
+  - **Instant Link Verification**: One-click validation of shared credentials.
+- **Key Features**:
+  - Bulk verification processing.
+  - Smart fraud detection algorithms.
+  - "Verified Talent" candidate sourcing.
+
+### 3. 📱 [BlockWallet Digi](./BlockWalletDigi)
+*The User Sovereignty Engine*
+- **Role**: A next-gen digital wallet for users to own, manage, and share their achievements.
+- **Core Technology**:
+  - **Biometic Security**: Face detection and liveness checks for secure access.
+  - **AI Integration**: intelligent claims analysis and management.
+- **Key Features**:
+  - Encrypted local storage.
+  - Instant sharing via QR or secure links.
+  - Seamless integration with external identity providers.
+
+### 4. 🌐 [CredVerse Gateway](./credverse-gateway)
+*The Public Portal*
+- **Role**: The unified entry point for the entire ecosystem.
+- **Key Features**:
+  - Centralized landing page.
+  - Ecosystem navigation.
+  - Public registry access.
+
+---
+
+## 🚀 Key Innovations & Updates
+
+- **🔐 Biometric & AI Security**: The Wallet now features advanced biometric modules (`use-biometrics`, `liveness-service`) and AI-driven analysis (`llm-service`, `evidence-analysis`) to ensure that the holder is always the authorized user.
+- **☁️ Cloud-Native Deployment**: Fully configured for deployment on Railway with health checks and production-ready server configurations see (`DEPLOYMENT.md`).
+- **🛡️ Shared Authentication**: A unified security module ensures consistent, bank-grade authentication across all services.
+
+---
+
+## 🛠️ Getting Started
+
+### Prerequisites
+- **Node.js**: v18+ 
+- **npm** or **pnpm**
+- **Git**
+
+### Installation
+
+Clone the repository and install dependencies for the ecosystem:
+
+```bash
+git clone https://github.com/raghavbadhwar/credity.git
+cd credity
+npm install
+```
+
+### Running Locally
+
+Each service runs on a dedicated port. Please refer to individual service READMEs for detailed startup guides, or use the root scripts if available.
+
+| Service | Port |
+|---------|------|
+| **Issuer** | `3000` / `5001` |
+| **Wallet** | `5173` / `5002` |
+| **Recruiter** | `5174` / `5003` |
+
+---
+
+## 📄 License & Proprietary Notice
+
+**© 2025 Raghav Badhwar. All Rights Reserved.**
+
+This software is **proprietary and confidential**. Unauthorized copying, distribution, modification, or use of this source code or any portion of it, via any medium, is strictly prohibited without the express written permission of the copyright holder.
+
+---
+*Architected with ❤️ for the future of Identity.*

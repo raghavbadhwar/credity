@@ -8,6 +8,10 @@ import walletRoutes from "./routes/wallet";
 import credentialsRoutes from "./routes/credentials";
 import sharingRoutes from "./routes/sharing";
 import notificationsRoutes from "./routes/notifications";
+import trustScoreRoutes from "./routes/trust-score";
+import connectionsRoutes from "./routes/connections";
+import claimsRoutes from "./routes/claims";
+import identityRoutes from "./routes/identity";
 
 export async function registerRoutes(
   httpServer: Server,
@@ -26,6 +30,10 @@ export async function registerRoutes(
   app.use("/api", notificationsRoutes); // Inbox & Activity
   app.use("/api", userRoutes);          // User Management
   app.use("/api", digilockerRoutes);    // DigiLocker Integration
+  app.use("/api/trust-score", trustScoreRoutes);  // Trust Score (Layer 1)
+  app.use("/api/connections", connectionsRoutes); // Platform Connections (Layer 1)
+  app.use("/api/v1/claims", claimsRoutes);        // Claims Verification API (B2B)
+  app.use("/api/identity", identityRoutes);       // Identity Verification (Liveness, Biometrics, Documents)
 
   return httpServer;
 }

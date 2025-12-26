@@ -9,6 +9,7 @@ import InstantVerify from "@/pages/InstantVerify";
 import BulkVerify from "@/pages/BulkVerify";
 import Directory from "@/pages/Directory";
 import AdminConsole from "@/pages/AdminConsole";
+import ClaimsDashboard from "@/pages/ClaimsDashboard";
 
 function Router() {
   return (
@@ -18,6 +19,7 @@ function Router() {
       <Route path="/bulk" component={BulkVerify} />
       <Route path="/directory" component={Directory} />
       <Route path="/admin" component={AdminConsole} />
+      <Route path="/claims" component={ClaimsDashboard} />
       <Route component={NotFound} />
     </Switch>
   );
