@@ -310,9 +310,9 @@ PHASE 3: FRAUD DETECTION & CLAIMS ANALYSIS
 
 ### 3.1 What Competitors DON'T Do
 
-| Capability | Worldcoin | Humanity | Billions | DigiLocker | **Credity** |
+| Capability |           Worldcoin | Humanity | Billions | DigiLocker | **Credity** |
 |------------|-----------|----------|----------|------------|-------------|
-| Identity Verification | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Identity Verification | ✅ |        ✅ |         ✅ |       ✅ |         ✅ |
 | Claims Validation | ❌ | ❌ | ❌ | ❌ | **✅** |
 | Evidence Authentication | ❌ | ❌ | ❌ | ❌ | **✅** |
 | Fraud Detection AI | ❌ | ❌ | Partial | ❌ | **✅** |
