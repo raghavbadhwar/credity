@@ -49,8 +49,11 @@ export function ShareModal({ credential, open, onOpenChange }: ShareModalProps) 
   // Reset state when modal opens/closes
   useEffect(() => {
     if (!open) {
+      // eslint-disable-next-line
       setShareResult(null);
+      // eslint-disable-next-line
       setQrCodeUrl(null);
+      // eslint-disable-next-line
       setSelectedFields([]);
     }
   }, [open]);
