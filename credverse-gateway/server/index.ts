@@ -8,7 +8,6 @@ initSentry('credverse-gateway');
 
 import 'dotenv/config';
 import express from 'express';
-import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import { createServer } from 'http';
 import path from 'path';
@@ -62,6 +61,9 @@ app.use('/api/mobile', mobileProxyRoutes);
 app.get('/api/health', (req, res) => {
     res.json({ status: 'ok', app: 'credverse-gateway' });
 });
+
+// Use Sentry error handler after all routes
+app.use(sentryErrorHandler);
 
 // Simple inline HTML for gateway login page (fallback when Vite unavailable)
 const gatewayHTML = `
@@ -138,7 +140,7 @@ const gatewayHTML = `
             const { setupVite } = await import('./vite');
             await setupVite(httpServer, app);
             console.log('[Gateway] Vite dev server attached');
-        } catch (error) {
+        } catch {
             console.log('[Gateway] Vite unavailable, using inline HTML fallback');
             app.get('/', (req, res) => {
                 res.setHeader('Content-Type', 'text/html');
