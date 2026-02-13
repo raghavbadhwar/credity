@@ -1,13 +1,13 @@
-import { Link, useLocation } from "wouter";
-import { Wallet, User, Settings, LogOut } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { Link, useLocation } from 'wouter';
+import { Wallet, User, Settings, LogOut } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 export function Nav() {
   const [location] = useLocation();
 
   const navItems = [
-    { href: "/", icon: Wallet, label: "Wallet" },
-    { href: "/connect", icon: User, label: "Connect" },
+    { href: '/', icon: Wallet, label: 'Wallet' },
+    { href: '/connect', icon: User, label: 'Connect' },
     // { href: "/settings", icon: Settings, label: "Settings" },
   ];
 
@@ -16,7 +16,7 @@ export function Nav() {
       <div className="flex lg:flex-col items-center justify-between p-4 lg:p-6 h-full">
         <div className="hidden lg:flex items-center gap-3 w-full mb-8">
           <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-accent flex items-center justify-center shadow-lg shadow-primary/20">
-             <Wallet className="text-white w-6 h-6" />
+            <Wallet className="text-white w-6 h-6" />
           </div>
           <div>
             <h1 className="font-display font-bold text-xl tracking-tight text-white">BlockCred</h1>
@@ -29,13 +29,20 @@ export function Nav() {
             const isActive = location === item.href;
             return (
               <Link key={item.href} href={item.href}>
-                <a className={cn(
-                  "flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 group",
-                  isActive 
-                    ? "bg-primary/10 text-primary shadow-[0_0_15px_-3px_var(--color-primary)]" 
-                    : "text-muted-foreground hover:text-white hover:bg-white/5"
-                )}>
-                  <item.icon className={cn("w-5 h-5 transition-transform group-hover:scale-110", isActive && "fill-current")} />
+                <a
+                  className={cn(
+                    'flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 group',
+                    isActive
+                      ? 'bg-primary/10 text-primary shadow-[0_0_15px_-3px_var(--color-primary)]'
+                      : 'text-muted-foreground hover:text-white hover:bg-white/5',
+                  )}
+                >
+                  <item.icon
+                    className={cn(
+                      'w-5 h-5 transition-transform group-hover:scale-110',
+                      isActive && 'fill-current',
+                    )}
+                  />
                   <span className="hidden lg:block font-medium">{item.label}</span>
                 </a>
               </Link>

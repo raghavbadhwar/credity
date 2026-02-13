@@ -1,17 +1,30 @@
-import { useState, useEffect } from "react";
-import { Sidebar } from "@/components/sidebar";
-import { Button } from "@/components/ui/button";
-import { Switch } from "@/components/ui/switch";
-import { Label } from "@/components/ui/label";
-import { Separator } from "@/components/ui/separator";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Alert, AlertDescription } from "@/components/ui/alert";
+import { useState, useEffect } from 'react';
+import { Sidebar } from '@/components/sidebar';
+import { Button } from '@/components/ui/button';
+import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
+import { Separator } from '@/components/ui/separator';
+import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from '@/components/ui/dialog';
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetDescription,
+} from '@/components/ui/sheet';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import {
   Shield,
   Cloud,
@@ -30,11 +43,11 @@ import {
   Bell,
   Lock,
   Activity as ActivityIcon,
-  Calendar
-} from "lucide-react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useToast } from "@/hooks/use-toast";
-import { useLocation } from "wouter";
+  Calendar,
+} from 'lucide-react';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useToast } from '@/hooks/use-toast';
+import { useLocation } from 'wouter';
 
 interface ActivityItem {
   id: number;
@@ -73,26 +86,26 @@ export default function SettingsPage() {
 
   // Backup/Restore State
   const [backupData, setBackupData] = useState<{ data: string; key: string } | null>(null);
-  const [restoreKey, setRestoreKey] = useState("");
-  const [restoreData, setRestoreData] = useState("");
+  const [restoreKey, setRestoreKey] = useState('');
+  const [restoreData, setRestoreData] = useState('');
   const [copied, setCopied] = useState(false);
 
   // Preferences State (Persisted in LocalStorage)
-  const [notificationsEnabled, setNotificationsEnabled] = useState(() =>
-    localStorage.getItem("pref_notifications") !== "false"
+  const [notificationsEnabled, setNotificationsEnabled] = useState(
+    () => localStorage.getItem('pref_notifications') !== 'false',
   );
-  const [shareAlertsEnabled, setShareAlertsEnabled] = useState(() =>
-    localStorage.getItem("pref_share_alerts") !== "false"
+  const [shareAlertsEnabled, setShareAlertsEnabled] = useState(
+    () => localStorage.getItem('pref_share_alerts') !== 'false',
   );
-  const [biometricEnabled, setBiometricEnabled] = useState(() =>
-    localStorage.getItem("pref_biometric") !== "false"
+  const [biometricEnabled, setBiometricEnabled] = useState(
+    () => localStorage.getItem('pref_biometric') !== 'false',
   );
 
   // Persist preferences
   useEffect(() => {
-    localStorage.setItem("pref_notifications", notificationsEnabled.toString());
-    localStorage.setItem("pref_share_alerts", shareAlertsEnabled.toString());
-    localStorage.setItem("pref_biometric", biometricEnabled.toString());
+    localStorage.setItem('pref_notifications', notificationsEnabled.toString());
+    localStorage.setItem('pref_share_alerts', shareAlertsEnabled.toString());
+    localStorage.setItem('pref_biometric', biometricEnabled.toString());
   }, [notificationsEnabled, shareAlertsEnabled, biometricEnabled]);
 
   // Get wallet status
@@ -148,13 +161,17 @@ export default function SettingsPage() {
       queryClient.invalidateQueries();
       toast({
         title: 'Wallet Restored',
-        description: `${data.credentialsRestored} credentials recovered`
+        description: `${data.credentialsRestored} credentials recovered`,
       });
-      setRestoreData("");
-      setRestoreKey("");
+      setRestoreData('');
+      setRestoreKey('');
     },
     onError: () => {
-      toast({ title: 'Restore Failed', description: 'Check your backup key', variant: 'destructive' });
+      toast({
+        title: 'Restore Failed',
+        description: 'Check your backup key',
+        variant: 'destructive',
+      });
     },
   });
 
@@ -179,11 +196,11 @@ export default function SettingsPage() {
 
   const handleSignOut = () => {
     // Clear any local session data if used
-    localStorage.removeItem("wallet_session");
-    localStorage.removeItem("did");
-    toast({ title: "Signed Out", description: "You have been logged out securely." });
+    localStorage.removeItem('wallet_session');
+    localStorage.removeItem('did');
+    toast({ title: 'Signed Out', description: 'You have been logged out securely.' });
     // Redirect to login (assuming /login exists, or just home)
-    setLocation("/");
+    setLocation('/');
   };
 
   const stats = walletStatus?.stats;
@@ -196,7 +213,9 @@ export default function SettingsPage() {
         <div className="max-w-2xl mx-auto space-y-8">
           <div className="space-y-2">
             <h1 className="text-2xl font-bold tracking-tight">Settings</h1>
-            <p className="text-muted-foreground">Manage your wallet security, backup, and preferences.</p>
+            <p className="text-muted-foreground">
+              Manage your wallet security, backup, and preferences.
+            </p>
           </div>
 
           {/* Wallet Status Card */}
@@ -241,18 +260,19 @@ export default function SettingsPage() {
                   <Label className="text-base flex items-center gap-2">
                     <Fingerprint className="w-4 h-4" /> Biometric Authentication
                   </Label>
-                  <p className="text-sm text-muted-foreground">Use FaceID/TouchID to unlock wallet</p>
+                  <p className="text-sm text-muted-foreground">
+                    Use FaceID/TouchID to unlock wallet
+                  </p>
                 </div>
-                <Switch
-                  checked={biometricEnabled}
-                  onCheckedChange={setBiometricEnabled}
-                />
+                <Switch checked={biometricEnabled} onCheckedChange={setBiometricEnabled} />
               </div>
 
               <div className="flex items-center justify-between p-4 border rounded-lg">
                 <div className="space-y-0.5">
                   <Label className="text-base">Local Encryption</Label>
-                  <p className="text-sm text-muted-foreground">AES-256-GCM encryption for all data</p>
+                  <p className="text-sm text-muted-foreground">
+                    AES-256-GCM encryption for all data
+                  </p>
                 </div>
                 <Badge className="bg-green-100 text-green-700 hover:bg-green-100">
                   <CheckCircle2 className="w-3 h-3 mr-1" /> Active
@@ -308,29 +328,29 @@ export default function SettingsPage() {
             <h3 className="text-lg font-medium flex items-center gap-2">
               <Bell className="w-5 h-5" /> Notifications
               {unreadNotifications > 0 && (
-                <Badge variant="destructive" className="text-xs">{unreadNotifications}</Badge>
+                <Badge variant="destructive" className="text-xs">
+                  {unreadNotifications}
+                </Badge>
               )}
             </h3>
             <div className="space-y-4">
               <div className="flex items-center justify-between p-4 border rounded-lg">
                 <div className="space-y-0.5">
                   <Label className="text-base">Share Access Alerts</Label>
-                  <p className="text-sm text-muted-foreground">Notify when credentials are verified</p>
+                  <p className="text-sm text-muted-foreground">
+                    Notify when credentials are verified
+                  </p>
                 </div>
-                <Switch
-                  checked={shareAlertsEnabled}
-                  onCheckedChange={setShareAlertsEnabled}
-                />
+                <Switch checked={shareAlertsEnabled} onCheckedChange={setShareAlertsEnabled} />
               </div>
               <div className="flex items-center justify-between p-4 border rounded-lg">
                 <div className="space-y-0.5">
                   <Label className="text-base">New Credential Alerts</Label>
-                  <p className="text-sm text-muted-foreground">Notify when new credentials are received</p>
+                  <p className="text-sm text-muted-foreground">
+                    Notify when new credentials are received
+                  </p>
                 </div>
-                <Switch
-                  checked={notificationsEnabled}
-                  onCheckedChange={setNotificationsEnabled}
-                />
+                <Switch checked={notificationsEnabled} onCheckedChange={setNotificationsEnabled} />
               </div>
             </div>
           </div>
@@ -343,11 +363,26 @@ export default function SettingsPage() {
               <Globe className="w-5 h-5" /> Preferences
             </h3>
             <div className="grid grid-cols-2 gap-4">
-              <Button variant="outline" className="justify-between" onClick={() => toast({ title: "Language", description: "Only English is supported in this version." })}>
+              <Button
+                variant="outline"
+                className="justify-between"
+                onClick={() =>
+                  toast({
+                    title: 'Language',
+                    description: 'Only English is supported in this version.',
+                  })
+                }
+              >
                 Language: English
                 <Globe className="w-4 h-4 ml-2 text-muted-foreground" />
               </Button>
-              <Button variant="outline" className="justify-between" onClick={() => toast({ title: "Theme", description: "System theme is currently active." })}>
+              <Button
+                variant="outline"
+                className="justify-between"
+                onClick={() =>
+                  toast({ title: 'Theme', description: 'System theme is currently active.' })
+                }
+              >
                 Theme: System
                 <Moon className="w-4 h-4 ml-2 text-muted-foreground" />
               </Button>
@@ -391,13 +426,13 @@ export default function SettingsPage() {
               <div className="space-y-2">
                 <Label>Backup Key</Label>
                 <div className="flex gap-2">
-                  <Input
-                    value={backupData.key}
-                    readOnly
-                    className="font-mono text-xs"
-                  />
+                  <Input value={backupData.key} readOnly className="font-mono text-xs" />
                   <Button size="icon" variant="outline" onClick={handleCopyKey}>
-                    {copied ? <CheckCircle2 className="w-4 h-4 text-green-600" /> : <Copy className="w-4 h-4" />}
+                    {copied ? (
+                      <CheckCircle2 className="w-4 h-4 text-green-600" />
+                    ) : (
+                      <Copy className="w-4 h-4" />
+                    )}
                   </Button>
                 </div>
               </div>
@@ -421,9 +456,7 @@ export default function SettingsPage() {
             <DialogTitle className="flex items-center gap-2">
               <Upload className="w-5 h-5" /> Restore Wallet
             </DialogTitle>
-            <DialogDescription>
-              Enter your backup data and recovery key.
-            </DialogDescription>
+            <DialogDescription>Enter your backup data and recovery key.</DialogDescription>
           </DialogHeader>
 
           <div className="space-y-4">
@@ -449,14 +482,14 @@ export default function SettingsPage() {
           </div>
 
           <DialogFooter>
-            <Button variant="outline" onClick={() => setRestoreDialogOpen(false)}>Cancel</Button>
+            <Button variant="outline" onClick={() => setRestoreDialogOpen(false)}>
+              Cancel
+            </Button>
             <Button
               onClick={() => restoreMutation.mutate()}
               disabled={!restoreData || !restoreKey || restoreMutation.isPending}
             >
-              {restoreMutation.isPending ? (
-                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-              ) : null}
+              {restoreMutation.isPending ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
               Restore Wallet
             </Button>
           </DialogFooter>
@@ -479,13 +512,16 @@ export default function SettingsPage() {
               ) : (
                 <div className="space-y-4">
                   {activities.map((activity) => (
-                    <div key={activity.id} className="flex gap-4 pb-4 border-b last:border-0 relative">
+                    <div
+                      key={activity.id}
+                      className="flex gap-4 pb-4 border-b last:border-0 relative"
+                    >
                       <div className="w-2 h-2 mt-2 rounded-full bg-blue-500 shrink-0" />
                       <div className="flex-1 space-y-1">
                         <p className="text-sm font-medium leading-none">{activity.description}</p>
                         <div className="flex items-center text-xs text-muted-foreground gap-2">
                           <ActivityIcon className="w-3 h-3" />
-                          <span className="capitalize">{activity.type.replace(/_/g, " ")}</span>
+                          <span className="capitalize">{activity.type.replace(/_/g, ' ')}</span>
                           <span>•</span>
                           <Calendar className="w-3 h-3" />
                           <span>{new Date(activity.timestamp).toLocaleString()}</span>

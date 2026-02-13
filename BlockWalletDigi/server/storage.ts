@@ -1,9 +1,12 @@
 import {
-  type User, type InsertUser,
-  type Credential, type InsertCredential,
-  type Activity, type InsertActivity
-} from "@shared/schema";
-import { PostgresStateStore } from "@credverse/shared-auth";
+  type User,
+  type InsertUser,
+  type Credential,
+  type InsertCredential,
+  type Activity,
+  type InsertActivity,
+} from '@shared/schema';
+import { PostgresStateStore } from '@credverse/shared-auth';
 
 export interface IStorage {
   // User
@@ -33,7 +36,7 @@ interface WalletStorageState {
 
 function parseDate(value: unknown): Date {
   if (value instanceof Date) return value;
-  if (typeof value === "string" || typeof value === "number") {
+  if (typeof value === 'string' || typeof value === 'number') {
     const date = new Date(value);
     if (!Number.isNaN(date.getTime())) return date;
   }
@@ -63,9 +66,7 @@ export class MemStorage implements IStorage {
   }
 
   async getUserByUsername(username: string): Promise<User | undefined> {
-    return Array.from(this.users.values()).find(
-      (user) => user.username === username,
-    );
+    return Array.from(this.users.values()).find((user) => user.username === username);
   }
 
   async createUser(insertUser: InsertUser): Promise<User> {
@@ -77,7 +78,7 @@ export class MemStorage implements IStorage {
       name: insertUser.name ?? null,
       email: insertUser.email ?? null,
       bio: insertUser.bio ?? null,
-      avatarUrl: insertUser.avatarUrl ?? null
+      avatarUrl: insertUser.avatarUrl ?? null,
     };
     this.users.set(id, user);
     return user;
@@ -85,7 +86,7 @@ export class MemStorage implements IStorage {
 
   async updateUser(id: number, updates: Partial<InsertUser>): Promise<User> {
     const user = await this.getUser(id);
-    if (!user) throw new Error("User not found");
+    if (!user) throw new Error('User not found');
 
     const updatedUser = { ...user, ...updates };
     this.users.set(id, updatedUser);
@@ -99,7 +100,7 @@ export class MemStorage implements IStorage {
 
   async listCredentials(userId: number): Promise<Credential[]> {
     return Array.from(this.credentials.values()).filter(
-      (c) => c.userId === userId && !c.isArchived
+      (c) => c.userId === userId && !c.isArchived,
     );
   }
 
@@ -109,7 +110,7 @@ export class MemStorage implements IStorage {
       ...insertCredential,
       id,
       jwt: insertCredential.jwt ?? null,
-      isArchived: insertCredential.isArchived ?? false
+      isArchived: insertCredential.isArchived ?? false,
     };
     this.credentials.set(id, credential);
     return credential;
@@ -127,7 +128,7 @@ export class MemStorage implements IStorage {
     const activity: Activity = {
       ...insertActivity,
       id,
-      timestamp: new Date()
+      timestamp: new Date(),
     };
     this.activities.set(id, activity);
     return activity;
@@ -146,14 +147,24 @@ export class MemStorage implements IStorage {
 
   importState(state: WalletStorageState): void {
     this.users = new Map((state.users || []).map(([key, value]) => [key, value]));
-    this.credentials = new Map((state.credentials || []).map(([key, value]) => [key, {
-      ...value,
-      issuanceDate: parseDate((value as any).issuanceDate),
-    }]));
-    this.activities = new Map((state.activities || []).map(([key, value]) => [key, {
-      ...value,
-      timestamp: parseDate((value as any).timestamp),
-    }]));
+    this.credentials = new Map(
+      (state.credentials || []).map(([key, value]) => [
+        key,
+        {
+          ...value,
+          issuanceDate: parseDate((value as any).issuanceDate),
+        },
+      ]),
+    );
+    this.activities = new Map(
+      (state.activities || []).map(([key, value]) => [
+        key,
+        {
+          ...value,
+          timestamp: parseDate((value as any).timestamp),
+        },
+      ]),
+    );
     this.currentUserId = state.currentUserId || 1;
     this.currentCredentialId = state.currentCredentialId || 1;
     this.currentActivityId = state.currentActivityId || 1;
@@ -161,13 +172,11 @@ export class MemStorage implements IStorage {
 }
 
 const requirePersistentStorage =
-  process.env.NODE_ENV === "production" || process.env.REQUIRE_DATABASE === "true";
+  process.env.NODE_ENV === 'production' || process.env.REQUIRE_DATABASE === 'true';
 const databaseUrl = process.env.DATABASE_URL;
 
 if (requirePersistentStorage && !databaseUrl) {
-  throw new Error(
-    "[Storage] REQUIRE_DATABASE policy is enabled but DATABASE_URL is missing."
-  );
+  throw new Error('[Storage] REQUIRE_DATABASE policy is enabled but DATABASE_URL is missing.');
 }
 
 function createPersistedStorage(base: MemStorage, dbUrl?: string): MemStorage {
@@ -177,13 +186,13 @@ function createPersistedStorage(base: MemStorage, dbUrl?: string): MemStorage {
 
   const stateStore = new PostgresStateStore<WalletStorageState>({
     databaseUrl: dbUrl,
-    serviceKey: "wallet-storage",
+    serviceKey: 'wallet-storage',
   });
 
   let hydrated = false;
   let hydrationPromise: Promise<void> | null = null;
   let persistChain = Promise.resolve();
-  const mutatingPrefixes = ["create", "update", "delete", "revoke", "bulk"];
+  const mutatingPrefixes = ['create', 'update', 'delete', 'revoke', 'bulk'];
 
   const ensureHydrated = async () => {
     if (hydrated) return;
@@ -207,7 +216,7 @@ function createPersistedStorage(base: MemStorage, dbUrl?: string): MemStorage {
         await stateStore.save(base.exportState());
       })
       .catch((error) => {
-        console.error("[Storage] Failed to persist wallet state:", error);
+        console.error('[Storage] Failed to persist wallet state:', error);
       });
     await persistChain;
   };
@@ -215,7 +224,7 @@ function createPersistedStorage(base: MemStorage, dbUrl?: string): MemStorage {
   return new Proxy(base, {
     get(target, prop, receiver) {
       const value = Reflect.get(target, prop, receiver);
-      if (typeof value !== "function") {
+      if (typeof value !== 'function') {
         return value;
       }
 
@@ -223,7 +232,7 @@ function createPersistedStorage(base: MemStorage, dbUrl?: string): MemStorage {
         await ensureHydrated();
         const result = await value.apply(target, args);
         const shouldPersist = mutatingPrefixes.some(
-          (prefix) => typeof prop === "string" && prop.startsWith(prefix),
+          (prefix) => typeof prop === 'string' && prop.startsWith(prefix),
         );
         if (shouldPersist) {
           await queuePersist();
