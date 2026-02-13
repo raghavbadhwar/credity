@@ -1,4 +1,4 @@
-import { Request, Response, NextFunction } from 'express';
+import { Request, Response, NextFunction, Application } from 'express';
 import rateLimit from 'express-rate-limit';
 import hpp from 'hpp';
 import helmet from 'helmet';
@@ -79,7 +79,7 @@ export function sanitizationMiddleware(req: Request, _res: Response, next: NextF
 // =============================================================================
 
 const SUSPICIOUS_PATTERNS = [
-    /(\%27)|(\')|(\\-\\-)|(\\%23)|(#)/i,     // SQL injection
+    /(%27)|(')|(--)|(%23)|(#)/i,     // SQL injection
     /<script\b[^>]*>([\s\S]*?)<\/script>/gi, // XSS script tags
     /javascript:/gi,                         // JavaScript protocol
     /on\w+\s*=/gi,                          // Event handlers
@@ -120,7 +120,7 @@ interface SecurityConfig {
     enableRateLimit?: boolean;
 }
 
-export function setupSecurity(app: any, config: SecurityConfig = {}) {
+export function setupSecurity(app: Application, config: SecurityConfig = {}) {
     const isDev = process.env.NODE_ENV !== 'production';
 
     // 1. Basic Headers (Helmet) - with dev-friendly settings
@@ -155,6 +155,7 @@ export function setupSecurity(app: any, config: SecurityConfig = {}) {
     // 6. Request ID
     app.use((req: Request, res: Response, next: NextFunction) => {
         const requestId = req.headers['x-request-id'] as string || crypto.randomUUID();
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (req as any).id = requestId;
         res.setHeader('X-Request-ID', requestId);
         next();
