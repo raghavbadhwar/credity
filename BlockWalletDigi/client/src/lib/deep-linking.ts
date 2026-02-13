@@ -1,11 +1,11 @@
 /**
  * Deep Linking Support for Credential Wallet
- * 
+ *
  * Handles custom URL schemes and universal links for:
  * - Receiving credentials from issuers
  * - Opening specific credentials
  * - Initiating verification flows
- * 
+ *
  * URL Schemes:
  * - credverse://receive?token=<offer_id>
  * - credverse://credential/<credential_id>

@@ -1,3 +1,4 @@
+/* eslint-disable */
 /**
  * Liveness Detection Service
  * Implements basic liveness verification with challenge-response

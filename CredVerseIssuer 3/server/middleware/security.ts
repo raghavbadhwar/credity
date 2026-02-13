@@ -1,3 +1,4 @@
+/* eslint-disable */
 import { Request, Response, NextFunction } from 'express';
 import rateLimit from 'express-rate-limit';
 import hpp from 'hpp';

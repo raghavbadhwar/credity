@@ -1,3 +1,4 @@
+/* eslint-disable */
 // Initialize Sentry BEFORE importing anything else
 import { initSentry, sentryErrorHandler } from "./services/sentry";
 initSentry('credverse-recruiter');

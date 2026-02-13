@@ -1,8 +1,9 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * LLM Service
  * Provides LLM-powered analysis for claims verification
  * Supports DeepSeek, Gemini, and OpenAI with configurable API keys
- * 
+ *
  * Set environment variables:
  * - DEEPSEEK_API_KEY: DeepSeek API key
  * - GEMINI_API_KEY: Google Gemini API key (fallback)

@@ -45,7 +45,9 @@ export function validatePasswordStrength(password: string): PasswordValidationRe
     if (!/[0-9]/.test(password)) {
         errors.push('Password must contain at least one number');
     }
-    if (!/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)) {
+    // Use new RegExp to avoid no-useless-escape lint errors with forward slashes in literals
+    // Regex: [!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]
+    if (!new RegExp("[!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>/?]").test(password)) {
         errors.push('Password must contain at least one special character');
     }
 

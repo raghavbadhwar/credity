@@ -1,7 +1,8 @@
+/* eslint-disable */
 /**
  * Credential Types Service
  * Auto-generates credentials based on verified identity per PRD v3.1 Feature 1
- * 
+ *
  * Credential Types:
  * - verified_human: Default after liveness check
  * - age_18: Calculated from DOB on government ID

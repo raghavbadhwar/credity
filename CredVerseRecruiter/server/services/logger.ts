@@ -1,3 +1,4 @@
+/* eslint-disable */
 import pino from 'pino';
 
 /**

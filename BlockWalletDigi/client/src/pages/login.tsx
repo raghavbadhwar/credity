@@ -23,15 +23,15 @@ export default function LoginPage() {
           <p className="text-muted-foreground">Authenticate to access your secure wallet.</p>
         </div>
 
-        <motion.div 
+        <motion.div
           className="py-12 flex justify-center"
           animate={isAuthenticating ? { scale: [1, 1.1, 1], opacity: [1, 0.5, 1] } : {}}
           transition={{ repeat: Infinity, duration: 1.5 }}
         >
           <div className="relative">
             <div className="absolute inset-0 bg-primary/20 blur-xl rounded-full" />
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               className="w-24 h-24 rounded-full border-2 border-primary/20 hover:border-primary hover:bg-primary/5 transition-all"
               onClick={handleBiometricLogin}
             >

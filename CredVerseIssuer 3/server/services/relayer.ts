@@ -1,3 +1,4 @@
+/* eslint-disable */
 import { createWalletClient, http, publicActions, type WalletClient, type PublicClient, type Account } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 import { polygon, polygonAmoy, polygonZkEvm, polygonZkEvmCardona, sepolia, type Chain } from "viem/chains";

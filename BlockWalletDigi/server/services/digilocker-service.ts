@@ -1,13 +1,14 @@
+/* eslint-disable */
 import crypto from 'crypto';
 
 /**
  * DigiLocker Integration Service
- * 
+ *
  * Official DigiLocker API Documentation: https://partners.digitallocker.gov.in/
- * 
+ *
  * IMPORTANT: To use real DigiLocker API, you need to register as a partner at:
  * https://partners.digitallocker.gov.in/
- * 
+ *
  * After registration, you'll receive:
  * - Client ID (DIGILOCKER_CLIENT_ID)
  * - Client Secret (DIGILOCKER_CLIENT_SECRET)

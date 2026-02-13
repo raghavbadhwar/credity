@@ -1,7 +1,7 @@
 /**
  * Biometrics Service
  * Implements PRD v3.1 Layer 1: Biometric Authentication
- * 
+ *
  * Features:
  * - Face ID / Touch ID enrollment
  * - Biometric verification for sensitive actions

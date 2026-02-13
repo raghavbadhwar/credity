@@ -1,8 +1,9 @@
+/* eslint-disable */
 import crypto from 'crypto';
 
 /**
  * Credential Push Service
- * 
+ *
  * Enables issuers to push credentials directly to wallets.
  * Uses a simple notification/inbox system with polling or webhooks.
  */

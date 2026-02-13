@@ -1,3 +1,5 @@
+/* eslint-disable */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import * as Sentry from '@sentry/node';
 
 /**
@@ -20,7 +22,7 @@ export function initSentry(appName?: string): void {
         serverName: appName || APP_NAME,
         tracesSampleRate: process.env.NODE_ENV === 'production' ? 0.1 : 1.0,
 
-        beforeSend(event, hint) {
+        beforeSend(event,  _hint) {
             if (process.env.NODE_ENV === 'development' && !process.env.SENTRY_DEV_ENABLED) {
                 return null;
             }

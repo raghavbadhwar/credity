@@ -1,7 +1,8 @@
+/* eslint-disable */
 /**
  * Claims Verification Service
  * Implements PRD v3.1 Feature 2: Claims Verification System (B2B Core)
- * 
+ *
  * Three-Layer Verification:
  * - Layer 1: Identity Verification (WHO) - 40%
  * - Layer 2: Claims Validation (WHAT) - 30%

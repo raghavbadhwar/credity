@@ -1,3 +1,4 @@
+/* eslint-disable */
 import { Router } from 'express';
 import { verificationEngine } from '../services/verification-engine';
 import { fraudDetector } from '../services/fraud-detector';

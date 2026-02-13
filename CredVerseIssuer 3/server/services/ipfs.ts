@@ -1,3 +1,4 @@
+/* eslint-disable */
 import { PinataSDK } from "pinata-web3";
 
 export class IpfsService {

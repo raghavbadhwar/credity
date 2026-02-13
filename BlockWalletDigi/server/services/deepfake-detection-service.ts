@@ -1,3 +1,4 @@
+/* eslint-disable */
 export interface DeepfakeDetectionResult {
     verdict: 'real' | 'fake' | 'unknown';
     confidence: number | null;

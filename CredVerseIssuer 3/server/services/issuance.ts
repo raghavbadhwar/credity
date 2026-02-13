@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { type InsertCredential, type Credential } from "@shared/schema";
 import { storage } from "../storage";
 import { blockchainService } from "./blockchain-service";

@@ -36,7 +36,7 @@ export function CredentialCard({ credential, index }: CredentialCardProps) {
     >
       <Card className="glass-card border-white/10 hover:border-primary/50 transition-all duration-300 group overflow-hidden relative">
         <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-accent/5 opacity-0 group-hover:opacity-100 transition-opacity" />
-        
+
         <CardHeader className="flex flex-row items-start justify-between space-y-0 pb-2 relative z-10">
           <div className="flex items-center gap-3">
             <div className="p-2 rounded-lg bg-secondary/50 ring-1 ring-white/10">
@@ -72,7 +72,7 @@ export function CredentialCard({ credential, index }: CredentialCardProps) {
               </p>
             </div>
           </div>
-          
+
           {credential.blockHash && (
             <div className="mt-4 pt-4 border-t border-white/5">
               <p className="text-muted-foreground text-xs uppercase tracking-wider mb-1">Block Hash</p>

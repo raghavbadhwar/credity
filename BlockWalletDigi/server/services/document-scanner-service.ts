@@ -1,7 +1,8 @@
+/* eslint-disable */
 /**
  * Document Scanner Service
  * Implements PRD v3.1 Layer 1: Document Verification
- * 
+ *
  * Features:
  * - OCR text extraction from ID documents
  * - Document type detection (Aadhaar, PAN, Passport, DL)

@@ -1,7 +1,7 @@
 /**
  * Business Dashboard Page
  * B2B Claims Management Dashboard per PRD v3.1 Feature 3
- * 
+ *
  * Shows:
  * - Claims processed today stats
  * - Auto-approved/Flagged/Rejected breakdown

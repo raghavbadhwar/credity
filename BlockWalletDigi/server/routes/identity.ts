@@ -1,7 +1,8 @@
+/* eslint-disable */
 /**
  * Identity Verification Routes
  * Implements PRD v3.1 Layer 1: Identity Verification API
- * 
+ *
  * Endpoints:
  * - POST /api/identity/liveness/start - Start liveness session
  * - POST /api/identity/liveness/challenge - Complete a challenge

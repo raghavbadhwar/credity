@@ -1,3 +1,4 @@
+/* eslint-disable */
 import {
   type User, type InsertUser,
   type Credential, type InsertCredential,

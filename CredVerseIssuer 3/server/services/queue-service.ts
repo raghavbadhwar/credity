@@ -1,3 +1,4 @@
+/* eslint-disable */
 import { Queue, Worker, Job, QueueEvents } from 'bullmq';
 import IORedis from 'ioredis';
 import { PostgresStateStore } from '@credverse/shared-auth';

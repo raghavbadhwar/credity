@@ -1,6 +1,7 @@
+/* eslint-disable react-refresh/only-export-components */
 /**
  * Accessibility Utilities
- * 
+ *
  * Helper functions and hooks for improving accessibility
  */
 

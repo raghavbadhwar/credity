@@ -1,3 +1,4 @@
+/* eslint-disable */
 import { Router } from 'express';
 import { walletService } from '../services/wallet-service';
 

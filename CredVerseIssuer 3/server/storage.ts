@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { type User, type InsertUser, type Tenant, type InsertTenant, type ApiKey, type InsertApiKey, type Issuer, type InsertIssuer, type Template, type InsertTemplate, type Credential, type InsertCredential } from "@shared/schema";
 import { randomUUID } from "crypto";
 import { PostgresStateStore } from "@credverse/shared-auth";

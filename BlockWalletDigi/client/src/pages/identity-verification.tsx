@@ -1,7 +1,7 @@
 /**
  * Identity Verification Page
  * Implements PRD v3.1 Layer 1: Identity Verification UI
- * 
+ *
  * Features:
  * - Liveness Detection (camera challenges)
  * - Biometric Setup (Face ID / Fingerprint)

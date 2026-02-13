@@ -2,12 +2,12 @@ import { Sidebar } from "@/components/sidebar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { 
-  QrCode, 
-  Share2, 
-  RotateCw, 
-  History, 
-  Globe, 
+import {
+  QrCode,
+  Share2,
+  RotateCw,
+  History,
+  Globe,
   ShieldCheck,
   CalendarDays
 } from "lucide-react";
@@ -16,7 +16,7 @@ import { motion } from "framer-motion";
 
 export default function DigitalID() {
   // Sort credentials by date descending for history
-  const history = [...MOCK_CREDENTIALS].sort((a, b) => 
+  const history = [...MOCK_CREDENTIALS].sort((a, b) =>
     new Date(b.issueDate).getTime() - new Date(a.issueDate).getTime()
   );
 
@@ -24,10 +24,10 @@ export default function DigitalID() {
     <div className="flex min-h-screen bg-background">
       <Sidebar />
       <div className="flex-1 md:ml-64 flex flex-col h-screen overflow-hidden">
-        
+
         <main className="flex-1 overflow-y-auto p-6">
           <div className="max-w-4xl mx-auto space-y-8">
-            
+
             <div className="flex items-center justify-between">
                <div className="space-y-1">
                  <h1 className="text-2xl font-bold tracking-tight">Digital Passport</h1>
@@ -43,13 +43,13 @@ export default function DigitalID() {
               <div className="space-y-6">
                 <div className="relative group perspective-1000">
                   <div className="relative w-full aspect-[1.586/1] rounded-2xl overflow-hidden shadow-2xl transition-transform duration-500 transform-style-3d group-hover:rotate-y-180">
-                    
+
                     {/* Front */}
                     <div className="absolute inset-0 bg-gradient-to-br from-slate-900 to-slate-800 text-white p-6 flex flex-col justify-between backface-hidden border border-white/10">
-                      
+
                       {/* Holographic Overlay Effect */}
                       <div className="absolute inset-0 bg-[linear-gradient(115deg,transparent_20%,rgba(255,255,255,0.1)_25%,transparent_30%)] pointer-events-none" />
-                      
+
                       <div className="flex justify-between items-start relative z-10">
                         <div className="flex items-center gap-3">
                           <div className="w-10 h-10 bg-white/10 rounded-full flex items-center justify-center border border-white/20 backdrop-blur-sm">
@@ -80,12 +80,12 @@ export default function DigitalID() {
                               <p className="font-medium text-base">Doe</p>
                             </div>
                           </div>
-                          
+
                           <div className="space-y-0.5">
                             <p className="text-[9px] opacity-60 uppercase tracking-wider">Digital ID (DID)</p>
                             <p className="font-mono text-xs opacity-90 truncate bg-white/10 p-1 rounded">did:ethr:0x71C...9A2</p>
                           </div>
-                          
+
                           <div className="grid grid-cols-2 gap-4">
                              <div className="space-y-0.5">
                               <p className="text-[9px] opacity-60 uppercase tracking-wider">Nationality</p>
@@ -111,7 +111,7 @@ export default function DigitalID() {
 
                   </div>
                 </div>
-                
+
                 <div className="flex justify-center text-xs text-muted-foreground">
                   <RotateCw className="w-3 h-3 mr-1" /> Hover card to flip
                 </div>
@@ -126,7 +126,7 @@ export default function DigitalID() {
 
                 <div className="relative pl-4 border-l-2 border-muted space-y-8">
                   {history.map((item, idx) => (
-                    <motion.div 
+                    <motion.div
                       key={item.id}
                       initial={{ opacity: 0, x: 10 }}
                       animate={{ opacity: 1, x: 0 }}
@@ -134,14 +134,14 @@ export default function DigitalID() {
                       className="relative"
                     >
                       <div className={`absolute -left-[21px] top-1 w-3 h-3 rounded-full ring-4 ring-card ${item.status === 'verified' ? 'bg-green-500' : 'bg-amber-500'}`} />
-                      
+
                       <div className="flex flex-col">
                         <span className="text-xs text-muted-foreground font-medium mb-0.5 flex items-center gap-1">
                            <CalendarDays className="w-3 h-3" /> {item.issueDate}
                         </span>
                         <h4 className="text-sm font-semibold">{item.title}</h4>
                         <p className="text-xs text-muted-foreground">{item.issuer}</p>
-                        
+
                         <div className="flex gap-2 mt-2">
                            <Badge variant="secondary" className="text-[10px] font-normal capitalize">
                              {item.type}
@@ -155,7 +155,7 @@ export default function DigitalID() {
                       </div>
                     </motion.div>
                   ))}
-                  
+
                   <div className="relative">
                     <div className="absolute -left-[21px] top-1 w-3 h-3 rounded-full bg-primary ring-4 ring-card" />
                     <h4 className="text-sm font-medium text-primary">Passport Created</h4>

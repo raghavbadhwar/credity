@@ -1,11 +1,62 @@
-import { Router } from 'express';
+import { Router, Request, Response, NextFunction } from 'express';
 import crypto from 'crypto';
 import { walletService } from '../services/wallet-service';
 import { didService } from '../services/did-service';
 import { storage } from '../storage';
-import { hashPassword } from '../services/auth-service';
+import { hashPassword, optionalAuthMiddleware } from '../services/auth-service';
 
 const router = Router();
+
+// Sentinel: Custom middleware for demo mode & authentication enforcement
+const requireAuth = (req: Request, res: Response, next: NextFunction) => {
+    // 1. If user is already authenticated via optionalAuthMiddleware, proceed
+    if (req.user) return next();
+
+    // 2. Allow demo bypass ONLY in non-production with explicit flag
+    if (process.env.NODE_ENV !== 'production' && process.env.ALLOW_DEMO_ROUTES === 'true') {
+        // Mock a user for demo (always user 1)
+        req.user = {
+            userId: 1,
+            username: 'demo_user',
+            role: 'holder',
+            type: 'access'
+        };
+        return next();
+    }
+
+    // 3. Otherwise, reject
+    res.status(401).json({ error: 'Authentication required' });
+};
+
+// Apply auth middleware to all routes in this router
+// We use optionalAuthMiddleware first to populate req.user if token exists
+router.use(optionalAuthMiddleware);
+
+// ============== Public Routes ==============
+
+/**
+ * Resolve a DID to its document (Public)
+ */
+router.get('/did/resolve/:did', async (req, res) => {
+    try {
+        const { did } = req.params;
+        const result = await didService.resolveDID(decodeURIComponent(did));
+
+        if (result.didResolutionMetadata.error) {
+            return res.status(400).json({ error: result.didResolutionMetadata.error });
+        }
+
+        res.json(result);
+    } catch (error) {
+        console.error('Error resolving DID:', error);
+        res.status(500).json({ error: 'Failed to resolve DID' });
+    }
+});
+
+// ============== Authenticated Routes ==============
+
+// Apply strict auth check for all subsequent routes
+router.use(requireAuth);
 
 // ============== Wallet Core & Status ==============
 
@@ -14,16 +65,22 @@ const router = Router();
  */
 router.post('/wallet/init', async (req, res) => {
     try {
-        const { userId } = req.body;
-        if (!userId) return res.status(400).json({ error: 'userId required' });
+        const userId = req.user!.userId;
 
         // Get or create user
         let user = await storage.getUser(userId);
 
         if (!user) {
+            // If user doesn't exist but is authenticated (e.g. via token),
+            // we might need to create it in local storage if using external auth?
+            // But usually userId comes from storage.
+            // In this monorepo, auth-service uses storage.getUserByUsername likely.
+            // If we are here, userId exists in the token.
+            // But storage might be empty if in-memory and restarted?
+            // Let's safe guard:
             const generatedPasswordHash = await hashPassword(crypto.randomBytes(24).toString('base64url'));
             user = await storage.createUser({
-                username: `user_${userId}`,
+                username: req.user!.username || `user_${userId}`,
                 name: 'Wallet User',
                 password: generatedPasswordHash,
             });
@@ -61,7 +118,8 @@ router.post('/wallet/init', async (req, res) => {
  */
 router.get('/wallet/status', async (req, res) => {
     try {
-        const userId = parseInt(req.query.userId as string) || 1;
+        // Sentinel: Prevent IDOR by using authenticated userId
+        const userId = req.user!.userId;
         const wallet = await walletService.getOrCreateWallet(userId);
         const stats = await walletService.getWalletStats(userId);
 
@@ -83,11 +141,7 @@ router.get('/wallet/status', async (req, res) => {
  */
 router.post('/did/create', async (req, res) => {
     try {
-        const { userId } = req.body;
-
-        if (!userId) {
-            return res.status(400).json({ error: 'userId is required' });
-        }
+        const userId = req.user!.userId;
 
         // Create new DID
         const didKeyPair = await didService.createDID();
@@ -118,25 +172,6 @@ router.post('/did/create', async (req, res) => {
     }
 });
 
-/**
- * Resolve a DID to its document
- */
-router.get('/did/resolve/:did', async (req, res) => {
-    try {
-        const { did } = req.params;
-        const result = await didService.resolveDID(decodeURIComponent(did));
-
-        if (result.didResolutionMetadata.error) {
-            return res.status(400).json({ error: result.didResolutionMetadata.error });
-        }
-
-        res.json(result);
-    } catch (error) {
-        console.error('Error resolving DID:', error);
-        res.status(500).json({ error: 'Failed to resolve DID' });
-    }
-});
-
 // ============== Backup & Recovery ==============
 
 /**
@@ -144,7 +179,8 @@ router.get('/did/resolve/:did', async (req, res) => {
  */
 router.post('/wallet/backup', async (req, res) => {
     try {
-        const userId = parseInt(req.body.userId) || 1;
+        // Sentinel: Prevent unauthorized backup (Account Takeover)
+        const userId = req.user!.userId;
         const { backupData, backupKey } = await walletService.createBackup(userId);
 
         await storage.createActivity({
@@ -176,6 +212,7 @@ router.post('/wallet/restore', async (req, res) => {
             return res.status(400).json({ error: 'backupData and backupKey required' });
         }
 
+        // Sentinel: Ensure user is authenticated to restore
         const wallet = await walletService.restoreFromBackup(backupData, backupKey);
 
         res.json({
