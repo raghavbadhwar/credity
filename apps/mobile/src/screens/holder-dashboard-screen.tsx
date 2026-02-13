@@ -1,24 +1,18 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { ActivityIndicator, Alert, Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import { useQueryClient } from '@tanstack/react-query';
 import * as Haptics from 'expo-haptics';
 import {
   createCredentialShareQr,
-  getHolderCertInIncidents,
-  getHolderConsents,
   getHolderCredential,
-  getHolderCredentials,
-  getHolderDataRequests,
-  getHolderReputationScore,
-  getHolderSafeDateScore,
-  getHolderWalletStatus,
-  getRoleProfile,
   submitHolderDataDelete,
   submitHolderDataExport,
   revokeHolderConsent,
 } from '../lib/api-client';
 import { requireProtectedAction } from '../lib/protected-action';
 import { colors } from '../theme/tokens';
+import { useHolderDashboardData } from '../lib/api-hooks';
 
 interface Props {
   onSwitchRole: () => void;
@@ -27,19 +21,25 @@ interface Props {
 
 export function HolderDashboardScreen({ onSwitchRole, onLogout }: Props) {
   const navigation = useNavigation();
-  const [loading, setLoading] = useState(true);
+  const queryClient = useQueryClient();
   const [unlocking, setUnlocking] = useState(true);
-  const [profile, setProfile] = useState<any>(null);
-  const [wallet, setWallet] = useState<any>(null);
-  const [reputation, setReputation] = useState<any>(null);
-  const [safeDate, setSafeDate] = useState<any>(null);
-  const [credentials, setCredentials] = useState<any[]>([]);
+  const [isUnlocked, setIsUnlocked] = useState(false);
   const [selectedCredential, setSelectedCredential] = useState<any>(null);
   const [lastShareLink, setLastShareLink] = useState<string | null>(null);
   const [showZkProof, setShowZkProof] = useState(false);
-  const [consents, setConsents] = useState<any[]>([]);
-  const [dataRequests, setDataRequests] = useState<any[]>([]);
-  const [certInIncidents, setCertInIncidents] = useState<any[]>([]);
+
+  const {
+    profile,
+    wallet,
+    reputation,
+    safeDate,
+    credentials,
+    consents,
+    dataRequests,
+    certInIncidents,
+    isLoading: loading,
+    refresh,
+  } = useHolderDashboardData(isUnlocked);
 
   const summary = useMemo(() => {
     return {
@@ -63,48 +63,21 @@ export function HolderDashboardScreen({ onSwitchRole, onLogout }: Props) {
     return 'Diamond';
   }
 
-  async function authenticateAndLoad() {
+  async function checkUnlock() {
     setUnlocking(true);
     try {
       const unlocked = await requireProtectedAction('Unlock holder wallet');
       if (!unlocked) {
         Alert.alert('Unlock failed', 'Biometric verification is required to access holder dashboard.');
-        return;
+        setIsUnlocked(false);
+      } else {
+        setIsUnlocked(true);
       }
-
-      setLoading(true);
-      const [
-        nextProfile,
-        nextWallet,
-        nextReputation,
-        nextSafeDate,
-        nextCredentials,
-        nextConsents,
-        nextDataRequests,
-        nextIncidents,
-      ] = await Promise.all([
-        getRoleProfile('holder'),
-        getHolderWalletStatus(),
-        getHolderReputationScore(),
-        getHolderSafeDateScore(),
-        getHolderCredentials(),
-        getHolderConsents(1),
-        getHolderDataRequests(1),
-        getHolderCertInIncidents(),
-      ]);
-      setProfile(nextProfile);
-      setWallet(nextWallet);
-      setReputation(nextReputation || null);
-      setSafeDate(nextSafeDate || null);
-      setCredentials(nextCredentials);
-      setConsents(nextConsents);
-      setDataRequests(nextDataRequests);
-      setCertInIncidents(nextIncidents);
     } catch (error: any) {
-      Alert.alert('Load failed', error?.message || 'Unable to load holder data.');
+      Alert.alert('Auth failed', error?.message || 'Unable to authenticate.');
+      setIsUnlocked(false);
     } finally {
       setUnlocking(false);
-      setLoading(false);
     }
   }
 
@@ -148,7 +121,7 @@ export function HolderDashboardScreen({ onSwitchRole, onLogout }: Props) {
         return;
       }
       await submitHolderDataExport(1, 'mobile_export_request');
-      await authenticateAndLoad();
+      await queryClient.invalidateQueries({ queryKey: ['holder', 'requests'] });
       Alert.alert('Submitted', 'Data export request submitted.');
     } catch (error: any) {
       Alert.alert('Request failed', error?.message || 'Unable to submit data export request.');
@@ -164,7 +137,7 @@ export function HolderDashboardScreen({ onSwitchRole, onLogout }: Props) {
         return;
       }
       await submitHolderDataDelete(1, 'mobile_delete_request');
-      await authenticateAndLoad();
+      await queryClient.invalidateQueries({ queryKey: ['holder', 'requests'] });
       Alert.alert('Submitted', 'Data deletion request submitted.');
     } catch (error: any) {
       Alert.alert('Request failed', error?.message || 'Unable to submit data deletion request.');
@@ -185,7 +158,7 @@ export function HolderDashboardScreen({ onSwitchRole, onLogout }: Props) {
         return;
       }
       await revokeHolderConsent(String(consentId), 1);
-      await authenticateAndLoad();
+      await queryClient.invalidateQueries({ queryKey: ['holder', 'consents'] });
       Alert.alert('Consent revoked', `Consent ${consentId} has been revoked.`);
     } catch (error: any) {
       Alert.alert('Revocation failed', error?.message || 'Unable to revoke consent.');
@@ -193,7 +166,7 @@ export function HolderDashboardScreen({ onSwitchRole, onLogout }: Props) {
   }
 
   useEffect(() => {
-    authenticateAndLoad();
+    checkUnlock();
   }, []);
 
   async function onLogoutPress() {
@@ -261,7 +234,7 @@ export function HolderDashboardScreen({ onSwitchRole, onLogout }: Props) {
         </View>
         <Text style={styles.metric}>Credentials: {summary.credentialCount}</Text>
         <Text style={styles.metric}>Trust Score: {String(summary.trust)}</Text>
-        <Pressable style={styles.primaryButton} onPress={authenticateAndLoad}>
+        <Pressable style={styles.primaryButton} onPress={() => refresh()}>
           <Text style={styles.primaryButtonText}>Refresh wallet</Text>
         </Pressable>
         <Pressable style={styles.secondaryButton} onPress={() => (navigation as any).navigate('Settings')}>
