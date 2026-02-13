@@ -10,141 +10,141 @@ const router = Router();
  * List all credentials
  */
 router.get('/wallet/credentials', async (req, res) => {
-  try {
-    const userId = parseInt(req.query.userId as string) || 1;
-    const category = req.query.category as string;
+    try {
+        const userId = parseInt(req.query.userId as string) || 1;
+        const category = req.query.category as string;
 
-    let credentials;
-    if (category) {
-      credentials = await walletService.getCredentialsByCategory(userId, category);
-    } else {
-      credentials = await walletService.getCredentials(userId);
+        let credentials;
+        if (category) {
+            credentials = await walletService.getCredentialsByCategory(userId, category);
+        } else {
+            credentials = await walletService.getCredentials(userId);
+        }
+
+        res.json({ credentials });
+    } catch (error) {
+        console.error('Get credentials error:', error);
+        res.status(500).json({ error: 'Failed to get credentials' });
     }
-
-    res.json({ credentials });
-  } catch (error) {
-    console.error('Get credentials error:', error);
-    res.status(500).json({ error: 'Failed to get credentials' });
-  }
 });
 
 /**
  * Get single credential details
  */
 router.get('/wallet/credentials/:id', async (req, res) => {
-  try {
-    const userId = parseInt(req.query.userId as string) || 1;
-    const { id } = req.params;
+    try {
+        const userId = parseInt(req.query.userId as string) || 1;
+        const { id } = req.params;
 
-    const credentials = await walletService.getCredentials(userId);
-    const credential = credentials.find((c) => c.id === id);
+        const credentials = await walletService.getCredentials(userId);
+        const credential = credentials.find(c => c.id === id);
 
-    if (!credential) {
-      return res.status(404).json({ error: 'Credential not found' });
+        if (!credential) {
+            return res.status(404).json({ error: 'Credential not found' });
+        }
+
+        // Get share history for this credential
+        const shares = await walletService.getShareHistory(userId, id);
+        const consentLogs = await walletService.getConsentLogs(userId, id);
+
+        res.json({
+            credential,
+            shares,
+            consentLogs,
+            verificationCount: credential.verificationCount,
+        });
+    } catch (error) {
+        console.error('Get credential error:', error);
+        res.status(500).json({ error: 'Failed to get credential' });
     }
-
-    // Get share history for this credential
-    const shares = await walletService.getShareHistory(userId, id);
-    const consentLogs = await walletService.getConsentLogs(userId, id);
-
-    res.json({
-      credential,
-      shares,
-      consentLogs,
-      verificationCount: credential.verificationCount,
-    });
-  } catch (error) {
-    console.error('Get credential error:', error);
-    res.status(500).json({ error: 'Failed to get credential' });
-  }
 });
 
 /**
  * Store a new credential
  */
 router.post('/wallet/credentials', async (req, res) => {
-  try {
-    const { userId, credential } = req.body;
-    if (!userId || !credential) {
-      return res.status(400).json({ error: 'userId and credential required' });
-    }
-
-    const stored = await walletService.storeCredential(userId, {
-      type: credential.type || ['VerifiableCredential'],
-      issuer: credential.issuer || 'Unknown',
-      issuanceDate: new Date(credential.issuanceDate || Date.now()),
-      expirationDate: credential.expirationDate ? new Date(credential.expirationDate) : undefined,
-      data: credential.data || credential,
-      jwt: credential.jwt,
-      category: credential.category,
-    });
-
-    // Also store in legacy storage for dashboard compatibility
     try {
-      await storage.createCredential({
-        userId,
-        type: stored.type,
-        issuer: stored.issuer,
-        issuanceDate: stored.issuanceDate,
-        data: stored.data,
-        jwt: stored.jwt,
-      });
-    } catch (e) {
-      // Ignore duplication error if any
+        const { userId, credential } = req.body;
+        if (!userId || !credential) {
+            return res.status(400).json({ error: 'userId and credential required' });
+        }
+
+        const stored = await walletService.storeCredential(userId, {
+            type: credential.type || ['VerifiableCredential'],
+            issuer: credential.issuer || 'Unknown',
+            issuanceDate: new Date(credential.issuanceDate || Date.now()),
+            expirationDate: credential.expirationDate ? new Date(credential.expirationDate) : undefined,
+            data: credential.data || credential,
+            jwt: credential.jwt,
+            category: credential.category,
+        });
+
+        // Also store in legacy storage for dashboard compatibility
+        try {
+            await storage.createCredential({
+                userId,
+                type: stored.type,
+                issuer: stored.issuer,
+                issuanceDate: stored.issuanceDate,
+                data: stored.data,
+                jwt: stored.jwt,
+            });
+        } catch (e) {
+            // Ignore duplication error if any
+        }
+
+        // Log activity
+        await storage.createActivity({
+            userId,
+            type: 'credential_stored',
+            description: `Stored ${stored.type[0]} from ${stored.issuer}`,
+        });
+
+        res.json({ success: true, credential: stored });
+    } catch (error) {
+        console.error('Store credential error:', error);
+        res.status(500).json({ error: 'Failed to store credential' });
     }
-
-    // Log activity
-    await storage.createActivity({
-      userId,
-      type: 'credential_stored',
-      description: `Stored ${stored.type[0]} from ${stored.issuer}`,
-    });
-
-    res.json({ success: true, credential: stored });
-  } catch (error) {
-    console.error('Store credential error:', error);
-    res.status(500).json({ error: 'Failed to store credential' });
-  }
 });
 
 /**
  * Import a credential (VC-JWT)
  */
 router.post('/credentials/import', async (req, res) => {
-  try {
-    const { userId, jwt: vcJwt, type, issuer, data } = req.body;
+    try {
+        const { userId, jwt: vcJwt, type, issuer, data } = req.body;
 
-    if (!userId) {
-      return res.status(400).json({ error: 'userId is required' });
+        if (!userId) {
+            return res.status(400).json({ error: 'userId is required' });
+        }
+
+        // In production, we would decode and validate the VC-JWT
+        // For MVP, we accept the credential data directly
+        const credential = await storage.createCredential({
+            userId,
+            type: type || ['VerifiableCredential'],
+            issuer: issuer || 'Unknown Issuer',
+            issuanceDate: new Date(),
+            data: data || {},
+            jwt: vcJwt,
+        });
+
+        // Log activity
+        await storage.createActivity({
+            userId,
+            type: 'credential_imported',
+            description: `Imported credential from ${issuer || 'Unknown Issuer'}`,
+        });
+
+        res.json({
+            success: true,
+            credential,
+            message: 'Credential imported successfully',
+        });
+    } catch (error) {
+        console.error('Error importing credential:', error);
+        res.status(500).json({ error: 'Failed to import credential' });
     }
-
-    // In production, we would decode and validate the VC-JWT
-    // For MVP, we accept the credential data directly
-    const credential = await storage.createCredential({
-      userId,
-      type: type || ['VerifiableCredential'],
-      issuer: issuer || 'Unknown Issuer',
-      issuanceDate: new Date(),
-      data: data || {},
-      jwt: vcJwt,
-    });
-
-    // Log activity
-    await storage.createActivity({
-      userId,
-      type: 'credential_imported',
-      description: `Imported credential from ${issuer || 'Unknown Issuer'}`,
-    });
-
-    res.json({
-      success: true,
-      credential,
-      message: 'Credential imported successfully',
-    });
-  } catch (error) {
-    console.error('Error importing credential:', error);
-    res.status(500).json({ error: 'Failed to import credential' });
-  }
 });
 // ... import endpoint ...
 
@@ -152,82 +152,81 @@ router.post('/credentials/import', async (req, res) => {
  * Claim a credential from an Offer URL
  */
 router.post('/wallet/offer/claim', async (req, res) => {
-  try {
-    const { userId, url } = req.body;
-    if (!userId || !url) {
-      return res.status(400).json({ error: 'userId and url required' });
-    }
-
-    console.log(`[Wallet] Claiming offer from: ${url}`);
-
-    // Fetch credential from Issuer
-    const response = await fetch(url);
-    if (!response.ok) {
-      const errText = await response.text();
-      throw new Error(`Failed to fetch offer: ${response.status} ${errText}`);
-    }
-
-    const data = await response.json();
-    // Expected format: { credential: { tenantId, templateId, issuerId, recipient, credentialData, vcJwt, ... }, vcJwt: string }
-
-    if (!data.credential && !data.vcJwt) {
-      throw new Error('Invalid response format from Issuer');
-    }
-
-    const credData = data.credential || {};
-    const vcJwt = data.vcJwt || credData.vcJwt;
-
-    // Extract issuer info - try to get issuer name from storage or use ID
-    let issuerName = 'External Issuer';
-    if (credData.issuerId) {
-      try {
-        const issuerRes = await fetch(
-          `http://localhost:5001/api/v1/public/registry/issuers/${credData.issuerId}`,
-        );
-        if (issuerRes.ok) {
-          const issuerData = await issuerRes.json();
-          issuerName = issuerData.name || issuerName;
+    try {
+        const { userId, url } = req.body;
+        if (!userId || !url) {
+            return res.status(400).json({ error: 'userId and url required' });
         }
-      } catch (e) {
-        console.log('[Wallet] Could not fetch issuer info');
-      }
+
+        console.log(`[Wallet] Claiming offer from: ${url}`);
+
+        // Fetch credential from Issuer
+        const response = await fetch(url);
+        if (!response.ok) {
+            const errText = await response.text();
+            throw new Error(`Failed to fetch offer: ${response.status} ${errText}`);
+        }
+
+        const data = await response.json();
+        // Expected format: { credential: { tenantId, templateId, issuerId, recipient, credentialData, vcJwt, ... }, vcJwt: string }
+
+        if (!data.credential && !data.vcJwt) {
+            throw new Error("Invalid response format from Issuer");
+        }
+
+        const credData = data.credential || {};
+        const vcJwt = data.vcJwt || credData.vcJwt;
+
+        // Extract issuer info - try to get issuer name from storage or use ID
+        let issuerName = 'External Issuer';
+        if (credData.issuerId) {
+            try {
+                const issuerRes = await fetch(`http://localhost:5001/api/v1/public/registry/issuers/${credData.issuerId}`);
+                if (issuerRes.ok) {
+                    const issuerData = await issuerRes.json();
+                    issuerName = issuerData.name || issuerName;
+                }
+            } catch (e) {
+                console.log('[Wallet] Could not fetch issuer info');
+            }
+        }
+
+        // Determine credential type from template or data
+        const credType = credData.credentialData?.credentialName || 'Verified Credential';
+
+        // Store in wallet
+        const stored = await walletService.storeCredential(userId, {
+            type: ['VerifiableCredential', credType],
+            issuer: issuerName,
+            issuanceDate: credData.createdAt ? new Date(credData.createdAt) : new Date(),
+            data: {
+                ...credData.credentialData,
+                recipient: credData.recipient,
+                credentialId: credData.id,
+                txHash: credData.txHash,
+                blockNumber: credData.blockNumber,
+            },
+            jwt: vcJwt,
+            category: 'academic' // Default category
+        });
+
+        // Log activity
+        await storage.createActivity({
+            userId,
+            type: 'credential_imported',
+            description: `Claimed ${credType} from ${issuerName}`,
+        });
+
+        res.json({
+            success: true,
+            credential: stored,
+            message: 'Credential claimed successfully'
+        });
+
+    } catch (error: any) {
+        console.error('[Wallet] Claim offer error:', error);
+        res.status(500).json({ error: error.message || 'Failed to claim offer' });
     }
-
-    // Determine credential type from template or data
-    const credType = credData.credentialData?.credentialName || 'Verified Credential';
-
-    // Store in wallet
-    const stored = await walletService.storeCredential(userId, {
-      type: ['VerifiableCredential', credType],
-      issuer: issuerName,
-      issuanceDate: credData.createdAt ? new Date(credData.createdAt) : new Date(),
-      data: {
-        ...credData.credentialData,
-        recipient: credData.recipient,
-        credentialId: credData.id,
-        txHash: credData.txHash,
-        blockNumber: credData.blockNumber,
-      },
-      jwt: vcJwt,
-      category: 'academic', // Default category
-    });
-
-    // Log activity
-    await storage.createActivity({
-      userId,
-      type: 'credential_imported',
-      description: `Claimed ${credType} from ${issuerName}`,
-    });
-
-    res.json({
-      success: true,
-      credential: stored,
-      message: 'Credential claimed successfully',
-    });
-  } catch (error: any) {
-    console.error('[Wallet] Claim offer error:', error);
-    res.status(500).json({ error: error.message || 'Failed to claim offer' });
-  }
 });
 
 export default router;

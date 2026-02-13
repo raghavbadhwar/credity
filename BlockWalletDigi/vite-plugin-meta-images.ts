@@ -42,12 +42,12 @@ export function metaImagesPlugin(): Plugin {
 
       html = html.replace(
         /<meta\s+property="og:image"\s+content="[^"]*"\s*\/>/g,
-        `<meta property="og:image" content="${imageUrl}" />`,
+        `<meta property="og:image" content="${imageUrl}" />`
       );
 
       html = html.replace(
         /<meta\s+name="twitter:image"\s+content="[^"]*"\s*\/>/g,
-        `<meta name="twitter:image" content="${imageUrl}" />`,
+        `<meta name="twitter:image" content="${imageUrl}" />`
       );
 
       return html;

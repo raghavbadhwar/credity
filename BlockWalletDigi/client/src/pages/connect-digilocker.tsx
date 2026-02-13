@@ -1,10 +1,10 @@
-import { useState, useEffect } from 'react';
-import { useLocation, useSearch } from 'wouter';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Sidebar } from '@/components/sidebar';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
+import { useState, useEffect } from "react";
+import { useLocation, useSearch } from "wouter";
+import { motion, AnimatePresence } from "framer-motion";
+import { Sidebar } from "@/components/sidebar";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import {
   CheckCircle2,
   Loader2,
@@ -18,10 +18,10 @@ import {
   Car,
   GraduationCap,
   RefreshCw,
-  LogOut,
-} from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+  LogOut
+} from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 interface DigiLockerDocument {
   uri: string;
@@ -57,18 +57,18 @@ export default function ConnectDigiLocker() {
 
     if (connected === 'true') {
       toast({
-        title: 'DigiLocker Connected!',
-        description: 'Your account is now linked. You can import documents.',
-        className: 'bg-emerald-900/90 border-emerald-500/20 text-white',
+        title: "DigiLocker Connected!",
+        description: "Your account is now linked. You can import documents.",
+        className: "bg-emerald-900/90 border-emerald-500/20 text-white",
       });
       queryClient.invalidateQueries({ queryKey: ['digilocker-status'] });
     }
 
     if (error) {
       toast({
-        title: 'Connection Failed',
+        title: "Connection Failed",
         description: error,
-        variant: 'destructive',
+        variant: "destructive",
       });
     }
   }, [searchParams]);
@@ -108,9 +108,9 @@ export default function ConnectDigiLocker() {
         window.location.href = data.authUrl;
       } else if (data.success) {
         toast({
-          title: 'DigiLocker Connected!',
+          title: "DigiLocker Connected!",
           description: `${data.documentsImported} documents imported.`,
-          className: 'bg-emerald-900/90 border-emerald-500/20 text-white',
+          className: "bg-emerald-900/90 border-emerald-500/20 text-white",
         });
         queryClient.invalidateQueries({ queryKey: ['digilocker-status'] });
         queryClient.invalidateQueries({ queryKey: ['digilocker-documents'] });
@@ -119,9 +119,9 @@ export default function ConnectDigiLocker() {
     },
     onError: () => {
       toast({
-        title: 'Connection Failed',
-        description: 'Could not connect to DigiLocker.',
-        variant: 'destructive',
+        title: "Connection Failed",
+        description: "Could not connect to DigiLocker.",
+        variant: "destructive",
       });
     },
   });
@@ -145,18 +145,18 @@ export default function ConnectDigiLocker() {
     },
     onSuccess: (data) => {
       toast({
-        title: 'Document Imported!',
+        title: "Document Imported!",
         description: data.message,
-        className: 'bg-emerald-900/90 border-emerald-500/20 text-white',
+        className: "bg-emerald-900/90 border-emerald-500/20 text-white",
       });
       queryClient.invalidateQueries({ queryKey: ['wallet-credentials'] });
       setImporting(null);
     },
     onError: () => {
       toast({
-        title: 'Import Failed',
-        description: 'Could not import document.',
-        variant: 'destructive',
+        title: "Import Failed",
+        description: "Could not import document.",
+        variant: "destructive",
       });
       setImporting(null);
     },
@@ -174,9 +174,9 @@ export default function ConnectDigiLocker() {
     },
     onSuccess: (data) => {
       toast({
-        title: 'All Documents Imported!',
+        title: "All Documents Imported!",
         description: `Imported ${data.imported.length} of ${data.total} documents.`,
-        className: 'bg-emerald-900/90 border-emerald-500/20 text-white',
+        className: "bg-emerald-900/90 border-emerald-500/20 text-white",
       });
       queryClient.invalidateQueries({ queryKey: ['wallet-credentials'] });
     },
@@ -193,7 +193,7 @@ export default function ConnectDigiLocker() {
       return res.json();
     },
     onSuccess: () => {
-      toast({ title: 'Disconnected from DigiLocker' });
+      toast({ title: "Disconnected from DigiLocker" });
       queryClient.invalidateQueries({ queryKey: ['digilocker-status'] });
     },
   });
@@ -207,6 +207,7 @@ export default function ConnectDigiLocker() {
 
       <main className="flex-1 md:ml-64 p-6 overflow-y-auto">
         <div className="max-w-2xl mx-auto space-y-6">
+
           {/* Header */}
           <div className="text-center space-y-2">
             <div className="w-20 h-20 mx-auto rounded-2xl bg-gradient-to-br from-blue-600 to-blue-800 flex items-center justify-center shadow-xl shadow-blue-900/30">
@@ -254,9 +255,7 @@ export default function ConnectDigiLocker() {
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() =>
-                        queryClient.invalidateQueries({ queryKey: ['digilocker-documents'] })
-                      }
+                      onClick={() => queryClient.invalidateQueries({ queryKey: ['digilocker-documents'] })}
                     >
                       <RefreshCw className="w-4 h-4 mr-2" /> Refresh
                     </Button>
@@ -333,7 +332,9 @@ export default function ConnectDigiLocker() {
                     Import All
                   </Button>
                 </div>
-                <CardDescription>Select documents to import into your wallet</CardDescription>
+                <CardDescription>
+                  Select documents to import into your wallet
+                </CardDescription>
               </CardHeader>
               <CardContent>
                 {docsLoading ? (
@@ -397,9 +398,9 @@ export default function ConnectDigiLocker() {
                 <div className="text-sm text-muted-foreground">
                   <p className="font-medium text-foreground mb-1">About DigiLocker</p>
                   <p>
-                    DigiLocker is the Government of India's official platform for storing and
-                    accessing documents digitally. Documents imported from DigiLocker are legally
-                    valid and cryptographically signed.
+                    DigiLocker is the Government of India's official platform for storing
+                    and accessing documents digitally. Documents imported from DigiLocker
+                    are legally valid and cryptographically signed.
                   </p>
                   <a
                     href="https://digilocker.gov.in"
@@ -413,6 +414,7 @@ export default function ConnectDigiLocker() {
               </div>
             </CardContent>
           </Card>
+
         </div>
       </main>
     </div>

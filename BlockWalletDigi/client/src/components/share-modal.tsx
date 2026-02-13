@@ -1,44 +1,18 @@
-import { useState, useEffect } from 'react';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-} from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Label } from '@/components/ui/label';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import {
-  Copy,
-  QrCode,
-  Link as LinkIcon,
-  Check,
-  Share2,
-  Clock,
-  Mail,
-  MessageCircle,
-  Loader2,
-  Shield,
-  Eye,
-  EyeOff,
-  ExternalLink,
-} from 'lucide-react';
-import { Credential } from '@shared/schema';
-import { useMutation, useQuery } from '@tanstack/react-query';
-import { useToast } from '@/hooks/use-toast';
-import QRCode from 'qrcode';
-import { useBiometrics } from '@/hooks/use-biometrics';
+import { useState, useEffect } from "react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Copy, QrCode, Link as LinkIcon, Check, Share2, Clock, Mail, MessageCircle, Loader2, Shield, Eye, EyeOff, ExternalLink } from "lucide-react";
+import { Credential } from "@shared/schema";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { useToast } from "@/hooks/use-toast";
+import QRCode from "qrcode";
+import { useBiometrics } from "@/hooks/use-biometrics";
 
 interface ShareModalProps {
   credential: Credential | null;
@@ -61,8 +35,8 @@ export function ShareModal({ credential, open, onOpenChange }: ShareModalProps) 
   const { toast } = useToast();
   const [copied, setCopied] = useState(false);
   const [selectedFields, setSelectedFields] = useState<string[]>([]);
-  const [expiryMinutes, setExpiryMinutes] = useState<string>('30');
-  const [shareType, setShareType] = useState<string>('link');
+  const [expiryMinutes, setExpiryMinutes] = useState<string>("30");
+  const [shareType, setShareType] = useState<string>("link");
   const [shareResult, setShareResult] = useState<ShareResult | null>(null);
   const [qrCodeUrl, setQrCodeUrl] = useState<string | null>(null);
 
@@ -89,11 +63,7 @@ export function ShareModal({ credential, open, onOpenChange }: ShareModalProps) 
       // PROMPT BIOMETRIC AUTH
       const verification = await verifyBiometrics('1');
       if (!verification.success) {
-        toast({
-          title: 'Authentication Failed',
-          description: 'Biometric verification required to share credentials',
-          variant: 'destructive',
-        });
+        toast({ title: 'Authentication Failed', description: 'Biometric verification required to share credentials', variant: 'destructive' });
         return;
       }
 
@@ -174,10 +144,10 @@ export function ShareModal({ credential, open, onOpenChange }: ShareModalProps) 
 
   const availableFields = fieldsData?.fields || Object.keys(credential.data || {});
   const expiryOptions = [
-    { value: '1', label: '1 minute' },
-    { value: '5', label: '5 minutes' },
-    { value: '30', label: '30 minutes' },
-    { value: '60', label: '1 hour' },
+    { value: "1", label: "1 minute" },
+    { value: "5", label: "5 minutes" },
+    { value: "30", label: "30 minutes" },
+    { value: "60", label: "1 hour" },
   ];
 
   return (
@@ -196,9 +166,7 @@ export function ShareModal({ credential, open, onOpenChange }: ShareModalProps) 
         <Tabs defaultValue="disclosure" className="w-full">
           <TabsList className="grid w-full grid-cols-2 mb-4">
             <TabsTrigger value="disclosure">Selective Disclosure</TabsTrigger>
-            <TabsTrigger value="share" disabled={!shareResult}>
-              Share Link
-            </TabsTrigger>
+            <TabsTrigger value="share" disabled={!shareResult}>Share Link</TabsTrigger>
           </TabsList>
 
           <TabsContent value="disclosure" className="space-y-4">
@@ -212,10 +180,8 @@ export function ShareModal({ credential, open, onOpenChange }: ShareModalProps) 
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  {expiryOptions.map((opt) => (
-                    <SelectItem key={opt.value} value={opt.value}>
-                      {opt.label}
-                    </SelectItem>
+                  {expiryOptions.map(opt => (
+                    <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -229,10 +195,10 @@ export function ShareModal({ credential, open, onOpenChange }: ShareModalProps) 
                   { value: 'link', icon: LinkIcon, label: 'Link' },
                   { value: 'qr', icon: QrCode, label: 'QR Code' },
                   { value: 'email', icon: Mail, label: 'Email' },
-                ].map((type) => (
+                ].map(type => (
                   <Button
                     key={type.value}
-                    variant={shareType === type.value ? 'default' : 'outline'}
+                    variant={shareType === type.value ? "default" : "outline"}
                     size="sm"
                     onClick={() => setShareType(type.value)}
                     className="flex flex-col h-auto py-3 gap-1"
@@ -261,12 +227,8 @@ export function ShareModal({ credential, open, onOpenChange }: ShareModalProps) 
                 {/* Required fields */}
                 <div className="flex items-center space-x-2 opacity-60">
                   <Checkbox id="f-issuer" checked disabled />
-                  <Label htmlFor="f-issuer" className="flex-1 text-sm">
-                    Issuer
-                  </Label>
-                  <Badge variant="outline" className="text-[10px]">
-                    Required
-                  </Badge>
+                  <Label htmlFor="f-issuer" className="flex-1 text-sm">Issuer</Label>
+                  <Badge variant="outline" className="text-[10px]">Required</Badge>
                 </div>
 
                 {/* Dynamic fields */}
@@ -285,13 +247,13 @@ export function ShareModal({ credential, open, onOpenChange }: ShareModalProps) 
                         if (checked) {
                           setSelectedFields([...currentSelection, field]);
                         } else {
-                          const newSelection = currentSelection.filter((f) => f !== field);
+                          const newSelection = currentSelection.filter(f => f !== field);
                           setSelectedFields(newSelection);
                         }
                       }}
                     />
                     <Label htmlFor={`f-${field}`} className="flex-1 text-sm capitalize">
-                      {field.replace(/_/g, ' ').replace(/([A-Z])/g, ' $1')}
+                      {field.replace(/_/g, " ").replace(/([A-Z])/g, " $1")}
                     </Label>
                     <span className="text-xs text-muted-foreground truncate max-w-[100px]">
                       {String((credential.data as any)?.[field] || '').slice(0, 20)}
@@ -347,11 +309,7 @@ export function ShareModal({ credential, open, onOpenChange }: ShareModalProps) 
                     className="font-mono text-xs bg-secondary/30"
                   />
                   <Button size="icon" variant="outline" onClick={handleCopy}>
-                    {copied ? (
-                      <Check className="w-4 h-4 text-green-600" />
-                    ) : (
-                      <Copy className="w-4 h-4" />
-                    )}
+                    {copied ? <Check className="w-4 h-4 text-green-600" /> : <Copy className="w-4 h-4" />}
                   </Button>
                 </div>
 
@@ -369,11 +327,7 @@ export function ShareModal({ credential, open, onOpenChange }: ShareModalProps) 
                 </div>
 
                 {/* Open Link */}
-                <Button
-                  variant="secondary"
-                  className="w-full"
-                  onClick={() => window.open(shareResult.shareUrl, '_blank')}
-                >
+                <Button variant="secondary" className="w-full" onClick={() => window.open(shareResult.shareUrl, '_blank')}>
                   <ExternalLink className="w-4 h-4 mr-2" />
                   Open Verification Page
                 </Button>

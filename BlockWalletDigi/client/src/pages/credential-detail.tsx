@@ -1,9 +1,9 @@
-import { useState } from 'react';
-import { useLocation, useRoute } from 'wouter';
-import { Sidebar } from '@/components/sidebar';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Card, CardContent } from '@/components/ui/card';
+import { useState } from "react";
+import { useLocation, useRoute } from "wouter";
+import { Sidebar } from "@/components/sidebar";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent } from "@/components/ui/card";
 import {
   QrCode,
   Download,
@@ -20,11 +20,11 @@ import {
   Loader2,
   Copy,
   ExternalLink,
-  AlertTriangle,
-} from 'lucide-react';
-import { motion } from 'framer-motion';
-import { ShareModal } from '@/components/share-modal';
-import { useQuery } from '@tanstack/react-query';
+  AlertTriangle
+} from "lucide-react";
+import { motion } from "framer-motion";
+import { ShareModal } from "@/components/share-modal";
+import { useQuery } from "@tanstack/react-query";
 
 interface CredentialData {
   id: string;
@@ -62,7 +62,7 @@ interface ConsentLog {
 
 export default function CredentialDetail() {
   const [location, setLocation] = useLocation();
-  const [match, params] = useRoute('/credential/:id');
+  const [match, params] = useRoute("/credential/:id");
   const [shareModalOpen, setShareModalOpen] = useState(false);
   const [copied, setCopied] = useState(false);
 
@@ -107,7 +107,7 @@ export default function CredentialDetail() {
         <div className="flex-1 md:ml-64 flex flex-col items-center justify-center gap-4">
           <AlertTriangle className="w-12 h-12 text-amber-500" />
           <p className="text-muted-foreground">Credential not found</p>
-          <Button onClick={() => setLocation('/')}>Go Back</Button>
+          <Button onClick={() => setLocation("/")}>Go Back</Button>
         </div>
       </div>
     );
@@ -115,39 +115,39 @@ export default function CredentialDetail() {
 
   const getCategoryColor = (category: string) => {
     const colors: Record<string, string> = {
-      academic: 'from-blue-600 to-blue-800',
-      employment: 'from-purple-600 to-purple-800',
-      skill: 'from-green-600 to-green-800',
-      government: 'from-red-600 to-red-800',
+      academic: "from-blue-600 to-blue-800",
+      employment: "from-purple-600 to-purple-800",
+      skill: "from-green-600 to-green-800",
+      government: "from-red-600 to-red-800",
     };
-    return colors[category] || 'from-gray-600 to-gray-800';
+    return colors[category] || "from-gray-600 to-gray-800";
   };
 
   const actions = [
     {
       icon: QrCode,
-      label: 'Generate QR',
-      desc: 'For in-person verification',
-      onClick: () => setShareModalOpen(true),
+      label: "Generate QR",
+      desc: "For in-person verification",
+      onClick: () => setShareModalOpen(true)
     },
     {
       icon: Download,
-      label: 'Download PDF',
-      desc: 'Signed official copy',
-      onClick: () => alert('PDF download coming soon'),
+      label: "Download PDF",
+      desc: "Signed official copy",
+      onClick: () => alert("PDF download coming soon")
     },
     {
       icon: LinkIcon,
-      label: 'Share Link',
-      desc: 'Time-limited URL',
-      onClick: () => setShareModalOpen(true),
+      label: "Share Link",
+      desc: "Time-limited URL",
+      onClick: () => setShareModalOpen(true)
     },
     {
       icon: EyeOff,
-      label: 'Selective Disclosure',
-      desc: 'Hide sensitive fields',
-      onClick: () => setShareModalOpen(true),
-    },
+      label: "Selective Disclosure",
+      desc: "Hide sensitive fields",
+      onClick: () => setShareModalOpen(true)
+    }
   ];
 
   return (
@@ -157,16 +157,15 @@ export default function CredentialDetail() {
       <div className="flex-1 md:ml-64 flex flex-col h-screen overflow-y-auto bg-secondary/30">
         {/* Header */}
         <div className="sticky top-0 z-10 bg-card/80 backdrop-blur-md border-b border-border px-6 py-4 flex items-center gap-4">
-          <Button variant="ghost" size="icon" onClick={() => setLocation('/')}>
+          <Button variant="ghost" size="icon" onClick={() => setLocation("/")}>
             <ArrowLeft className="w-5 h-5" />
           </Button>
           <h1 className="font-semibold text-lg">Credential Details</h1>
-          <Badge variant="outline" className="ml-auto capitalize">
-            {credential.category}
-          </Badge>
+          <Badge variant="outline" className="ml-auto capitalize">{credential.category}</Badge>
         </div>
 
         <main className="p-6 max-w-3xl mx-auto w-full space-y-8 pb-24">
+
           {/* Credential Card */}
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
@@ -176,12 +175,8 @@ export default function CredentialDetail() {
             <div className="absolute top-0 right-0 w-40 h-40 bg-white/10 rounded-full blur-3xl -mr-10 -mt-10" />
 
             <div className="absolute top-6 right-6">
-              <Badge
-                className={`${credential.anchorStatus === 'anchored' ? 'bg-green-500/20 text-green-100' : 'bg-amber-500/20 text-amber-100'} border-none`}
-              >
-                {credential.anchorStatus === 'anchored'
-                  ? '⛓ Blockchain Verified'
-                  : '⏳ Pending Anchor'}
+              <Badge className={`${credential.anchorStatus === 'anchored' ? 'bg-green-500/20 text-green-100' : 'bg-amber-500/20 text-amber-100'} border-none`}>
+                {credential.anchorStatus === 'anchored' ? '⛓ Blockchain Verified' : '⏳ Pending Anchor'}
               </Badge>
             </div>
 
@@ -191,28 +186,18 @@ export default function CredentialDetail() {
               </div>
 
               <div>
-                <p className="text-white/70 text-sm uppercase tracking-wider mb-2">
-                  {credential.issuer}
-                </p>
-                <h1 className="text-3xl font-bold">
-                  {credential.data?.name || credential.type[1] || 'Credential'}
-                </h1>
+                <p className="text-white/70 text-sm uppercase tracking-wider mb-2">{credential.issuer}</p>
+                <h1 className="text-3xl font-bold">{credential.data?.name || credential.type[1] || 'Credential'}</h1>
               </div>
 
               <div className="grid grid-cols-2 gap-6 pt-4 border-t border-white/20">
                 <div>
                   <p className="text-white/60 text-xs uppercase">Recipient</p>
-                  <p className="text-lg font-semibold">
-                    {typeof credential.data?.recipient === 'object'
-                      ? credential.data?.recipient?.name
-                      : credential.data?.recipient || 'John Doe'}
-                  </p>
+                  <p className="text-lg font-semibold">{typeof credential.data?.recipient === 'object' ? credential.data?.recipient?.name : credential.data?.recipient || "John Doe"}</p>
                 </div>
                 <div>
                   <p className="text-white/60 text-xs uppercase">Issued On</p>
-                  <p className="text-lg font-semibold">
-                    {new Date(credential.issuanceDate).toLocaleDateString()}
-                  </p>
+                  <p className="text-lg font-semibold">{new Date(credential.issuanceDate).toLocaleDateString()}</p>
                 </div>
               </div>
             </div>
@@ -225,7 +210,7 @@ export default function CredentialDetail() {
                 key={idx}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.1 + idx * 0.05 }}
+                transition={{ delay: 0.1 + (idx * 0.05) }}
                 onClick={action.onClick}
                 className="flex flex-col items-center justify-center p-4 bg-card rounded-xl border border-border shadow-sm hover:shadow-md hover:border-primary/50 hover:-translate-y-1 transition-all duration-200 group text-center h-full"
               >
@@ -249,9 +234,7 @@ export default function CredentialDetail() {
 
                 <div className="relative pl-4 border-l-2 border-border space-y-6">
                   <div className="relative">
-                    <div
-                      className={`absolute -left-[21px] top-1 w-3 h-3 rounded-full ring-4 ring-card ${credential.anchorStatus === 'anchored' ? 'bg-green-500' : 'bg-amber-500'}`}
-                    />
+                    <div className={`absolute -left-[21px] top-1 w-3 h-3 rounded-full ring-4 ring-card ${credential.anchorStatus === 'anchored' ? 'bg-green-500' : 'bg-amber-500'}`} />
                     <p className="text-sm font-medium">Blockchain Anchor</p>
                     {credential.anchorTxHash ? (
                       <p className="text-xs text-muted-foreground font-mono mt-1 truncate">
@@ -284,9 +267,7 @@ export default function CredentialDetail() {
                 <div className="space-y-3 text-sm">
                   <div className="flex justify-between py-2 border-b border-border">
                     <span className="text-muted-foreground">Credential ID</span>
-                    <span className="font-mono text-xs truncate max-w-[150px]">
-                      {credential.id}
-                    </span>
+                    <span className="font-mono text-xs truncate max-w-[150px]">{credential.id}</span>
                   </div>
                   <div className="flex justify-between py-2 border-b border-border">
                     <span className="text-muted-foreground">Schema Type</span>
@@ -294,10 +275,7 @@ export default function CredentialDetail() {
                   </div>
                   <div className="flex justify-between py-2 border-b border-border">
                     <span className="text-muted-foreground">Hash</span>
-                    <button
-                      onClick={handleCopyHash}
-                      className="flex items-center gap-1 text-primary hover:underline"
-                    >
+                    <button onClick={handleCopyHash} className="flex items-center gap-1 text-primary hover:underline">
                       <span className="font-mono text-xs">{credential.hash.slice(0, 12)}...</span>
                       {copied ? <CheckCircle2 className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
                     </button>
@@ -322,18 +300,12 @@ export default function CredentialDetail() {
                 <Eye className="w-4 h-4 text-primary" /> Credential Data
               </h3>
               <div className="grid md:grid-cols-2 gap-4">
-                {Object.entries(credential.data || {})
-                  .filter(([key]) => key !== 'recipient')
-                  .map(([key, value]) => (
-                    <div key={key} className="p-3 bg-secondary/50 rounded-lg">
-                      <p className="text-xs text-muted-foreground uppercase mb-1">
-                        {key.replace(/_/g, ' ')}
-                      </p>
-                      <p className="font-medium">
-                        {typeof value === 'object' ? JSON.stringify(value) : String(value)}
-                      </p>
-                    </div>
-                  ))}
+                {Object.entries(credential.data || {}).filter(([key]) => key !== 'recipient').map(([key, value]) => (
+                  <div key={key} className="p-3 bg-secondary/50 rounded-lg">
+                    <p className="text-xs text-muted-foreground uppercase mb-1">{key.replace(/_/g, ' ')}</p>
+                    <p className="font-medium">{typeof value === 'object' ? JSON.stringify(value) : String(value)}</p>
+                  </div>
+                ))}
               </div>
             </CardContent>
           </Card>
@@ -347,10 +319,7 @@ export default function CredentialDetail() {
                 </h3>
                 <div className="space-y-3">
                   {shares.map((share) => (
-                    <div
-                      key={share.id}
-                      className="flex items-center justify-between p-3 bg-secondary/30 rounded-lg border"
-                    >
+                    <div key={share.id} className="flex items-center justify-between p-3 bg-secondary/30 rounded-lg border">
                       <div>
                         <p className="text-sm font-medium capitalize">{share.shareType} Share</p>
                         <p className="text-xs text-muted-foreground">
@@ -358,20 +327,8 @@ export default function CredentialDetail() {
                         </p>
                       </div>
                       <div className="text-right">
-                        <Badge
-                          variant={
-                            share.revoked
-                              ? 'destructive'
-                              : new Date(share.expiry) < new Date()
-                                ? 'secondary'
-                                : 'outline'
-                          }
-                        >
-                          {share.revoked
-                            ? 'Revoked'
-                            : new Date(share.expiry) < new Date()
-                              ? 'Expired'
-                              : 'Active'}
+                        <Badge variant={share.revoked ? "destructive" : new Date(share.expiry) < new Date() ? "secondary" : "outline"}>
+                          {share.revoked ? 'Revoked' : new Date(share.expiry) < new Date() ? 'Expired' : 'Active'}
                         </Badge>
                         <p className="text-xs text-muted-foreground mt-1">
                           {new Date(share.createdAt).toLocaleDateString()}
@@ -394,14 +351,10 @@ export default function CredentialDetail() {
                 <div className="space-y-2">
                   {consentLogs.slice(0, 5).map((log) => (
                     <div key={log.id} className="flex items-center gap-3 p-2 text-sm">
-                      <div
-                        className={`w-2 h-2 rounded-full ${log.action === 'share' ? 'bg-blue-500' : log.action === 'revoke' ? 'bg-red-500' : 'bg-green-500'}`}
-                      />
+                      <div className={`w-2 h-2 rounded-full ${log.action === 'share' ? 'bg-blue-500' : log.action === 'revoke' ? 'bg-red-500' : 'bg-green-500'}`} />
                       <span className="capitalize">{log.action}</span>
                       <span className="text-muted-foreground">•</span>
-                      <span className="text-muted-foreground">
-                        {log.disclosedFields.length} fields
-                      </span>
+                      <span className="text-muted-foreground">{log.disclosedFields.length} fields</span>
                       <span className="text-muted-foreground ml-auto text-xs">
                         {new Date(log.timestamp).toLocaleString()}
                       </span>
@@ -411,6 +364,7 @@ export default function CredentialDetail() {
               </CardContent>
             </Card>
           )}
+
         </main>
       </div>
 

@@ -1,8 +1,8 @@
-import { useState } from 'react';
-import { motion } from 'framer-motion';
-import { Fingerprint, ScanFace, ArrowRight } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { useLocation } from 'wouter';
+import { useState } from "react";
+import { motion } from "framer-motion";
+import { Fingerprint, ScanFace, ArrowRight } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { useLocation } from "wouter";
 
 export default function LoginPage() {
   const [_, setLocation] = useLocation();
@@ -11,7 +11,7 @@ export default function LoginPage() {
   const handleBiometricLogin = () => {
     setIsAuthenticating(true);
     setTimeout(() => {
-      setLocation('/');
+      setLocation("/");
     }, 1500);
   };
 

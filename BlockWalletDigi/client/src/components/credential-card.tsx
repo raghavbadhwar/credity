@@ -1,15 +1,15 @@
-import { motion } from 'framer-motion';
-import { ShieldCheck, Award, FileText, ExternalLink } from 'lucide-react';
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
+import { motion } from "framer-motion";
+import { ShieldCheck, Award, FileText, ExternalLink } from "lucide-react";
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 
 export interface Credential {
   id: string;
   title: string;
   issuer: string;
   issueDate: string;
-  type: 'degree' | 'license' | 'id' | 'certificate';
+  type: "degree" | "license" | "id" | "certificate";
   verified: boolean;
   blockHash?: string;
 }
@@ -22,12 +22,9 @@ interface CredentialCardProps {
 export function CredentialCard({ credential, index }: CredentialCardProps) {
   const getIcon = () => {
     switch (credential.type) {
-      case 'degree':
-        return <Award className="w-6 h-6 text-primary" />;
-      case 'id':
-        return <ShieldCheck className="w-6 h-6 text-accent" />;
-      default:
-        return <FileText className="w-6 h-6 text-muted-foreground" />;
+      case "degree": return <Award className="w-6 h-6 text-primary" />;
+      case "id": return <ShieldCheck className="w-6 h-6 text-accent" />;
+      default: return <FileText className="w-6 h-6 text-muted-foreground" />;
     }
   };
 
@@ -42,19 +39,20 @@ export function CredentialCard({ credential, index }: CredentialCardProps) {
 
         <CardHeader className="flex flex-row items-start justify-between space-y-0 pb-2 relative z-10">
           <div className="flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-secondary/50 ring-1 ring-white/10">{getIcon()}</div>
+            <div className="p-2 rounded-lg bg-secondary/50 ring-1 ring-white/10">
+              {getIcon()}
+            </div>
             <div>
               <CardTitle className="text-lg font-medium leading-none text-white">
                 {credential.title}
               </CardTitle>
-              <p className="text-sm text-muted-foreground mt-1">{credential.issuer}</p>
+              <p className="text-sm text-muted-foreground mt-1">
+                {credential.issuer}
+              </p>
             </div>
           </div>
           {credential.verified && (
-            <Badge
-              variant="outline"
-              className="bg-accent/10 text-accent border-accent/20 flex gap-1 items-center"
-            >
+            <Badge variant="outline" className="bg-accent/10 text-accent border-accent/20 flex gap-1 items-center">
               <ShieldCheck className="w-3 h-3" />
               Verified
             </Badge>
@@ -77,9 +75,7 @@ export function CredentialCard({ credential, index }: CredentialCardProps) {
 
           {credential.blockHash && (
             <div className="mt-4 pt-4 border-t border-white/5">
-              <p className="text-muted-foreground text-xs uppercase tracking-wider mb-1">
-                Block Hash
-              </p>
+              <p className="text-muted-foreground text-xs uppercase tracking-wider mb-1">Block Hash</p>
               <p className="font-mono text-[10px] text-primary/80 truncate">
                 {credential.blockHash}
               </p>
@@ -88,13 +84,9 @@ export function CredentialCard({ credential, index }: CredentialCardProps) {
         </CardContent>
 
         <CardFooter className="relative z-10 pt-0">
-          <Button
-            variant="ghost"
-            size="sm"
-            className="w-full hover:bg-primary/10 hover:text-primary text-muted-foreground group-hover:text-white transition-colors"
-          >
-            View Details <ExternalLink className="w-3 h-3 ml-2" />
-          </Button>
+           <Button variant="ghost" size="sm" className="w-full hover:bg-primary/10 hover:text-primary text-muted-foreground group-hover:text-white transition-colors">
+             View Details <ExternalLink className="w-3 h-3 ml-2" />
+           </Button>
         </CardFooter>
       </Card>
     </motion.div>
