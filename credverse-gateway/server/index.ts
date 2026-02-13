@@ -3,12 +3,12 @@
  */
 
 // Initialize Sentry BEFORE importing anything else
-import { initSentry, sentryErrorHandler } from './services/sentry';
+import { initSentry } from './services/sentry';
 initSentry('credverse-gateway');
 
 import 'dotenv/config';
 import express from 'express';
-import cors from 'cors';
+// import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import { createServer } from 'http';
 import path from 'path';
@@ -138,9 +138,9 @@ const gatewayHTML = `
             const { setupVite } = await import('./vite');
             await setupVite(httpServer, app);
             console.log('[Gateway] Vite dev server attached');
-        } catch (error) {
+        } catch {
             console.log('[Gateway] Vite unavailable, using inline HTML fallback');
-            app.get('/', (req, res) => {
+            app.get('/', (_req, res) => {
                 res.setHeader('Content-Type', 'text/html');
                 res.send(gatewayHTML);
             });
