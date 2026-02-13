@@ -76,6 +76,22 @@ export function useHolderDashboardData(enabled: boolean) {
     await queryClient.invalidateQueries({ queryKey: ['holder'] });
   };
 
+  // Security: If not enabled (locked), do not return any data, even if cached.
+  if (!enabled) {
+    return {
+      profile: null,
+      wallet: null,
+      reputation: null,
+      safeDate: null,
+      credentials: [],
+      consents: [],
+      dataRequests: [],
+      certInIncidents: [],
+      isLoading: false,
+      refresh,
+    };
+  }
+
   return {
     profile: profileQuery.data || null,
     wallet: walletQuery.data || null,
