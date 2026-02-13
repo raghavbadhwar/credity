@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Router } from 'express';
 import crypto from 'crypto';
 import { apiKeyOrAuthMiddleware } from '../auth';
