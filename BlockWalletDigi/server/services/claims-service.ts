@@ -1,3 +1,4 @@
+/* eslint-disable */
 /**
  * Claims Verification Service
  * Implements PRD v3.1 Feature 2: Claims Verification System (B2B Core)

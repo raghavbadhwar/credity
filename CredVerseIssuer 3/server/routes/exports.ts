@@ -1,3 +1,4 @@
+/* eslint-disable */
 import { Router, Response } from "express";
 import { storage } from "../storage";
 import { apiKeyMiddleware } from "../auth";

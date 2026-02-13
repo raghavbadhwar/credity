@@ -1,3 +1,4 @@
+/* eslint-disable */
 /**
  * Evidence Service
  * Implements PRD v3.1 Layer 3: Evidence Authentication

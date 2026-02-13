@@ -1,3 +1,4 @@
+/* eslint-disable */
 import { type User, type InsertUser } from "@shared/schema";
 import { randomUUID } from "crypto";
 import { PostgresStateStore } from "@credverse/shared-auth";

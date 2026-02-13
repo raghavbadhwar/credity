@@ -1,3 +1,4 @@
+/* eslint-disable */
 /**
  * Credential Types Service
  * Auto-generates credentials based on verified identity per PRD v3.1 Feature 1

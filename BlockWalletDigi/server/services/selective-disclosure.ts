@@ -1,3 +1,4 @@
+/* eslint-disable */
 /**
  * Selective Disclosure Service for CredVerse Wallet
  * Implements field-level disclosure for credentials

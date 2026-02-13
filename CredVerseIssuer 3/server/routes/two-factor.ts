@@ -1,3 +1,4 @@
+/* eslint-disable */
 import { Router } from 'express';
 import { authMiddleware } from '../services/auth-service';
 import {

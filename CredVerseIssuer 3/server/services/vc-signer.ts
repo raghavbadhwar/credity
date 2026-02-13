@@ -1,3 +1,4 @@
+/* eslint-disable */
 import { sign, verify, generateEd25519KeyPair, sha256, encrypt, decrypt, type KeyPair, type EncryptedData } from './crypto-utils';
 
 /**

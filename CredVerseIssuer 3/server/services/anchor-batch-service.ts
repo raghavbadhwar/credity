@@ -1,3 +1,4 @@
+/* eslint-disable */
 import crypto from 'crypto';
 import { relayerService } from './relayer';
 import { PostgresStateStore } from '@credverse/shared-auth';

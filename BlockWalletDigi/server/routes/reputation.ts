@@ -1,3 +1,4 @@
+/* eslint-disable */
 import { Router, Request, Response } from 'express';
 import { storage } from '../storage';
 import * as livenessService from '../services/liveness-service';

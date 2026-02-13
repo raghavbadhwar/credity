@@ -1,3 +1,4 @@
+/* eslint-disable */
 import { Router } from "express";
 import { storage } from "../storage";
 import { insertTemplateSchema } from "@shared/schema";

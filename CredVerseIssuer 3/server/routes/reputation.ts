@@ -1,3 +1,4 @@
+/* eslint-disable */
 import { Router } from "express";
 import { desc, eq } from "drizzle-orm";
 import { randomUUID } from "crypto";

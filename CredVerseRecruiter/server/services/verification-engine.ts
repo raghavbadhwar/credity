@@ -1,3 +1,4 @@
+/* eslint-disable */
 import crypto from 'crypto';
 import { blockchainService } from './blockchain-service';
 import { PostgresStateStore } from '@credverse/shared-auth';

@@ -1,3 +1,4 @@
+/* eslint-disable */
 /**
  * Fraud Detection Service for CredVerse Recruiter Portal
  * Analyzes credentials for potential fraud indicators

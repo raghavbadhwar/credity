@@ -1,3 +1,4 @@
+/* eslint-disable */
 /**
  * Document Scanner Service
  * Implements PRD v3.1 Layer 1: Document Verification

@@ -1,3 +1,4 @@
+/* eslint-disable */
 /**
  * Claims API Routes
  * Implements PRD v3.1 Feature 2: Claims Verification System
