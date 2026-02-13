@@ -81,6 +81,15 @@ export function HolderDashboardScreen({ onSwitchRole, onLogout }: Props) {
     }
   }
 
+  async function onRefreshPress() {
+    Haptics.selectionAsync();
+    if (!isUnlocked) {
+      await checkUnlock();
+    } else {
+      await refresh();
+    }
+  }
+
   async function onGenerateShare() {
     if (!credentials.length) {
       Alert.alert('No credential', 'Add a credential before generating a share QR.');
@@ -234,7 +243,7 @@ export function HolderDashboardScreen({ onSwitchRole, onLogout }: Props) {
         </View>
         <Text style={styles.metric}>Credentials: {summary.credentialCount}</Text>
         <Text style={styles.metric}>Trust Score: {String(summary.trust)}</Text>
-        <Pressable style={styles.primaryButton} onPress={() => refresh()}>
+        <Pressable style={styles.primaryButton} onPress={onRefreshPress}>
           <Text style={styles.primaryButtonText}>Refresh wallet</Text>
         </Pressable>
         <Pressable style={styles.secondaryButton} onPress={() => (navigation as any).navigate('Settings')}>

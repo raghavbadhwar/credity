@@ -61,7 +61,7 @@ export function useHolderDashboardData(enabled: boolean) {
     enabled,
   });
 
-  const isLoading =
+  const isLoading = enabled && (
     profileQuery.isLoading ||
     walletQuery.isLoading ||
     reputationQuery.isLoading ||
@@ -69,7 +69,8 @@ export function useHolderDashboardData(enabled: boolean) {
     credentialsQuery.isLoading ||
     consentsQuery.isLoading ||
     requestsQuery.isLoading ||
-    incidentsQuery.isLoading;
+    incidentsQuery.isLoading
+  );
 
   const refresh = async () => {
     await queryClient.invalidateQueries({ queryKey: ['holder'] });
