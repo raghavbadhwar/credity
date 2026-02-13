@@ -1,5 +1,11 @@
 import { ethers } from 'ethers';
-import crypto from 'crypto';
+import {
+    getChainRuntimeConfig,
+    getChainWritePolicy,
+    resolveChainNetwork,
+    resolveChainRpcUrl,
+    type SupportedChainNetwork,
+} from '@credverse/shared-auth';
 
 // CredentialRegistry ABI (simplified)
 const REGISTRY_ABI = [
@@ -13,14 +19,13 @@ const REGISTRY_ABI = [
     "event CredentialRevoked(bytes32 indexed credentialHash, address indexed revoker, string reason, uint256 timestamp)"
 ];
 
-// Default to Sepolia testnet
-const DEFAULT_RPC = 'https://eth-sepolia.g.alchemy.com/v2/demo';
 const DEFAULT_CONTRACT = process.env.REGISTRY_CONTRACT_ADDRESS || '';
 
 export interface BlockchainConfig {
-    rpcUrl: string;
-    contractAddress: string;
+    rpcUrl?: string;
+    contractAddress?: string;
     privateKey?: string;
+    chainNetwork?: SupportedChainNetwork;
 }
 
 export interface AnchorResult {
@@ -48,15 +53,28 @@ export class BlockchainService {
     private contract: ethers.Contract;
     private signer?: ethers.Wallet;
     private isConfigured: boolean = false;
+    private chain: SupportedChainNetwork;
+    private writesAllowed: boolean = true;
+    private writePolicyReason?: string;
 
     constructor(config?: Partial<BlockchainConfig>) {
-        // Use Local Hardhat Node
-        const rpcUrl = config?.rpcUrl || 'http://127.0.0.1:8545';
-        const contractAddress = config?.contractAddress || '0x5FbDB2315678afecb367f032d93F642f64180aa3';
-        // Account #0 from Hardhat node
-        const privateKey = config?.privateKey || '0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80';
+        this.chain = resolveChainNetwork(config?.chainNetwork);
+        const chainConfig = getChainRuntimeConfig(this.chain);
+        const rpcUrl = resolveChainRpcUrl(this.chain, process.env, config?.rpcUrl);
+        const writePolicy = getChainWritePolicy(this.chain);
+        const contractAddress = config?.contractAddress || DEFAULT_CONTRACT;
+        const privateKey = config?.privateKey || process.env.RELAYER_PRIVATE_KEY;
+        this.writesAllowed = writePolicy.allowWrites;
+        this.writePolicyReason = writePolicy.reason;
 
-        this.provider = new ethers.JsonRpcProvider(rpcUrl);
+        if (!writePolicy.allowWrites) {
+            console.warn(`[Blockchain] Writes disabled for ${this.chain}: ${writePolicy.reason}`);
+        }
+
+        this.provider = new ethers.JsonRpcProvider(rpcUrl, {
+            chainId: chainConfig.chainId,
+            name: chainConfig.networkName,
+        });
 
         if (contractAddress && contractAddress.startsWith('0x')) {
             if (privateKey) {
@@ -66,14 +84,14 @@ export class BlockchainService {
                 this.contract = new ethers.Contract(contractAddress, REGISTRY_ABI, this.provider);
             }
             // Don't set isConfigured here - validate contract first
-            console.log(`[Blockchain] Attempting to configure with ${contractAddress} on ${rpcUrl}`);
+            console.log(`[Blockchain] Attempting to configure with ${contractAddress} on ${this.chain} (${rpcUrl})`);
 
             // Async validation - check if contract is actually deployed
             this.validateContract(contractAddress, rpcUrl).catch(() => { });
         } else {
             // Create a dummy contract for development
             this.contract = new ethers.Contract(ethers.ZeroAddress, REGISTRY_ABI, this.provider);
-            console.log(`[Blockchain] Running in simulation mode (no contract address)`);
+            console.log(`[Blockchain] Running in deferred mode on ${this.chain} (no contract configuration)`);
         }
     }
 
@@ -84,14 +102,14 @@ export class BlockchainService {
         try {
             const code = await this.provider.getCode(address);
             if (code === '0x' || code === '') {
-                console.log(`[Blockchain] Contract NOT deployed at ${address} - using simulation mode`);
+                console.log(`[Blockchain] Contract NOT deployed at ${address} on ${this.chain} - deferred mode active`);
                 this.isConfigured = false;
             } else {
-                console.log(`[Blockchain] Contract verified at ${address} on ${rpcUrl}`);
+                console.log(`[Blockchain] Contract verified at ${address} on ${this.chain} (${rpcUrl})`);
                 this.isConfigured = true;
             }
         } catch (error: any) {
-            console.log(`[Blockchain] RPC unreachable (${error.message}) - using simulation mode`);
+            console.log(`[Blockchain] RPC unreachable (${error.message}) on ${this.chain} - deferred mode active`);
             this.isConfigured = false;
         }
     }
@@ -110,14 +128,19 @@ export class BlockchainService {
     async anchorCredential(credentialData: any): Promise<AnchorResult> {
         const hash = this.hashCredential(credentialData);
 
-        if (!this.isConfigured || !this.signer) {
-            // Simulate for development
-            console.log(`[Blockchain] Simulated anchor: ${hash}`);
+        if (!this.writesAllowed) {
             return {
-                success: true,
-                txHash: `0x${crypto.randomBytes(32).toString('hex')}`,
-                blockNumber: Math.floor(Math.random() * 1000000) + 50000000,
+                success: false,
                 hash,
+                error: `Writes disabled by policy for ${this.chain}`,
+            };
+        }
+
+        if (!this.isConfigured || !this.signer) {
+            return {
+                success: false,
+                hash,
+                error: 'Blockchain anchoring is not configured',
             };
         }
 
@@ -125,7 +148,7 @@ export class BlockchainService {
             const tx = await this.contract.anchorCredential(hash);
             const receipt = await tx.wait();
 
-            console.log(`[Blockchain] Anchored credential: ${hash} in tx ${receipt.hash}`);
+            console.log(`[Blockchain] Anchored credential: ${hash} in tx ${receipt.hash} on ${this.chain}`);
 
             return {
                 success: true,
@@ -147,12 +170,19 @@ export class BlockchainService {
      * Revoke a credential on-chain
      */
     async revokeCredential(credentialHash: string, reason: string): Promise<AnchorResult> {
-        if (!this.isConfigured || !this.signer) {
-            console.log(`[Blockchain] Simulated revocation: ${credentialHash}`);
+        if (!this.writesAllowed) {
             return {
-                success: true,
-                txHash: `0x${crypto.randomBytes(32).toString('hex')}`,
+                success: false,
                 hash: credentialHash,
+                error: `Writes disabled by policy for ${this.chain}`,
+            };
+        }
+
+        if (!this.isConfigured || !this.signer) {
+            return {
+                success: false,
+                hash: credentialHash,
+                error: 'Blockchain revocation is not configured',
             };
         }
 
@@ -160,7 +190,7 @@ export class BlockchainService {
             const tx = await this.contract.revokeCredential(credentialHash, reason);
             const receipt = await tx.wait();
 
-            console.log(`[Blockchain] Revoked credential: ${credentialHash}`);
+            console.log(`[Blockchain] Revoked credential: ${credentialHash} on ${this.chain}`);
 
             return {
                 success: true,
@@ -183,13 +213,9 @@ export class BlockchainService {
      */
     async verifyCredential(credentialHash: string): Promise<VerifyResult> {
         if (!this.isConfigured) {
-            // Simulate for development - assume valid
             return {
-                exists: true,
-                isValid: true,
-                issuer: '0x' + crypto.randomBytes(20).toString('hex'),
-                anchoredAt: Math.floor(Date.now() / 1000) - 86400,
-                isRevoked: false,
+                exists: false,
+                isValid: false,
             };
         }
 
@@ -221,11 +247,7 @@ export class BlockchainService {
     async getCredentialDetails(credentialHash: string): Promise<any> {
         if (!this.isConfigured) {
             return {
-                exists: true,
-                issuer: '0x' + crypto.randomBytes(20).toString('hex'),
-                anchoredAt: new Date(Date.now() - 86400000),
-                isRevoked: false,
-                revocationReason: '',
+                exists: false,
             };
         }
 
@@ -276,6 +298,25 @@ export class BlockchainService {
         return this.isConfigured;
     }
 
+    getRuntimeStatus(): {
+        chainNetwork: SupportedChainNetwork;
+        writesAllowed: boolean;
+        writePolicyReason?: string;
+        configured: boolean;
+        chainId: number;
+        networkName: string;
+    } {
+        const chainConfig = getChainRuntimeConfig(this.chain);
+        return {
+            chainNetwork: this.chain,
+            writesAllowed: this.writesAllowed,
+            writePolicyReason: this.writePolicyReason,
+            configured: this.isConfigured,
+            chainId: chainConfig.chainId,
+            networkName: chainConfig.networkName,
+        };
+    }
+
     /**
      * Get current network info
      */
@@ -287,7 +328,8 @@ export class BlockchainService {
                 name: network.name,
             };
         } catch {
-            return { chainId: 0, name: 'unknown' };
+            const chainConfig = getChainRuntimeConfig(this.chain);
+            return { chainId: chainConfig.chainId, name: chainConfig.networkName };
         }
     }
 }

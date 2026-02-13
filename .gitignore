@@ -8,3 +8,4 @@ build
 coverage
 tmp
 .gemini
+cr_backup/

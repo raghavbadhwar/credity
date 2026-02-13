@@ -136,7 +136,15 @@ export function setupSecurity(app: Application, config: SecurityConfig = {}) {
         origin: config.allowedOrigins || process.env.ALLOWED_ORIGINS?.split(',') || true,
         credentials: true,
         methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-        allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+        allowedHeaders: [
+            'Content-Type',
+            'Authorization',
+            'X-Requested-With',
+            'X-API-Key',
+            'Idempotency-Key',
+            'X-Webhook-Signature',
+            'X-Webhook-Timestamp',
+        ],
     }));
 
     // 3. HPP (Parameter Pollution)

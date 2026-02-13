@@ -83,7 +83,7 @@ export default function Team() {
         queryKey: ['team'],
         queryFn: async () => {
             const response = await fetch('/api/v1/team', {
-                headers: { 'x-api-key': 'demo-api-key' },
+                headers: { 'x-api-key': (import.meta as any).env?.VITE_API_KEY || '' },
             });
             if (!response.ok) throw new Error('Failed to fetch team');
             return response.json();
@@ -95,7 +95,7 @@ export default function Team() {
         queryKey: ['activity-logs', activityMember?.id],
         queryFn: async () => {
             const response = await fetch('/api/v1/activity-logs', {
-                headers: { 'x-api-key': 'demo-api-key' },
+                headers: { 'x-api-key': (import.meta as any).env?.VITE_API_KEY || '' },
             });
             if (!response.ok) return [];
             return response.json();
@@ -110,7 +110,7 @@ export default function Team() {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'x-api-key': 'demo-api-key',
+                    'x-api-key': (import.meta as any).env?.VITE_API_KEY || '',
                 },
                 body: JSON.stringify(data),
             });
@@ -141,7 +141,7 @@ export default function Team() {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
-                    'x-api-key': 'demo-api-key',
+                    'x-api-key': (import.meta as any).env?.VITE_API_KEY || '',
                 },
                 body: JSON.stringify({ role }),
             });
@@ -159,7 +159,7 @@ export default function Team() {
         mutationFn: async (id: string) => {
             const response = await fetch(`/api/v1/team/${id}`, {
                 method: 'DELETE',
-                headers: { 'x-api-key': 'demo-api-key' },
+                headers: { 'x-api-key': (import.meta as any).env?.VITE_API_KEY || '' },
             });
             if (!response.ok) throw new Error('Failed to remove member');
             return response.json();
@@ -177,7 +177,7 @@ export default function Team() {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'x-api-key': 'demo-api-key',
+                    'x-api-key': (import.meta as any).env?.VITE_API_KEY || '',
                 },
                 body: JSON.stringify({ name: member.name, email: member.email, role: member.role }),
             });

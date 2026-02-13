@@ -1,7 +1,9 @@
 import { Router } from 'express';
+import crypto from 'crypto';
 import { walletService } from '../services/wallet-service';
 import { didService } from '../services/did-service';
 import { storage } from '../storage';
+import { hashPassword } from '../services/auth-service';
 
 const router = Router();
 
@@ -19,10 +21,11 @@ router.post('/wallet/init', async (req, res) => {
         let user = await storage.getUser(userId);
 
         if (!user) {
+            const generatedPasswordHash = await hashPassword(crypto.randomBytes(24).toString('base64url'));
             user = await storage.createUser({
                 username: `user_${userId}`,
                 name: 'Wallet User',
-                password: 'wallet-auto-generated', // Auto-init wallets use passkey/DID auth
+                password: generatedPasswordHash,
             });
         }
 

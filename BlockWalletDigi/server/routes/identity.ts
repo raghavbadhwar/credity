@@ -71,8 +71,7 @@ router.post('/liveness/challenge', async (req: Request, res: Response) => {
             if (spoofCheck.isSpoofed) {
                 return res.status(400).json({
                     success: false,
-                    error: 'Spoofing detected',
-                    method: spoofCheck.method
+                    error: 'Spoofing detected'
                 });
             }
         }

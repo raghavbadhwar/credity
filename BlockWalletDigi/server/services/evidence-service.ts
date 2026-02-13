@@ -10,6 +10,7 @@
  */
 
 import * as crypto from 'crypto';
+import { detectDeepfakeFromUrl } from './deepfake-detection-service';
 
 export interface EvidenceUploadRequest {
     userId: string;
@@ -32,6 +33,12 @@ export interface EvidenceAnalysisResult {
         softwareDetected: string | null;
         formatConsistent: boolean;
     };
+    aiDetection: {
+        verdict: 'real' | 'fake' | 'unknown';
+        confidence: number | null;
+        provider: string;
+        reason?: string;
+    };
 }
 
 /**
@@ -53,13 +60,14 @@ export async function analyzeEvidence(request: EvidenceUploadRequest): Promise<E
     const manipulationAnalysis = detectManipulation(request, metadataExtracted);
 
     // Check for AI generation (placeholder - would use ML model)
-    const isAiGenerated = await checkAiGenerated(request);
+    const aiDetection = await detectDeepfakeFromUrl(request.url);
+    const isAiGenerated = aiDetection.verdict === 'fake';
 
     // Calculate authenticity score
     const authenticityScore = calculateAuthenticityScore(
         metadataExtracted,
         manipulationAnalysis,
-        isAiGenerated
+        aiDetection.verdict
     );
 
     return {
@@ -74,7 +82,8 @@ export async function analyzeEvidence(request: EvidenceUploadRequest): Promise<E
             locationPresent: !!metadataExtracted.gpsData,
             softwareDetected: manipulationAnalysis.software,
             formatConsistent: true
-        }
+        },
+        aiDetection,
     };
 }
 
@@ -180,32 +189,19 @@ function detectManipulation(
  * Check if evidence is AI-generated
  * In production, would use trained ML model or API like Arya.ai
  */
-async function checkAiGenerated(request: EvidenceUploadRequest): Promise<boolean> {
-    // Placeholder - would call deepfake detection API
-    // For now, return false (assume not AI-generated)
-
-    // In production:
-    // 1. Download image from URL
-    // 2. Send to EfficientNet-B7 model or Arya.ai API
-    // 3. Get confidence score
-    // 4. Return true if confidence > 0.85
-
-    return false;
-}
-
-/**
- * Calculate authenticity score based on analysis
- */
 function calculateAuthenticityScore(
     metadata: Record<string, any>,
     manipulationAnalysis: { detected: boolean; indicators: string[] },
-    isAiGenerated: boolean
+    aiVerdict: 'real' | 'fake' | 'unknown'
 ): number {
     let score = 70; // Base score
 
     // AI generation kills authenticity
-    if (isAiGenerated) {
+    if (aiVerdict === 'fake') {
         return 10;
+    }
+    if (aiVerdict === 'unknown') {
+        score -= 10;
     }
 
     // Manipulation detection

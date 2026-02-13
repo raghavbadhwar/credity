@@ -3,7 +3,7 @@ import { storage } from "../storage";
 import { apiKeyMiddleware } from "../auth";
 
 const router = Router();
-router.use(apiKeyMiddleware);
+router.use("/template-designs", apiKeyMiddleware);
 
 // List all template designs
 router.get("/template-designs", async (req, res) => {

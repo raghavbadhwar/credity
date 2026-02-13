@@ -1,5 +1,6 @@
 import { type User, type InsertUser, type Tenant, type InsertTenant, type ApiKey, type InsertApiKey, type Issuer, type InsertIssuer, type Template, type InsertTemplate, type Credential, type InsertCredential } from "@shared/schema";
 import { randomUUID } from "crypto";
+import { PostgresStateStore } from "@credverse/shared-auth";
 
 // Extended types for full functionality
 export interface Student {
@@ -62,6 +63,31 @@ export interface TemplateDesign {
   updatedAt: Date;
 }
 
+interface IssuerStorageState {
+  users: Array<[string, User]>;
+  tenants: Array<[string, Tenant]>;
+  apiKeys: Array<[string, ApiKey]>;
+  issuers: Array<[string, Issuer]>;
+  templates: Array<[string, Template]>;
+  credentials: Array<[string, Credential]>;
+  students: Array<[string, Student]>;
+  teamMembers: Array<[string, TeamMember]>;
+  verificationLogs: Array<[string, VerificationLog]>;
+  templateDesigns: Array<[string, TemplateDesign]>;
+  activityLogs: Array<[string, any]>;
+}
+
+function parseDate(value: unknown, fallback = new Date()): Date {
+  if (value instanceof Date) return value;
+  if (typeof value === "string" || typeof value === "number") {
+    const parsed = new Date(value);
+    if (!Number.isNaN(parsed.getTime())) {
+      return parsed;
+    }
+  }
+  return fallback;
+}
+
 export interface IStorage {
   // User
   getUser(id: string): Promise<User | undefined>;
@@ -78,6 +104,7 @@ export interface IStorage {
 
   // Issuer
   getIssuer(id: string): Promise<Issuer | undefined>;
+  getIssuerByDid(did: string): Promise<Issuer | undefined>;
   createIssuer(issuer: InsertIssuer): Promise<Issuer>;
   listIssuers(tenantId: string): Promise<Issuer[]>;
 
@@ -133,15 +160,19 @@ export class MemStorage implements IStorage {
       createdAt: new Date(),
     });
 
-    // Seed API Key
-    this.apiKeys.set("key-1", {
-      id: "key-1",
-      tenantId: tenantId,
-      keyHash: "demo-api-key",
-      permissions: ["all"],
-      expiresAt: null,
-      createdAt: new Date()
-    });
+    // Seed API key only for explicit bootstrap/test use.
+    const isTestEnv = process.env.NODE_ENV === "test" || process.env.VITEST === "true";
+    const bootstrapApiKey = process.env.ISSUER_BOOTSTRAP_API_KEY || (isTestEnv ? "test-api-key" : null);
+    if (bootstrapApiKey) {
+      this.apiKeys.set("key-1", {
+        id: "key-1",
+        tenantId: tenantId,
+        keyHash: bootstrapApiKey,
+        permissions: ["all"],
+        expiresAt: null,
+        createdAt: new Date()
+      });
+    }
 
     // Seed Students
     const sampleStudents: Omit<Student, "id" | "createdAt">[] = [
@@ -330,6 +361,15 @@ export class MemStorage implements IStorage {
       ...insertCredential,
       id,
       createdAt: new Date(),
+      format: (insertCredential as any).format ?? "vc+jwt",
+      issuerDid: (insertCredential as any).issuerDid ?? null,
+      subjectDid: (insertCredential as any).subjectDid ?? null,
+      statusListId: (insertCredential as any).statusListId ?? null,
+      statusListIndex: (insertCredential as any).statusListIndex ?? null,
+      anchorBatchId: (insertCredential as any).anchorBatchId ?? null,
+      anchorProof: (insertCredential as any).anchorProof ?? null,
+      holderBinding: (insertCredential as any).holderBinding ?? null,
+      issuanceFlow: (insertCredential as any).issuanceFlow ?? "legacy",
       vcJwt: insertCredential.vcJwt ?? null,
       ipfsHash: insertCredential.ipfsHash ?? null,
       anchorId: insertCredential.anchorId ?? null,
@@ -524,6 +564,147 @@ export class MemStorage implements IStorage {
     this.templateDesigns.set(newId, duplicate);
     return duplicate;
   }
+
+  exportState(): IssuerStorageState {
+    return {
+      users: Array.from(this.users.entries()),
+      tenants: Array.from(this.tenants.entries()),
+      apiKeys: Array.from(this.apiKeys.entries()),
+      issuers: Array.from(this.issuers.entries()),
+      templates: Array.from(this.templates.entries()),
+      credentials: Array.from(this.credentials.entries()),
+      students: Array.from(this.students.entries()),
+      teamMembers: Array.from(this.teamMembers.entries()),
+      verificationLogs: Array.from(this.verificationLogs.entries()),
+      templateDesigns: Array.from(this.templateDesigns.entries()),
+      activityLogs: Array.from(this.activityLogs.entries()),
+    };
+  }
+
+  importState(state: IssuerStorageState): void {
+    this.users = new Map((state.users || []).map(([key, value]) => [key, {
+      ...value,
+      createdAt: parseDate((value as any).createdAt),
+    }]));
+    this.tenants = new Map((state.tenants || []).map(([key, value]) => [key, {
+      ...value,
+      createdAt: parseDate((value as any).createdAt),
+    }]));
+    this.apiKeys = new Map((state.apiKeys || []).map(([key, value]) => [key, {
+      ...value,
+      createdAt: parseDate((value as any).createdAt),
+      expiresAt: (value as any).expiresAt ? parseDate((value as any).expiresAt) : null,
+    }]));
+    this.issuers = new Map((state.issuers || []).map(([key, value]) => [key, {
+      ...value,
+      createdAt: parseDate((value as any).createdAt),
+    }]));
+    this.templates = new Map((state.templates || []).map(([key, value]) => [key, {
+      ...value,
+      createdAt: parseDate((value as any).createdAt),
+    }]));
+    this.credentials = new Map((state.credentials || []).map(([key, value]) => [key, {
+      ...value,
+      createdAt: parseDate((value as any).createdAt),
+    }]));
+    this.students = new Map((state.students || []).map(([key, value]) => [key, {
+      ...value,
+      createdAt: parseDate((value as any).createdAt),
+    }]));
+    this.teamMembers = new Map((state.teamMembers || []).map(([key, value]) => [key, {
+      ...value,
+      invitedAt: parseDate((value as any).invitedAt),
+      joinedAt: (value as any).joinedAt ? parseDate((value as any).joinedAt) : null,
+    }]));
+    this.verificationLogs = new Map((state.verificationLogs || []).map(([key, value]) => [key, {
+      ...value,
+      timestamp: parseDate((value as any).timestamp),
+    }]));
+    this.templateDesigns = new Map((state.templateDesigns || []).map(([key, value]) => [key, {
+      ...value,
+      createdAt: parseDate((value as any).createdAt),
+      updatedAt: parseDate((value as any).updatedAt),
+    }]));
+    this.activityLogs = new Map((state.activityLogs || []).map(([key, value]) => [key, {
+      ...value,
+      timestamp: (value as any)?.timestamp ? parseDate((value as any).timestamp) : parseDate(undefined),
+    }]));
+  }
 }
 
-export const storage = new MemStorage();
+const requirePersistentStorage =
+  process.env.NODE_ENV === "production" || process.env.REQUIRE_DATABASE === "true";
+const databaseUrl = process.env.DATABASE_URL;
+
+if (requirePersistentStorage && !databaseUrl) {
+  throw new Error(
+    "[Storage] REQUIRE_DATABASE policy is enabled but DATABASE_URL is missing."
+  );
+}
+
+function createPersistedStorage(base: MemStorage, dbUrl?: string): MemStorage {
+  if (!dbUrl) {
+    return base;
+  }
+
+  const stateStore = new PostgresStateStore<IssuerStorageState>({
+    databaseUrl: dbUrl,
+    serviceKey: "issuer-storage",
+  });
+
+  let hydrated = false;
+  let hydrationPromise: Promise<void> | null = null;
+  let persistChain = Promise.resolve();
+
+  const mutatingPrefixes = ["create", "update", "delete", "revoke", "bulk", "duplicate"];
+
+  const ensureHydrated = async () => {
+    if (hydrated) return;
+    if (!hydrationPromise) {
+      hydrationPromise = (async () => {
+        const loaded = await stateStore.load();
+        if (loaded) {
+          base.importState(loaded);
+        } else {
+          await stateStore.save(base.exportState());
+        }
+        hydrated = true;
+      })();
+    }
+    await hydrationPromise;
+  };
+
+  const queuePersist = async () => {
+    persistChain = persistChain
+      .then(async () => {
+        await stateStore.save(base.exportState());
+      })
+      .catch((error) => {
+        console.error("[Storage] Failed to persist issuer state:", error);
+      });
+    await persistChain;
+  };
+
+  return new Proxy(base, {
+    get(target, prop, receiver) {
+      const value = Reflect.get(target, prop, receiver);
+      if (typeof value !== "function") {
+        return value;
+      }
+
+      return async (...args: unknown[]) => {
+        await ensureHydrated();
+        const result = await value.apply(target, args);
+        const shouldPersist = mutatingPrefixes.some(
+          (prefix) => typeof prop === "string" && prop.startsWith(prefix),
+        );
+        if (shouldPersist) {
+          await queuePersist();
+        }
+        return result;
+      };
+    },
+  }) as MemStorage;
+}
+
+export const storage = createPersistedStorage(new MemStorage(), databaseUrl);

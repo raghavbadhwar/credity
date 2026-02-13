@@ -4,7 +4,7 @@ import { apiKeyMiddleware } from "../auth";
 
 const router = Router();
 
-router.use(apiKeyMiddleware);
+router.use("/analytics", apiKeyMiddleware);
 
 router.get("/analytics", async (req, res) => {
     try {

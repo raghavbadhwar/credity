@@ -5,7 +5,7 @@ import { digiLockerService } from "../services/digilocker";
 import PDFDocument from "pdfkit";
 
 const router = Router();
-router.use(apiKeyMiddleware);
+router.use("/digilocker", apiKeyMiddleware);
 
 // Storage for DigiLocker tokens (in production use proper token storage)
 const digiLockerTokens: Map<string, { accessToken: string; expiresAt: Date }> = new Map();
@@ -13,9 +13,9 @@ const digiLockerTokens: Map<string, { accessToken: string; expiresAt: Date }> = 
 // Get DigiLocker status and config
 router.get("/digilocker/status", async (req, res) => {
     try {
+        const configured = digiLockerService.isReady();
         res.json({
-            configured: digiLockerService.isReady(),
-            demoMode: !digiLockerService.isReady(),
+            configured,
             supportedDocTypes: digiLockerService.getSupportedDocTypes(),
         });
     } catch (error) {
@@ -38,6 +38,12 @@ router.post("/digilocker/auth/initiate", async (req, res) => {
             return res.status(404).json({ message: "Credential not found" });
         }
 
+        if (!digiLockerService.isReady()) {
+            return res.status(503).json({
+                message: "DigiLocker integration is not configured. Set DigiLocker credentials before initiating OAuth.",
+            });
+        }
+
         // Generate state token
         const state = Buffer.from(JSON.stringify({
             tenantId,
@@ -50,7 +56,6 @@ router.post("/digilocker/auth/initiate", async (req, res) => {
         res.json({
             authUrl,
             state,
-            demoMode: !digiLockerService.isReady(),
         });
     } catch (error) {
         res.status(500).json({ message: "Failed to initiate DigiLocker auth" });
@@ -85,45 +90,6 @@ router.get("/digilocker/callback", async (req, res) => {
     }
 });
 
-// Demo auth endpoint for testing without real DigiLocker
-router.get("/digilocker/demo-auth", async (req, res) => {
-    try {
-        const { state } = req.query;
-
-        // Simulate user consent
-        res.send(`
-      <!DOCTYPE html>
-      <html>
-      <head>
-        <title>DigiLocker Authorization (Demo)</title>
-        <style>
-          body { font-family: system-ui; max-width: 400px; margin: 100px auto; padding: 20px; text-align: center; }
-          .logo { font-size: 48px; margin-bottom: 20px; }
-          h2 { color: #1E40AF; }
-          .btn { background: #3B82F6; color: white; border: none; padding: 12px 32px; border-radius: 8px; cursor: pointer; font-size: 16px; margin: 10px; }
-          .btn.secondary { background: #E5E7EB; color: #374151; }
-          .info { background: #FEF3C7; padding: 12px; border-radius: 8px; margin: 20px 0; font-size: 14px; }
-        </style>
-      </head>
-      <body>
-        <div class="logo">🔐</div>
-        <h2>DigiLocker Authorization</h2>
-        <p>CredVerse wants to push a credential to your DigiLocker account.</p>
-        <div class="info">⚠️ Demo Mode - No real DigiLocker connection</div>
-        <form action="/api/v1/digilocker/callback" method="GET">
-          <input type="hidden" name="code" value="demo-code-${Date.now()}" />
-          <input type="hidden" name="state" value="${state}" />
-          <button type="submit" class="btn">Authorize</button>
-          <button type="button" class="btn secondary" onclick="window.close()">Cancel</button>
-        </form>
-      </body>
-      </html>
-    `);
-    } catch (error) {
-        res.status(500).send("Demo auth error");
-    }
-});
-
 // Push credential to DigiLocker
 router.post("/digilocker/push", async (req, res) => {
     try {
@@ -139,11 +105,21 @@ router.post("/digilocker/push", async (req, res) => {
             return res.status(404).json({ message: "Credential not found" });
         }
 
-        // Get or use demo token
-        let accessToken = "demo-token";
+        if (!digiLockerService.isReady()) {
+            return res.status(503).json({
+                message: "DigiLocker integration is not configured for push operations.",
+            });
+        }
+
+        // Get OAuth token
+        let accessToken = "";
         const storedToken = digiLockerTokens.get(tenantId);
         if (storedToken && storedToken.expiresAt > new Date()) {
             accessToken = storedToken.accessToken;
+        } else {
+            return res.status(401).json({
+                message: "DigiLocker authorization required. Complete OAuth before pushing documents.",
+            });
         }
 
         // Generate PDF content as base64

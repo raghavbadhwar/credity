@@ -191,7 +191,7 @@ router.post('/auth/logout', authMiddleware, (req, res) => {
  */
 router.get('/auth/me', authMiddleware, async (req, res) => {
     try {
-        const user = await storage.getUser(req.user!.userId);
+        const user = await storage.getUser(String(req.user!.userId));
         if (!user) {
             return res.status(404).json({ error: 'User not found' });
         }

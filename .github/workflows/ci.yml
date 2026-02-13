@@ -1,0 +1,140 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize, reopened, labeled]
+
+jobs:
+  shared-auth:
+    name: Build shared-auth
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: packages/shared-auth/package-lock.json
+      - run: cd packages/shared-auth && npm ci
+      - run: cd packages/shared-auth && npm run build
+      - run: cd packages/shared-auth && npm run lint
+
+  wallet:
+    name: BlockWalletDigi
+    needs: shared-auth
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: BlockWalletDigi/package-lock.json
+      - run: cd packages/shared-auth && npm ci && npm run build
+      - run: cd BlockWalletDigi && npm ci
+      - run: cd BlockWalletDigi && npm run lint
+      - run: cd BlockWalletDigi && npm run check
+      - run: cd BlockWalletDigi && npm test
+      - run: cd BlockWalletDigi && npm run build
+
+  issuer:
+    name: CredVerseIssuer
+    needs: shared-auth
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: "CredVerseIssuer 3/package-lock.json"
+      - run: cd packages/shared-auth && npm ci && npm run build
+      - run: cd "CredVerseIssuer 3" && npm ci
+      - run: cd "CredVerseIssuer 3" && npm run lint
+      - run: cd "CredVerseIssuer 3" && npm run check
+      - run: cd "CredVerseIssuer 3" && npm test
+      - run: cd "CredVerseIssuer 3" && npm run build
+
+  issuer-contracts:
+    name: CredVerseIssuer-Contracts
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: "CredVerseIssuer 3/contracts/package-lock.json"
+      - run: cd "CredVerseIssuer 3/contracts" && npm ci
+      - run: cd "CredVerseIssuer 3/contracts" && npm run analyze:static
+
+  recruiter:
+    name: CredVerseRecruiter
+    needs: shared-auth
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: CredVerseRecruiter/package-lock.json
+      - run: cd packages/shared-auth && npm ci && npm run build
+      - run: cd CredVerseRecruiter && npm ci
+      - run: cd CredVerseRecruiter && npm run lint
+      - run: cd CredVerseRecruiter && npm run check
+      - run: cd CredVerseRecruiter && npm test
+      - run: cd CredVerseRecruiter && npm run build
+
+  gateway:
+    name: credverse-gateway
+    needs: shared-auth
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: credverse-gateway/package-lock.json
+      - run: cd packages/shared-auth && npm ci && npm run build
+      - run: cd credverse-gateway && npm ci
+      - run: cd credverse-gateway && npm run lint
+      - run: cd credverse-gateway && npm run test:proxy
+      - run: cd credverse-gateway && npm run build
+
+  mobile:
+    name: apps-mobile
+    needs: shared-auth
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: apps/mobile/package-lock.json
+      - run: cd apps/mobile && npm ci
+      - run: cd apps/mobile && npm run typecheck
+      - run: cd apps/mobile && npm test
+
+  foundation-gate-smoke:
+    name: foundation-gate-smoke
+    needs: [wallet, issuer, recruiter, gateway]
+    if: github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'run-foundation-gate')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm ci
+      - run: cd packages/shared-auth && npm ci && npm run build
+      - run: cd BlockWalletDigi && npm ci
+      - run: cd "CredVerseIssuer 3" && npm ci
+      - run: cd CredVerseRecruiter && npm ci
+      - run: cd credverse-gateway && npm ci
+      - run: npm run gate:foundation:local

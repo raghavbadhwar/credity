@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { QrCode, FileText, Link as LinkIcon, CheckCircle, AlertOctagon, Download, ShieldCheck, Loader2, Building, AlertTriangle, Eye, Zap } from "lucide-react";
+import { QrCode, FileText, Link as LinkIcon, CheckCircle, AlertOctagon, Download, ShieldCheck, Loader2, Building, AlertTriangle, Eye } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useMutation } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
@@ -110,29 +110,6 @@ export default function InstantVerify() {
     },
   });
 
-  // Simulate verification mutation
-  const simulateMutation = useMutation({
-    mutationFn: async () => {
-      const response = await fetch('/api/verify/simulate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-      });
-      if (!response.ok) throw new Error('Simulation failed');
-      return response.json();
-    },
-    onSuccess: (data) => {
-      setVerificationResult(data.verification);
-      setFraudAnalysis(data.fraud);
-      setRecord(data.record);
-      setViewState("result");
-      toast({ title: 'Verification Complete', description: `Status: ${data.verification.status}` });
-    },
-    onError: () => {
-      toast({ title: 'Simulation failed', variant: 'destructive' });
-      setViewState("idle");
-    },
-  });
-
   const handleVerify = (jwt?: string, credential?: any) => {
     setViewState("verifying");
     setProgress(0);
@@ -149,23 +126,6 @@ export default function InstantVerify() {
     }, 100);
 
     verifyMutation.mutate({ jwt, credential });
-  };
-
-  const handleSimulate = () => {
-    setViewState("verifying");
-    setProgress(0);
-
-    const interval = setInterval(() => {
-      setProgress(p => {
-        if (p >= 95) {
-          clearInterval(interval);
-          return 95;
-        }
-        return p + 5;
-      });
-    }, 100);
-
-    simulateMutation.mutate();
   };
 
   const handleVerifyLink = () => {
@@ -242,7 +202,16 @@ export default function InstantVerify() {
                       <QrCode className="w-24 h-24 text-muted-foreground/30" />
                       <p className="absolute bottom-4 text-white/70 text-sm">Point camera at QR code</p>
                     </div>
-                    <Button className="w-full" onClick={handleSimulate}>
+                    <Button
+                      className="w-full"
+                      variant="outline"
+                      onClick={() =>
+                        toast({
+                          title: "Use Live QR Scan",
+                          description: "QR capture is available in the mobile app flow for production verification.",
+                        })
+                      }
+                    >
                       Activate Camera
                     </Button>
                   </TabsContent>
@@ -264,19 +233,6 @@ export default function InstantVerify() {
                     >
                       Verify JWT
                     </Button>
-
-                    <div className="space-y-2 pt-4 border-t">
-                      <p className="text-xs font-medium text-muted-foreground uppercase">Quick Demo Actions</p>
-                      <Button
-                        variant="outline"
-                        className="w-full bg-gradient-to-r from-blue-50 to-indigo-50 hover:from-blue-100 hover:to-indigo-100 border-blue-200"
-                        onClick={handleSimulate}
-                        disabled={simulateMutation.isPending}
-                      >
-                        <Zap className="w-4 h-4 mr-2 text-blue-600" />
-                        {simulateMutation.isPending ? 'Simulating...' : 'Simulate Random Verification'}
-                      </Button>
-                    </div>
                   </TabsContent>
 
                   <TabsContent value="link" className="space-y-4">

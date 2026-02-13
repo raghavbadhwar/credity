@@ -57,7 +57,7 @@ export default function Issuance() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "x-api-key": "demo-api-key"
+          "x-api-key": (import.meta as any).env?.VITE_API_KEY || ""
         },
         body: JSON.stringify({
           templateId: formData.credentialType,
@@ -96,7 +96,7 @@ export default function Issuance() {
       try {
         const offerRes = await fetch(`/api/v1/credentials/${data.id}/offer`, {
           method: 'POST',
-          headers: { 'x-api-key': 'demo-api-key' },
+          headers: { 'x-api-key': (import.meta as any).env?.VITE_API_KEY || '' },
         });
         if (offerRes.ok) {
           const offerData = await offerRes.json();

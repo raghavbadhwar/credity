@@ -3,7 +3,7 @@ import { storage } from "../storage";
 import { apiKeyMiddleware } from "../auth";
 
 const router = Router();
-router.use(apiKeyMiddleware);
+router.use("/verification-logs", apiKeyMiddleware);
 
 // List verification logs
 router.get("/verification-logs", async (req, res) => {

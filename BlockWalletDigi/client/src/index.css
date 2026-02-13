@@ -132,6 +132,6 @@
   }
 
   .pulse-verified {
-    @apply animate-[pulse_2s_cubic-bezier(0.4, 0, 0.6, 1)_infinite];
+    @apply animate-[pulse_2s_cubic-bezier(0.4,0,0.6,1)_infinite];
   }
 }

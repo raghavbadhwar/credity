@@ -37,7 +37,7 @@ export default function Templates() {
     queryKey: ['template-designs'],
     queryFn: async () => {
       const response = await fetch('/api/v1/template-designs', {
-        headers: { 'x-api-key': 'demo-api-key' },
+        headers: { 'x-api-key': (import.meta as any).env?.VITE_API_KEY || '' },
       });
       if (!response.ok) throw new Error('Failed to fetch templates');
       return response.json();
@@ -49,7 +49,7 @@ export default function Templates() {
     mutationFn: async (id: string) => {
       const response = await fetch(`/api/v1/template-designs/${id}/duplicate`, {
         method: 'POST',
-        headers: { 'x-api-key': 'demo-api-key' },
+        headers: { 'x-api-key': (import.meta as any).env?.VITE_API_KEY || '' },
       });
       if (!response.ok) throw new Error('Failed to duplicate');
       return response.json();
@@ -68,7 +68,7 @@ export default function Templates() {
     mutationFn: async (id: string) => {
       const response = await fetch(`/api/v1/template-designs/${id}`, {
         method: 'DELETE',
-        headers: { 'x-api-key': 'demo-api-key' },
+        headers: { 'x-api-key': (import.meta as any).env?.VITE_API_KEY || '' },
       });
       if (!response.ok) throw new Error('Failed to delete');
       return response.json();

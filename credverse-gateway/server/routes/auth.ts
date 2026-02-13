@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import crypto from 'crypto';
+import IORedis from 'ioredis';
 import {
     initAuth,
     generateAccessToken,
@@ -15,16 +16,148 @@ import {
 } from '../services/google';
 
 const router = Router();
+const requireStrictSecrets =
+    process.env.NODE_ENV === 'production' || process.env.REQUIRE_DATABASE === 'true';
+const gatewayJwtSecret = process.env.JWT_SECRET
+    || (requireStrictSecrets ? '' : 'dev-only-secret-not-for-production');
+const gatewayJwtRefreshSecret = process.env.JWT_REFRESH_SECRET
+    || (requireStrictSecrets ? '' : 'dev-only-refresh-secret-not-for-production');
+
+if (requireStrictSecrets && (!process.env.JWT_SECRET || !process.env.JWT_REFRESH_SECRET)) {
+    throw new Error('Gateway auth requires JWT_SECRET and JWT_REFRESH_SECRET in strict mode.');
+}
+
+const requirePersistentSessionStore =
+    process.env.NODE_ENV === 'production' || process.env.REQUIRE_DATABASE === 'true';
+const redisUrl = process.env.REDIS_URL;
+if (requirePersistentSessionStore && !redisUrl) {
+    throw new Error('Gateway auth requires REDIS_URL for session/state persistence in strict mode.');
+}
 
 // Initialize shared auth
 initAuth({
-    jwtSecret: process.env.JWT_SECRET || 'credverse-dev-jwt-secret-2024',
+    jwtSecret: gatewayJwtSecret,
+    jwtRefreshSecret: gatewayJwtRefreshSecret,
     app: 'gateway'
 });
 
-// In-memory session storage (use Redis in production)
-const sessions = new Map<string, { user: GoogleUser; jwtToken: string; createdAt: Date }>();
-const pendingStates = new Map<string, { createdAt: Date }>();
+const SESSION_TTL_SECONDS = 7 * 24 * 60 * 60;
+const STATE_TTL_SECONDS = 10 * 60;
+
+type SessionRecord = {
+    user: GoogleUser;
+    jwtToken: string;
+    createdAt: string;
+};
+
+class GatewaySessionStore {
+    private readonly redis?: IORedis;
+    private readonly sessions = new Map<string, SessionRecord>();
+    private readonly pendingStates = new Map<string, { createdAt: Date }>();
+
+    constructor(url?: string) {
+        if (!url) {
+            return;
+        }
+
+        this.redis = new IORedis(url, {
+            maxRetriesPerRequest: 1,
+            enableReadyCheck: true,
+            lazyConnect: false,
+        });
+
+        this.redis.on('error', (error) => {
+            console.error('[Auth] Redis session store error:', error);
+        });
+    }
+
+    private prunePendingStates(): void {
+        const expiredBefore = Date.now() - STATE_TTL_SECONDS * 1000;
+        for (const [key, value] of this.pendingStates.entries()) {
+            if (value.createdAt.getTime() < expiredBefore) {
+                this.pendingStates.delete(key);
+            }
+        }
+    }
+
+    private pruneSessions(): void {
+        const expiredBefore = Date.now() - SESSION_TTL_SECONDS * 1000;
+        for (const [key, value] of this.sessions.entries()) {
+            const createdAtMs = Date.parse(value.createdAt);
+            if (Number.isFinite(createdAtMs) && createdAtMs < expiredBefore) {
+                this.sessions.delete(key);
+            }
+        }
+    }
+
+    async setPendingState(state: string): Promise<void> {
+        if (this.redis) {
+            await this.redis.set(`gateway:auth:state:${state}`, '1', 'EX', STATE_TTL_SECONDS);
+            return;
+        }
+
+        this.pendingStates.set(state, { createdAt: new Date() });
+        this.prunePendingStates();
+    }
+
+    async consumePendingState(state: string): Promise<boolean> {
+        if (this.redis) {
+            const key = `gateway:auth:state:${state}`;
+            const exists = await this.redis.get(key);
+            if (!exists) return false;
+            await this.redis.del(key);
+            return true;
+        }
+
+        this.prunePendingStates();
+        if (!this.pendingStates.has(state)) {
+            return false;
+        }
+        this.pendingStates.delete(state);
+        return true;
+    }
+
+    async setSession(sessionId: string, session: SessionRecord): Promise<void> {
+        if (this.redis) {
+            await this.redis.set(
+                `gateway:auth:session:${sessionId}`,
+                JSON.stringify(session),
+                'EX',
+                SESSION_TTL_SECONDS,
+            );
+            return;
+        }
+
+        this.sessions.set(sessionId, session);
+        this.pruneSessions();
+    }
+
+    async getSession(sessionId: string): Promise<SessionRecord | null> {
+        if (this.redis) {
+            const raw = await this.redis.get(`gateway:auth:session:${sessionId}`);
+            if (!raw) return null;
+            try {
+                return JSON.parse(raw) as SessionRecord;
+            } catch {
+                return null;
+            }
+        }
+
+        this.pruneSessions();
+        return this.sessions.get(sessionId) ?? null;
+    }
+
+    async deleteSession(sessionId: string): Promise<void> {
+        if (this.redis) {
+            await this.redis.del(`gateway:auth:session:${sessionId}`);
+            return;
+        }
+
+        this.sessions.delete(sessionId);
+    }
+}
+
+const sessionStore = new GatewaySessionStore(redisUrl);
 
 /**
  * Generate JWT for cross-app SSO
@@ -41,14 +174,18 @@ function generateSSOToken(user: GoogleUser): string {
 /**
  * Verify SSO token
  */
-function verifySSOToken(token: string): any {
-    return verifyAccessToken(token);
+function verifySSOToken(token: string): Record<string, unknown> | null {
+    const decoded = verifyAccessToken(token);
+    if (!decoded || typeof decoded !== 'object') {
+        return null;
+    }
+    return decoded as Record<string, unknown>;
 }
 
 /**
  * Check if Google OAuth is available
  */
-router.get('/auth/status', (req, res) => {
+router.get('/auth/status', (_req, res) => {
     res.json({
         googleOAuth: isGoogleOAuthConfigured(),
         sso: true,
@@ -61,21 +198,13 @@ router.get('/auth/status', (req, res) => {
 /**
  * Start Google OAuth flow
  */
-router.get('/auth/google', (req, res) => {
+router.get('/auth/google', async (_req, res) => {
     if (!isGoogleOAuthConfigured()) {
         return res.status(503).json({ error: 'Google OAuth not configured' });
     }
 
     const state = crypto.randomBytes(32).toString('hex');
-    pendingStates.set(state, { createdAt: new Date() });
-
-    // Clean up old states
-    const tenMinutesAgo = Date.now() - 10 * 60 * 1000;
-    for (const [key, value] of pendingStates.entries()) {
-        if (value.createdAt.getTime() < tenMinutesAgo) {
-            pendingStates.delete(key);
-        }
-    }
+    await sessionStore.setPendingState(state);
 
     const authUrl = getAuthorizationUrl(state);
     res.redirect(authUrl);
@@ -96,30 +225,34 @@ router.get('/auth/google/callback', async (req, res) => {
             return res.redirect('/?error=invalid_request');
         }
 
-        if (!pendingStates.has(state as string)) {
+        const validState = await sessionStore.consumePendingState(state as string);
+        if (!validState) {
             return res.redirect('/?error=invalid_state');
         }
-        pendingStates.delete(state as string);
 
         const tokens = await exchangeCodeForTokens(code as string);
         const googleUser = await getGoogleUserInfo(tokens.accessToken);
         const jwtToken = generateSSOToken(googleUser);
 
         const sessionId = crypto.randomBytes(32).toString('hex');
-        sessions.set(sessionId, { user: googleUser, jwtToken, createdAt: new Date() });
+        await sessionStore.setSession(sessionId, {
+            user: googleUser,
+            jwtToken,
+            createdAt: new Date().toISOString(),
+        });
 
         res.cookie('session', sessionId, {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
             sameSite: 'lax',
-            maxAge: 7 * 24 * 60 * 60 * 1000,
+            maxAge: SESSION_TTL_SECONDS * 1000,
         });
 
         res.cookie('sso_token', jwtToken, {
-            httpOnly: false,
+            httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
             sameSite: 'lax',
-            maxAge: 7 * 24 * 60 * 60 * 1000,
+            maxAge: SESSION_TTL_SECONDS * 1000,
         });
 
         res.redirect(`/?login=success&name=${encodeURIComponent(googleUser.name)}`);
@@ -132,14 +265,18 @@ router.get('/auth/google/callback', async (req, res) => {
 /**
  * Get current user and SSO token
  */
-router.get('/auth/me', (req, res) => {
+router.get('/auth/me', async (req, res) => {
     const sessionId = req.cookies?.session;
 
-    if (!sessionId || !sessions.has(sessionId)) {
+    if (!sessionId) {
         return res.status(401).json({ error: 'Not authenticated' });
     }
 
-    const session = sessions.get(sessionId)!;
+    const session = await sessionStore.getSession(sessionId);
+    if (!session) {
+        return res.status(401).json({ error: 'Not authenticated' });
+    }
+
     res.json({
         user: session.user,
         ssoToken: session.jwtToken,
@@ -169,10 +306,10 @@ router.post('/auth/verify-token', (req, res) => {
         res.json({
             valid: true,
             user: {
-                id: decoded.sub,
-                email: decoded.email,
-                name: decoded.name,
-                picture: decoded.picture,
+                id: typeof decoded.sub === 'string' ? decoded.sub : null,
+                email: typeof decoded.email === 'string' ? decoded.email : null,
+                name: typeof decoded.name === 'string' ? decoded.name : null,
+                picture: typeof decoded.picture === 'string' ? decoded.picture : null,
             },
             app: 'gateway',
         });
@@ -184,54 +321,14 @@ router.post('/auth/verify-token', (req, res) => {
 /**
  * Logout
  */
-router.post('/auth/logout', (req, res) => {
+router.post('/auth/logout', async (req, res) => {
     const sessionId = req.cookies?.session;
-    if (sessionId) sessions.delete(sessionId);
+    if (sessionId) {
+        await sessionStore.deleteSession(sessionId);
+    }
     res.clearCookie('session');
     res.clearCookie('sso_token');
     res.json({ success: true });
-});
-
-/**
- * Demo login
- */
-router.post('/auth/demo-login', (req, res) => {
-    const { name, email } = req.body;
-
-    if (!name || !email) {
-        return res.status(400).json({ error: 'Name and email required' });
-    }
-
-    const demoUser: GoogleUser = {
-        id: `demo-${Date.now()}`,
-        email,
-        name,
-        picture: undefined,
-    };
-
-    const jwtToken = generateSSOToken(demoUser);
-    const sessionId = crypto.randomBytes(32).toString('hex');
-    sessions.set(sessionId, { user: demoUser, jwtToken, createdAt: new Date() });
-
-    res.cookie('session', sessionId, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'lax',
-        maxAge: 7 * 24 * 60 * 60 * 1000,
-    });
-
-    res.cookie('sso_token', jwtToken, {
-        httpOnly: false,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'lax',
-        maxAge: 7 * 24 * 60 * 60 * 1000,
-    });
-
-    res.json({
-        success: true,
-        user: demoUser,
-        ssoToken: jwtToken,
-    });
 });
 
 export default router;

@@ -1,36 +1,31 @@
 import { Request, Response, NextFunction } from "express";
 import { storage } from "./storage";
-import { z } from "zod";
+import { verifyAccessToken } from "@credverse/shared-auth";
 
 // Simple in-memory rate limiter for MVP
 const rateLimitMap = new Map<string, { count: number; lastReset: number }>();
 const RATE_LIMIT_WINDOW = 60 * 1000; // 1 minute
 const RATE_LIMIT_MAX = 1000; // 1000 requests per minute
 
-export async function apiKeyMiddleware(req: Request, res: Response, next: NextFunction) {
-    const apiKeyHeader = req.headers["x-api-key"];
+function readOptionalString(value: unknown): string | undefined {
+    return typeof value === "string" && value.trim().length > 0 ? value : undefined;
+}
 
-    if (!apiKeyHeader || typeof apiKeyHeader !== "string") {
-        return res.status(401).json({ message: "Missing or invalid API Key" });
-    }
-
-    // In a real app, we would hash the key from the header and compare it with the stored hash
-    // For MVP, we'll assume the header sends the hash directly or we store plain keys (NOT RECOMMENDED FOR PROD)
-    // Let's assume we store the key directly for this MVP to keep it simple, or we'd need a hashing helper.
-    // Ideally: const keyHash = hash(apiKeyHeader);
-    const keyHash = apiKeyHeader;
-
+async function resolveApiKeyTenant(keyHeader: string): Promise<{ tenantId: string; keyHash: string; error?: string }> {
+    const keyHash = keyHeader;
     const apiKey = await storage.getApiKey(keyHash);
-
     if (!apiKey) {
-        return res.status(401).json({ message: "Invalid API Key" });
+        return { tenantId: "", keyHash, error: "Invalid API Key" };
     }
 
     if (apiKey.expiresAt && new Date() > apiKey.expiresAt) {
-        return res.status(401).json({ message: "API Key expired" });
+        return { tenantId: "", keyHash, error: "API Key expired" };
     }
 
-    // Rate Limiting
+    return { tenantId: apiKey.tenantId, keyHash };
+}
+
+function enforceApiRateLimit(keyHash: string): { allowed: boolean; error?: string } {
     const now = Date.now();
     const limitData = rateLimitMap.get(keyHash) || { count: 0, lastReset: now };
 
@@ -43,11 +38,75 @@ export async function apiKeyMiddleware(req: Request, res: Response, next: NextFu
     rateLimitMap.set(keyHash, limitData);
 
     if (limitData.count > RATE_LIMIT_MAX) {
-        return res.status(429).json({ message: "Rate limit exceeded" });
+        return { allowed: false, error: "Rate limit exceeded" };
     }
 
-    // Attach tenantId to request
-    (req as any).tenantId = apiKey.tenantId;
+    return { allowed: true };
+}
+
+export async function apiKeyMiddleware(req: Request, res: Response, next: NextFunction) {
+    const apiKeyHeader = req.headers["x-api-key"];
+
+    if (!apiKeyHeader || typeof apiKeyHeader !== "string") {
+        return res.status(401).json({ message: "Missing or invalid API Key" });
+    }
+
+    const resolved = await resolveApiKeyTenant(apiKeyHeader);
+    if (resolved.error) {
+        return res.status(401).json({ message: resolved.error });
+    }
+
+    const rate = enforceApiRateLimit(resolved.keyHash);
+    if (!rate.allowed) {
+        return res.status(429).json({ message: rate.error });
+    }
+
+    (req as any).tenantId = resolved.tenantId;
+    next();
+}
+
+/**
+ * Allow either API key auth or JWT auth for mobile/app flows.
+ * For JWT auth in non-production, tenantId may be provided via request body/query.
+ */
+export async function apiKeyOrAuthMiddleware(req: Request, res: Response, next: NextFunction) {
+    const apiKeyHeader = req.headers["x-api-key"];
+    if (apiKeyHeader && typeof apiKeyHeader === "string") {
+        const resolved = await resolveApiKeyTenant(apiKeyHeader);
+        if (resolved.error) {
+            return res.status(401).json({ message: resolved.error });
+        }
+
+        const rate = enforceApiRateLimit(resolved.keyHash);
+        if (!rate.allowed) {
+            return res.status(429).json({ message: rate.error });
+        }
+
+        (req as any).tenantId = resolved.tenantId;
+        return next();
+    }
+
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+        return res.status(401).json({ message: "Missing or invalid API Key" });
+    }
+
+    const token = authHeader.slice(7);
+    const payload = verifyAccessToken(token);
+    if (!payload) {
+        return res.status(401).json({ message: "Invalid or expired token" });
+    }
+
+    (req as any).user = payload;
+    const bodyTenantId = readOptionalString((req as any).body?.tenantId);
+    const queryTenantId = readOptionalString((req as any).query?.tenantId);
+    const tokenTenantId = readOptionalString((payload as any).tenantId);
+    const tenantId =
+        tokenTenantId
+        || (process.env.NODE_ENV !== "production" ? bodyTenantId || queryTenantId : undefined)
+        || String(payload.userId);
+
+    (req as any).tenantId = tenantId;
     next();
 }
 

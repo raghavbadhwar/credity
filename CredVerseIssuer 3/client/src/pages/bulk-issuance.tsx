@@ -44,7 +44,7 @@ export default function BulkIssuance() {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
-                    "x-api-key": "demo-api-key"
+                    "x-api-key": (import.meta as any).env?.VITE_API_KEY || ""
                 },
                 body: JSON.stringify({
                     templateId: "tmpl_123", // Mock template

@@ -4,6 +4,8 @@ import { digilockerService } from "../services/digilocker-service";
 import { walletService } from "../services/wallet-service";
 
 const router = Router();
+const allowDemoRoutes =
+    process.env.NODE_ENV !== 'production' && process.env.ALLOW_DEMO_ROUTES === 'true';
 
 /**
  * Get authorization URL for DigiLocker OAuth flow
@@ -21,6 +23,9 @@ router.get("/digilocker/auth", async (req, res) => {
         });
     } catch (error: any) {
         console.error('[DigiLocker] Auth URL error:', error);
+        if (String(error?.message || '').includes('not configured')) {
+            return res.status(503).json({ error: 'DigiLocker is not configured for this environment' });
+        }
         res.status(500).json({ error: error.message });
     }
 });
@@ -247,6 +252,10 @@ router.post("/digilocker/connect", async (req, res) => {
 
         // In demo mode, auto-complete the flow
         if (digilockerService.isDemoMode()) {
+            if (!allowDemoRoutes) {
+                return res.status(404).json({ error: 'Not found' });
+            }
+
             await digilockerService.exchangeCodeForTokens('demo_code', state);
 
             // Import demo documents
@@ -292,6 +301,9 @@ router.post("/digilocker/connect", async (req, res) => {
         }
     } catch (error: any) {
         console.error('[DigiLocker] Connect error:', error);
+        if (String(error?.message || '').includes('not configured')) {
+            return res.status(503).json({ error: 'DigiLocker is not configured for this environment' });
+        }
         res.status(500).json({ error: error.message });
     }
 });

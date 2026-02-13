@@ -2,6 +2,23 @@
 
 This guide covers deploying the CredVerse ecosystem to Railway (recommended) or other platforms.
 
+## ☁️ GCP Deployment Baseline (Cloud Run + Cloud SQL, Mumbai)
+
+This repo now includes a production baseline under `infra/gcp` targeting `asia-south1`:
+
+- `infra/gcp/cloudrun/services.yaml`
+- `infra/gcp/cloudrun/env.example.yaml`
+- `infra/gcp/README.md`
+
+Recommended production controls:
+
+- `REQUIRE_DATABASE=true`
+- `REQUIRE_QUEUE=true`
+- `ALLOW_DEMO_ROUTES=false`
+- `BLOCKCHAIN_ANCHOR_MODE=async`
+
+Use Secret Manager for all secrets and connect Cloud Run services to Cloud SQL (PostgreSQL regional HA) and Memorystore (Redis).
+
 ## 🏗️ Architecture Overview
 
 CredVerse is a monorepo with 4 services:
@@ -73,12 +90,28 @@ node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
 ```env
 ISSUER_KEY_ENCRYPTION=<64-char-hex-key>
 # Optional:
+CHAIN_NETWORK=ethereum-sepolia
+ENABLE_ZKEVM_MAINNET=false
+CHAIN_RPC_URL=
+RPC_URL=  # Optional backward-compatible override
 SEPOLIA_RPC_URL=https://eth-sepolia.g.alchemy.com/v2/YOUR_KEY
+POLYGON_AMOY_RPC_URL=https://rpc-amoy.polygon.technology
+POLYGON_ZKEVM_CARDONA_RPC_URL=https://rpc.cardona.zkevm-rpc.com
+POLYGON_ZKEVM_RPC_URL=https://zkevm-rpc.com
 DEPLOYER_PRIVATE_KEY=0x...
 REDIS_URL=redis://...  # For bulk issuance queue
 RESEND_API_KEY=re_...  # For email notifications
 SENTRY_DSN=https://...  # Error monitoring
 ```
+
+`CHAIN_NETWORK` supported values:
+- `ethereum-sepolia` (default, safest pilot)
+- `polygon-mainnet`
+- `polygon-amoy`
+- `polygon-zkevm-cardona` (recommended zkEVM testnet path)
+- `polygon-zkevm-mainnet` (enable only after cost and stability sign-off)
+
+`ENABLE_ZKEVM_MAINNET` must be set to `true` before write operations (anchor/revoke) are allowed on `polygon-zkevm-mainnet`.
 
 #### Gateway Service (Additional)
 ```env

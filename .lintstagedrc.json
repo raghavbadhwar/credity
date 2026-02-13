@@ -1,0 +1,22 @@
+{
+  "BlockWalletDigi/**/*.{ts,tsx}": [
+    "eslint --fix --no-warn-ignored",
+    "prettier --write"
+  ],
+  "CredVerseIssuer 3/**/*.{ts,tsx}": [
+    "eslint --fix --no-warn-ignored",
+    "prettier --write"
+  ],
+  "CredVerseRecruiter/**/*.{ts,tsx}": [
+    "eslint --fix --no-warn-ignored",
+    "prettier --write"
+  ],
+  "credverse-gateway/**/*.{ts,tsx}": [
+    "eslint --fix --no-warn-ignored",
+    "prettier --write"
+  ],
+  "packages/shared-auth/src/**/*.ts": [
+    "eslint --fix --no-warn-ignored",
+    "prettier --write"
+  ]
+}

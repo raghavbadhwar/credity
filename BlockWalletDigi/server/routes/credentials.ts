@@ -1,7 +1,6 @@
 import { Router } from 'express';
 import { walletService } from '../services/wallet-service';
 import { storage } from '../storage';
-import { insertCredentialSchema } from "@shared/schema";
 
 const router = Router();
 
@@ -227,74 +226,6 @@ router.post('/wallet/offer/claim', async (req, res) => {
     } catch (error: any) {
         console.error('[Wallet] Claim offer error:', error);
         res.status(500).json({ error: error.message || 'Failed to claim offer' });
-    }
-});
-
-// ============== Demo Data ==============
-
-/**
- * Add sample credentials for demo
- */
-router.post('/wallet/demo/populate', async (req, res) => {
-    try {
-        const userId = parseInt(req.body.userId) || 1;
-
-        // Add sample credentials
-        const sampleCredentials = [
-            {
-                type: ['VerifiableCredential', 'UniversityDegree'],
-                issuer: 'Stanford University',
-                issuanceDate: new Date('2023-05-15'),
-                data: {
-                    name: 'Bachelor of Computer Science',
-                    recipient: 'John Doe',
-                    graduationDate: '2023-05-15',
-                    gpa: '3.8',
-                    honors: 'Magna Cum Laude',
-                },
-                category: 'academic',
-            },
-            {
-                type: ['VerifiableCredential', 'EmploymentCertificate'],
-                issuer: 'Google LLC',
-                issuanceDate: new Date('2023-08-01'),
-                data: {
-                    name: 'Software Engineer',
-                    recipient: 'John Doe',
-                    startDate: '2023-08-01',
-                    department: 'Cloud Platform',
-                    level: 'L4',
-                },
-                category: 'employment',
-            },
-            {
-                type: ['VerifiableCredential', 'SkillBadge'],
-                issuer: 'AWS',
-                issuanceDate: new Date('2024-01-10'),
-                data: {
-                    name: 'AWS Solutions Architect - Professional',
-                    recipient: 'John Doe',
-                    validUntil: '2027-01-10',
-                    score: '920/1000',
-                },
-                category: 'skill',
-            },
-        ];
-
-        for (const cred of sampleCredentials) {
-            await walletService.storeCredential(userId, cred as any);
-        }
-
-        const stats = await walletService.getWalletStats(userId);
-
-        res.json({
-            success: true,
-            message: 'Demo credentials added',
-            stats,
-        });
-    } catch (error) {
-        console.error('Populate demo error:', error);
-        res.status(500).json({ error: 'Failed to populate demo data' });
     }
 });
 

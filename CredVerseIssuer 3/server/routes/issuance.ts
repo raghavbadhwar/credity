@@ -1,14 +1,40 @@
 import { Router } from "express";
 import { storage } from "../storage";
 import { issuanceService } from "../services/issuance";
-import { apiKeyMiddleware } from "../auth";
-import { z } from "zod";
+import { apiKeyOrAuthMiddleware } from "../auth";
+import { idempotencyMiddleware } from "@credverse/shared-auth";
+import { revokeCredentialStatus } from "../services/status-list-service";
+import {
+    getDeadLetterJobs,
+    getJobStatus,
+    getQueueStats,
+    isQueueAvailable,
+    replayDeadLetterJob,
+} from "../services/queue-service";
 
 const router = Router();
 
-router.use(apiKeyMiddleware);
+router.use(apiKeyOrAuthMiddleware);
+const writeIdempotency = idempotencyMiddleware({ ttlMs: 6 * 60 * 60 * 1000 });
 
-router.post("/credentials/:id/offer", async (req, res) => {
+function authorizeQueueOperations(req: any, res: any): boolean {
+    const hasApiKey = typeof req.headers?.["x-api-key"] === "string";
+    if (hasApiKey) {
+        return true;
+    }
+
+    const role = typeof req.user?.role === "string" ? req.user.role.toLowerCase() : "";
+    if (role === "admin" || role === "issuer") {
+        return true;
+    }
+
+    res.status(403).json({
+        message: "Queue operations require issuer/admin role or API key",
+    });
+    return false;
+}
+
+router.post("/credentials/:id/offer", writeIdempotency, async (req, res) => {
     try {
         const credential = await storage.getCredential(req.params.id);
         if (!credential) {
@@ -36,7 +62,7 @@ router.post("/credentials/:id/offer", async (req, res) => {
     }
 });
 
-router.post("/credentials/issue", async (req, res) => {
+router.post("/credentials/issue", writeIdempotency, async (req, res) => {
     try {
         const tenantId = (req as any).tenantId;
         const { templateId, issuerId, recipient, credentialData } = req.body;
@@ -55,11 +81,13 @@ router.post("/credentials/issue", async (req, res) => {
 
         res.status(201).json(credential);
     } catch (error: any) {
-        res.status(500).json({ message: error.message || "Internal Server Error" });
+        const message = error.message || "Internal Server Error";
+        const status = message.includes("queue") || message.includes("REDIS_URL") ? 503 : 500;
+        res.status(status).json({ message });
     }
 });
 
-router.post("/credentials/bulk-issue", async (req, res) => {
+router.post("/credentials/bulk-issue", writeIdempotency, async (req, res) => {
     try {
         const tenantId = (req as any).tenantId;
         const { templateId, issuerId, recipientsData } = req.body;
@@ -78,6 +106,100 @@ router.post("/credentials/bulk-issue", async (req, res) => {
         res.status(202).json(result);
     } catch (error: any) {
         res.status(500).json({ message: error.message || "Internal Server Error" });
+    }
+});
+
+router.get("/queue/stats", async (_req, res) => {
+    try {
+        if (!authorizeQueueOperations(_req as any, res)) {
+            return;
+        }
+        if (!isQueueAvailable()) {
+            return res.status(503).json({
+                message: "Queue service unavailable",
+                queue: { available: false },
+            });
+        }
+
+        const stats = await getQueueStats();
+        res.json({
+            queue: {
+                available: true,
+                stats,
+            },
+        });
+    } catch (error: any) {
+        res.status(500).json({ message: error.message || "Failed to fetch queue stats" });
+    }
+});
+
+router.get("/queue/jobs/:jobId", async (req, res) => {
+    try {
+        if (!authorizeQueueOperations(req as any, res)) {
+            return;
+        }
+        if (!isQueueAvailable()) {
+            return res.status(503).json({
+                message: "Queue service unavailable",
+                queue: { available: false },
+            });
+        }
+
+        const status = await getJobStatus(req.params.jobId);
+        if (!status) {
+            return res.status(404).json({ message: "Job not found" });
+        }
+
+        res.json(status);
+    } catch (error: any) {
+        res.status(500).json({ message: error.message || "Failed to fetch queue job status" });
+    }
+});
+
+router.get("/queue/dead-letter", async (req, res) => {
+    try {
+        if (!authorizeQueueOperations(req as any, res)) {
+            return;
+        }
+        if (!isQueueAvailable()) {
+            return res.status(503).json({
+                message: "Queue service unavailable",
+                queue: { available: false },
+            });
+        }
+
+        const limit = Number(req.query.limit || 50);
+        const entries = await getDeadLetterJobs(limit);
+        res.json({
+            count: entries.length,
+            entries,
+        });
+    } catch (error: any) {
+        res.status(500).json({ message: error.message || "Failed to fetch dead-letter queue" });
+    }
+});
+
+router.post("/queue/dead-letter/:entryId/replay", writeIdempotency, async (req, res) => {
+    try {
+        if (!authorizeQueueOperations(req as any, res)) {
+            return;
+        }
+        if (!isQueueAvailable()) {
+            return res.status(503).json({
+                message: "Queue service unavailable",
+                queue: { available: false },
+            });
+        }
+
+        const replay = await replayDeadLetterJob(req.params.entryId);
+        res.status(202).json({
+            success: true,
+            ...replay,
+        });
+    } catch (error: any) {
+        const message = error?.message || "Failed to replay dead-letter entry";
+        const status = message.toLowerCase().includes("not found") ? 404 : 500;
+        res.status(status).json({ message });
     }
 });
 
@@ -112,7 +234,7 @@ router.get("/credentials", async (req, res) => {
 });
 
 // Revoke a credential
-router.post("/credentials/:id/revoke", async (req, res) => {
+router.post("/credentials/:id/revoke", writeIdempotency, async (req, res) => {
     try {
         const credential = await storage.getCredential(req.params.id);
 
@@ -125,7 +247,9 @@ router.post("/credentials/:id/revoke", async (req, res) => {
             return res.status(403).json({ message: "Forbidden" });
         }
 
-        await storage.revokeCredential(req.params.id);
+        const reason = req.body?.reason || "revoked_by_issuer";
+        await issuanceService.revokeCredential(req.params.id, reason);
+        await revokeCredentialStatus(req.params.id);
 
         res.json({ message: "Credential revoked successfully", id: req.params.id });
     } catch (error) {

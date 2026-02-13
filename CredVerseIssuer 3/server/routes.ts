@@ -13,11 +13,15 @@ import verificationLogsRoutes from "./routes/verificationLogs";
 import exportsRoutes from "./routes/exports";
 import activityLogsRoutes from "./routes/activityLogs";
 import digilockerRoutes from "./routes/digilocker";
+import standardsRoutes from "./routes/standards";
 import authRoutes from "./routes/auth";
 import publicRoutes from "./routes/public";
 import twoFactorRoutes from "./routes/two-factor";
+import reputationRoutes from "./routes/reputation";
+import complianceRoutes from "./routes/compliance";
 import { initQueueService, startIssuanceWorker } from "./services/queue-service";
 import { issuanceService } from "./services/issuance";
+import { blockchainService } from "./services/blockchain-service";
 
 import { setupSecurity } from "@credverse/shared-auth";
 
@@ -39,11 +43,20 @@ export async function registerRoutes(
 
   // Health check endpoint for Railway
   app.get("/api/health", (_req, res) => {
-    res.status(200).json({ status: "ok", timestamp: new Date().toISOString() });
+    res.status(200).json({
+      status: "ok",
+      app: "issuer",
+      timestamp: new Date().toISOString(),
+      queue: {
+        available: queueAvailable,
+      },
+      blockchain: blockchainService.getRuntimeStatus(),
+    });
   });
 
   // put application routes here
   // prefix all routes with /api
+  app.use("/", standardsRoutes); // OID4VCI metadata + standards endpoints
   app.use("/api/v1/public", publicRoutes); // Mount public routes
   // auth routes first
   app.use("/api/v1", authRoutes);
@@ -60,6 +73,8 @@ export async function registerRoutes(
   app.use("/api/v1", exportsRoutes);
   app.use("/api/v1", activityLogsRoutes);
   app.use("/api/v1", digilockerRoutes);
+  app.use("/api/v1", reputationRoutes);
+  app.use("/api/v1", complianceRoutes);
 
 
   return httpServer;

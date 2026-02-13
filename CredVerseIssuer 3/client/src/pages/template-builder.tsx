@@ -307,7 +307,7 @@ export default function TemplateBuilder() {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'x-api-key': 'demo-api-key',
+                    'x-api-key': (import.meta as any).env?.VITE_API_KEY || '',
                 },
                 body: JSON.stringify({
                     name: templateName,

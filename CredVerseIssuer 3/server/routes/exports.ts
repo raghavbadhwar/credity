@@ -4,7 +4,7 @@ import { apiKeyMiddleware } from "../auth";
 import PDFDocument from "pdfkit";
 
 const router = Router();
-router.use(apiKeyMiddleware);
+router.use("/exports", apiKeyMiddleware);
 
 // Helper to convert array to CSV
 function arrayToCSV(data: any[], columns: string[]): string {

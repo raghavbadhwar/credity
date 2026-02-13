@@ -81,7 +81,7 @@ router.get('/verifications/:id', async (req, res) => {
         const { id } = req.params;
 
         const record = await storage.getVerification(id);
-        const details = verificationEngine.getVerificationResult(id);
+        const details = await verificationEngine.getVerificationResult(id);
 
         if (!record) {
             return res.status(404).json({ error: 'Verification not found' });

@@ -36,7 +36,10 @@ import {
     Smartphone,
     CircleDot,
     AlertCircle,
-    Clock
+    Clock,
+    Zap,
+    Shield,
+    EyeOff
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useBiometrics } from "@/hooks/use-biometrics";

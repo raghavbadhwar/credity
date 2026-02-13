@@ -10,12 +10,28 @@ import helmet from "helmet";
 import cors from "cors";
 import { errorHandler } from "./middleware/error-handler";
 import { setupSecurity } from "@credverse/shared-auth";
+import { initAuth } from "@credverse/shared-auth";
 import { registerRoutes } from "./routes";
 import { serveStatic } from "./static";
 import { createServer } from "http";
 
 const app = express();
 const httpServer = createServer(app);
+
+const requireDatabase = process.env.NODE_ENV === 'production' || process.env.REQUIRE_DATABASE === 'true';
+if (requireDatabase && !process.env.DATABASE_URL) {
+  console.error('[Startup] REQUIRE_DATABASE policy is enabled but DATABASE_URL is missing.');
+  process.exit(1);
+}
+if (requireDatabase) {
+  console.log('[Startup] Database persistence policy is enforced.');
+}
+
+initAuth({
+  jwtSecret: process.env.JWT_SECRET || '',
+  jwtRefreshSecret: process.env.JWT_REFRESH_SECRET || '',
+  app: 'wallet',
+});
 
 declare module "http" {
   interface IncomingMessage {

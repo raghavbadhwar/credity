@@ -3,7 +3,8 @@ import { storage } from "../storage";
 import { apiKeyMiddleware } from "../auth";
 
 const router = Router();
-router.use(apiKeyMiddleware);
+router.use("/activity-logs", apiKeyMiddleware);
+router.use("/reports", apiKeyMiddleware);
 
 // Activity log types
 export interface ActivityLog {

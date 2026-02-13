@@ -26,7 +26,8 @@ router.get("/templates/public/:id", async (req, res) => {
     }
 });
 
-router.use(apiKeyMiddleware);
+// Keep /templates/public/* accessible without API key.
+router.use("/templates", apiKeyMiddleware);
 
 router.post("/templates", async (req, res) => {
     try {

@@ -1,5 +1,6 @@
 import crypto from 'crypto';
 import { blockchainService } from './blockchain-service';
+import { PostgresStateStore } from '@credverse/shared-auth';
 
 /**
  * Verification Engine for CredVerse Recruiter Portal
@@ -43,6 +44,95 @@ export interface BulkVerificationResult {
 // In-memory cache for verification results
 const verificationCache = new Map<string, VerificationResult>();
 const bulkJobs = new Map<string, BulkVerificationResult>();
+type PersistedVerificationResult = Omit<VerificationResult, 'timestamp'> & { timestamp: string };
+type PersistedBulkVerificationResult = Omit<BulkVerificationResult, 'completedAt' | 'results'> & {
+    completedAt: string;
+    results: PersistedVerificationResult[];
+};
+type VerificationEngineState = {
+    verificationCache: Array<[string, PersistedVerificationResult]>;
+    bulkJobs: Array<[string, PersistedBulkVerificationResult]>;
+};
+const hasDatabase = typeof process.env.DATABASE_URL === 'string' && process.env.DATABASE_URL.length > 0;
+const stateStore = hasDatabase
+    ? new PostgresStateStore<VerificationEngineState>({
+        databaseUrl: process.env.DATABASE_URL as string,
+        serviceKey: 'recruiter-verification-engine',
+    })
+    : null;
+let hydrated = false;
+let hydrationPromise: Promise<void> | null = null;
+let persistChain = Promise.resolve();
+
+function serializeVerificationResult(result: VerificationResult): PersistedVerificationResult {
+    return {
+        ...result,
+        timestamp: result.timestamp.toISOString(),
+    };
+}
+
+function deserializeVerificationResult(result: PersistedVerificationResult): VerificationResult {
+    return {
+        ...result,
+        timestamp: new Date(result.timestamp),
+    };
+}
+
+function serializeBulkResult(result: BulkVerificationResult): PersistedBulkVerificationResult {
+    return {
+        ...result,
+        completedAt: result.completedAt.toISOString(),
+        results: result.results.map(serializeVerificationResult),
+    };
+}
+
+function deserializeBulkResult(result: PersistedBulkVerificationResult): BulkVerificationResult {
+    return {
+        ...result,
+        completedAt: new Date(result.completedAt),
+        results: result.results.map(deserializeVerificationResult),
+    };
+}
+
+async function ensureHydrated(): Promise<void> {
+    if (!stateStore || hydrated) return;
+    if (!hydrationPromise) {
+        hydrationPromise = (async () => {
+            const loaded = await stateStore.load();
+            verificationCache.clear();
+            bulkJobs.clear();
+            for (const [verificationId, result] of loaded?.verificationCache || []) {
+                verificationCache.set(verificationId, deserializeVerificationResult(result));
+            }
+            for (const [jobId, result] of loaded?.bulkJobs || []) {
+                bulkJobs.set(jobId, deserializeBulkResult(result));
+            }
+            hydrated = true;
+        })();
+    }
+    await hydrationPromise;
+}
+
+async function queuePersist(): Promise<void> {
+    if (!stateStore) return;
+    persistChain = persistChain
+        .then(async () => {
+            await stateStore.save({
+                verificationCache: Array.from(verificationCache.entries()).map(([verificationId, result]) => [
+                    verificationId,
+                    serializeVerificationResult(result),
+                ]),
+                bulkJobs: Array.from(bulkJobs.entries()).map(([jobId, result]) => [
+                    jobId,
+                    serializeBulkResult(result),
+                ]),
+            });
+        })
+        .catch((error) => {
+            console.error('[VerificationEngine] Persist failed:', error);
+        });
+    await persistChain;
+}
 
 /**
  * Verification Engine
@@ -88,6 +178,7 @@ export class VerificationEngine {
      * Verify a single credential
      */
     async verifyCredential(payload: CredentialPayload): Promise<VerificationResult> {
+        await ensureHydrated();
         const verificationId = `verify-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
         const checks: VerificationCheck[] = [];
         const riskFlags: string[] = [];
@@ -191,6 +282,7 @@ export class VerificationEngine {
 
             // Cache result
             verificationCache.set(verificationId, result);
+            await queuePersist();
 
             return result;
         } catch (error) {
@@ -203,6 +295,7 @@ export class VerificationEngine {
      * Bulk verify credentials from CSV data
      */
     async bulkVerify(credentials: CredentialPayload[]): Promise<BulkVerificationResult> {
+        await ensureHydrated();
         const jobId = `bulk-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
         const results: VerificationResult[] = [];
 
@@ -230,6 +323,7 @@ export class VerificationEngine {
         };
 
         bulkJobs.set(jobId, bulkResult);
+        await queuePersist();
         return bulkResult;
     }
 
@@ -265,55 +359,15 @@ export class VerificationEngine {
 
     /**
      * Verify credential signature
-     * In demo mode, we accept JWTs from trusted issuers without cryptographic verification
      */
     private async verifySignature(credential: any): Promise<VerificationCheck> {
         // Get issuer identifier (could be DID or plain name)
         const issuer = credential.issuer?.id || credential.iss || credential.issuer;
         const isValidDid = typeof issuer === 'string' && issuer.startsWith('did:');
 
-        // Check if issuer is trusted (from registry) – supports DID or name lookup
-        const trustedIssuer = typeof issuer === 'string' ? (this.issuerRegistry.get(issuer) || this.issuerRegistry.get(issuer.toLowerCase())) : undefined;
-
         // Detect presence of cryptographic proof
         const hasProof = credential.proof || credential.signature;
-
-        // Demo mode: accept JWTs from trusted issuers OR raw credentials with a proof field
-        const isDemoMode = process.env.NODE_ENV !== 'production';
-        const isJwtCredential = credential.vc || credential.sub; // JWT payloads have vc or sub
-
-        if (isDemoMode && trustedIssuer) {
-            // If JWT credential with DID issuer, accept as before
-            if (isJwtCredential && isValidDid) {
-                return {
-                    name: 'Signature Validation',
-                    status: 'passed',
-                    message: 'JWT from trusted issuer (Demo Mode)',
-                    details: {
-                        proofType: 'jwt',
-                        issuer,
-                        trustedIssuer: trustedIssuer.name,
-                        mode: 'demo'
-                    },
-                };
-            }
-            // If raw credential includes a proof object, accept it in demo mode
-            if (hasProof) {
-                return {
-                    name: 'Signature Validation',
-                    status: 'passed',
-                    message: 'Proof present in credential (Demo Mode)',
-                    details: {
-                        proofType: credential.proof?.type ?? 'unknown',
-                        issuer,
-                        trustedIssuer: trustedIssuer.name,
-                        mode: 'demo'
-                    },
-                };
-            }
-        }
-
-        // Production mode: require valid DID and proof
+        // Require valid issuer DID and cryptographic proof for all runtime modes.
         return {
             name: 'Signature Validation',
             status: (hasProof && isValidDid) ? 'passed' : 'failed',
@@ -595,14 +649,16 @@ export class VerificationEngine {
     /**
      * Get verification result by ID
      */
-    getVerificationResult(id: string): VerificationResult | undefined {
+    async getVerificationResult(id: string): Promise<VerificationResult | undefined> {
+        await ensureHydrated();
         return verificationCache.get(id);
     }
 
     /**
      * Get bulk job result
      */
-    getBulkJobResult(id: string): BulkVerificationResult | undefined {
+    async getBulkJobResult(id: string): Promise<BulkVerificationResult | undefined> {
+        await ensureHydrated();
         return bulkJobs.get(id);
     }
 }

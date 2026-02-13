@@ -8,7 +8,8 @@ import {
     calculateTrustScore,
     generateImprovementSuggestions,
     getScoreHistory,
-    UserTrustData
+    UserTrustData,
+    ImprovementSuggestion
 } from '../services/trust-score-service';
 
 const router = Router();
@@ -107,14 +108,14 @@ router.get('/suggestions', async (req: Request, res: Response) => {
         const breakdown = calculateTrustScore(userData);
         const suggestions = generateImprovementSuggestions(userData, breakdown);
 
-        const quickWins = suggestions.filter(s => s.category === 'quick_win');
-        const longTerm = suggestions.filter(s => s.category === 'long_term');
+        const quickWins = suggestions.filter((s: ImprovementSuggestion) => s.category === 'quick_win');
+        const longTerm = suggestions.filter((s: ImprovementSuggestion) => s.category === 'long_term');
 
         res.json({
             success: true,
             quickWins,
             longTerm,
-            potentialPoints: suggestions.reduce((sum, s) => sum + s.points, 0)
+            potentialPoints: suggestions.reduce((sum: number, s: ImprovementSuggestion) => sum + s.points, 0)
         });
     } catch (error: any) {
         console.error('Trust score suggestions error:', error);

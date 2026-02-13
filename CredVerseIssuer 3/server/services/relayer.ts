@@ -1,6 +1,7 @@
 import { createWalletClient, http, publicActions, type WalletClient, type PublicClient, type Account } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
-import { sepolia } from "viem/chains";
+import { polygon, polygonAmoy, polygonZkEvm, polygonZkEvmCardona, sepolia, type Chain } from "viem/chains";
+import { getChainWritePolicy, resolveChainNetwork, resolveChainRpcUrl, type SupportedChainNetwork } from "@credverse/shared-auth";
 
 // ABI for CredentialRegistry (simplified for MVP)
 const REGISTRY_ABI = [
@@ -27,30 +28,55 @@ const REGISTRY_ABI = [
     },
 ] as const;
 
+const VIEM_CHAIN_CONFIG: Record<SupportedChainNetwork, Chain> = {
+    'ethereum-sepolia': sepolia,
+    'polygon-mainnet': polygon,
+    'polygon-amoy': polygonAmoy,
+    'polygon-zkevm-mainnet': polygonZkEvm,
+    'polygon-zkevm-cardona': polygonZkEvmCardona,
+};
+
 export class RelayerService {
-    private client: WalletClient & PublicClient;
-    private account: Account;
-    private contractAddress: `0x${string}`;
+    private client?: WalletClient & PublicClient;
+    private account?: Account;
+    private contractAddress?: `0x${string}`;
+    private chain?: Chain;
+    private network?: SupportedChainNetwork;
 
     constructor() {
-        // In production, load from env vars
-        const privateKey = process.env.RELAYER_PRIVATE_KEY as `0x${string}` || "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"; // Default Anvil key
+        const privateKey = process.env.RELAYER_PRIVATE_KEY as `0x${string}` | undefined;
+        const contractAddress = process.env.REGISTRY_CONTRACT_ADDRESS as `0x${string}` | undefined;
+        const network = resolveChainNetwork();
+        const rpcUrl = resolveChainRpcUrl(network);
+        const policy = getChainWritePolicy(network);
+
+        if (!policy.allowWrites) {
+            console.warn(`[Relayer] Writes disabled for ${network}: ${policy.reason}`);
+            return;
+        }
+
+        if (!privateKey || !contractAddress || !rpcUrl) {
+            console.warn(`[Relayer] Not fully configured for ${network}. Write operations will be unavailable.`);
+            return;
+        }
+
         this.account = privateKeyToAccount(privateKey);
-
-        this.contractAddress = process.env.REGISTRY_CONTRACT_ADDRESS as `0x${string}` || "0x0000000000000000000000000000000000000000";
-
+        this.contractAddress = contractAddress;
+        this.chain = VIEM_CHAIN_CONFIG[network];
+        this.network = network;
         this.client = createWalletClient({
             account: this.account,
-            chain: sepolia,
-            transport: http(process.env.RPC_URL),
+            chain: this.chain,
+            transport: http(rpcUrl),
         }).extend(publicActions) as any;
+
+        console.log(`[Relayer] Configured for ${network} (chainId=${this.chain.id})`);
     }
 
     async anchorCredential(credentialHash: string): Promise<string> {
         try {
-            if (this.contractAddress === "0x0000000000000000000000000000000000000000") {
-                console.warn("Contract address not set, skipping on-chain anchor");
-                return "0x_mock_tx_hash_contract_not_set";
+            if (!this.client || !this.account || !this.contractAddress || !this.chain) {
+                throw new Error('Relayer is not configured');
             }
 
             const hash = await this.client.writeContract({
@@ -59,10 +85,10 @@ export class RelayerService {
                 functionName: "anchorCredential",
                 args: [credentialHash as `0x${string}`],
                 account: this.account,
-                chain: sepolia,
+                chain: this.chain,
             });
 
-            console.log(`Anchored credential ${credentialHash} in tx ${hash}`);
+            console.log(`Anchored credential ${credentialHash} in tx ${hash} on ${this.network}`);
             return hash;
         } catch (error) {
             console.error("Failed to anchor credential:", error);
@@ -72,9 +98,8 @@ export class RelayerService {
 
     async revokeCredential(credentialHash: string): Promise<string> {
         try {
-            if (this.contractAddress === "0x0000000000000000000000000000000000000000") {
-                console.warn("Contract address not set, skipping on-chain revocation");
-                return "0x_mock_tx_hash_contract_not_set";
+            if (!this.client || !this.account || !this.contractAddress || !this.chain) {
+                throw new Error('Relayer is not configured');
             }
 
             const hash = await this.client.writeContract({
@@ -83,10 +108,10 @@ export class RelayerService {
                 functionName: "revokeCredential",
                 args: [credentialHash as `0x${string}`],
                 account: this.account,
-                chain: sepolia,
+                chain: this.chain,
             });
 
-            console.log(`Revoked credential ${credentialHash} in tx ${hash}`);
+            console.log(`Revoked credential ${credentialHash} in tx ${hash} on ${this.network}`);
             return hash;
         } catch (error) {
             console.error("Failed to revoke credential:", error);
@@ -94,11 +119,13 @@ export class RelayerService {
         }
     }
 
-    async isRevoked(credentialHash: string): Promise<boolean> {
+    async isRevoked(credentialHash: string): Promise<boolean | null> {
         try {
-            if (this.contractAddress === "0x0000000000000000000000000000000000000000") {
-                console.warn("Contract address not set, assuming not revoked");
-                return false;
+            if (!this.client || !this.contractAddress) {
+                return null;
+            }
+            if (!/^0x[a-fA-F0-9]{64}$/.test(credentialHash)) {
+                return null;
             }
 
             const isRevoked = await this.client.readContract({
@@ -111,9 +138,7 @@ export class RelayerService {
             return isRevoked;
         } catch (error) {
             console.error("Failed to check revocation status:", error);
-            // Default to false (not revoked) if check fails, or throw? 
-            // For safety, maybe better to return false but log error.
-            return false;
+            return null;
         }
     }
 }

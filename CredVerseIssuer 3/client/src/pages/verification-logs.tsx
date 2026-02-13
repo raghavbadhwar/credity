@@ -12,9 +12,9 @@ import {
 } from "@/components/ui/table";
 import {
     ShieldCheck, AlertTriangle, Globe, Download, Clock, MapPin, Loader2, FileCheck,
-    RefreshCw, AlertCircle, Zap
+    RefreshCw, AlertCircle
 } from "lucide-react";
-import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 
 interface VerificationLog {
@@ -33,20 +33,6 @@ interface VerificationStats {
     suspicious: number;
 }
 
-// Verifier data for realistic simulations
-const VERIFIERS = [
-    { name: "TechCorp HR", location: "Mumbai, IN" },
-    { name: "Google Hiring", location: "Bangalore, IN" },
-    { name: "Microsoft Recruiting", location: "Hyderabad, IN" },
-    { name: "Amazon India", location: "New Delhi, IN" },
-    { name: "LinkedIn", location: "Seattle, US" },
-    { name: "Meta Recruiting", location: "San Francisco, US" },
-    { name: "Barclays HR", location: "London, UK" },
-    { name: "DBS Bank", location: "Singapore, SG" },
-    { name: "Infosys Campus", location: "Pune, IN" },
-    { name: "Wipro Talent", location: "Chennai, IN" },
-];
-
 export default function VerificationLogs() {
     const { toast } = useToast();
     const queryClient = useQueryClient();
@@ -56,7 +42,7 @@ export default function VerificationLogs() {
         queryKey: ['verification-logs'],
         queryFn: async () => {
             const response = await fetch('/api/v1/verification-logs', {
-                headers: { 'x-api-key': 'demo-api-key' },
+                headers: { 'x-api-key': (import.meta as any).env?.VITE_API_KEY || '' },
             });
             if (!response.ok) throw new Error('Failed to fetch logs');
             return response.json();
@@ -69,7 +55,7 @@ export default function VerificationLogs() {
         queryKey: ['verification-stats'],
         queryFn: async () => {
             const response = await fetch('/api/v1/verification-logs/stats', {
-                headers: { 'x-api-key': 'demo-api-key' },
+                headers: { 'x-api-key': (import.meta as any).env?.VITE_API_KEY || '' },
             });
             if (!response.ok) throw new Error('Failed to fetch stats');
             return response.json();
@@ -77,43 +63,10 @@ export default function VerificationLogs() {
         refetchInterval: 5000,
     });
 
-    // Simulate verification mutation
-    const simulateMutation = useMutation({
-        mutationFn: async () => {
-            const verifier = VERIFIERS[Math.floor(Math.random() * VERIFIERS.length)];
-            const credentialId = `CRED-${Date.now().toString().slice(-6)}`;
-
-            const response = await fetch('/api/v1/verify/simulate', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'x-api-key': 'demo-api-key'
-                },
-                body: JSON.stringify({
-                    credentialId,
-                    verifierName: verifier.name,
-                }),
-            });
-            if (!response.ok) throw new Error('Simulation failed');
-            return response.json();
-        },
-        onSuccess: (data) => {
-            queryClient.invalidateQueries({ queryKey: ['verification-logs'] });
-            queryClient.invalidateQueries({ queryKey: ['verification-stats'] });
-            toast({
-                title: 'Verification Simulated',
-                description: `${data.verificationLog?.verifierName || 'Verifier'} checked a credential`
-            });
-        },
-        onError: () => {
-            toast({ title: 'Simulation failed', variant: 'destructive' });
-        }
-    });
-
     // Export logs
     const handleExport = async () => {
         const response = await fetch('/api/v1/exports/verification-logs/csv', {
-            headers: { 'x-api-key': 'demo-api-key' },
+            headers: { 'x-api-key': (import.meta as any).env?.VITE_API_KEY || '' },
         });
         const blob = await response.blob();
         const url = URL.createObjectURL(blob);
@@ -155,16 +108,7 @@ export default function VerificationLogs() {
                         <h2 className="text-3xl font-heading font-bold tracking-tight">Verification Logs</h2>
                         <p className="text-muted-foreground mt-1">Monitor real-time credential verifications worldwide.</p>
                     </div>
-                    <div className="flex gap-2">
-                        <Button
-                            variant="default"
-                            onClick={() => simulateMutation.mutate()}
-                            disabled={simulateMutation.isPending}
-                            className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700"
-                        >
-                            <Zap className="mr-2 h-4 w-4" />
-                            {simulateMutation.isPending ? 'Simulating...' : 'Simulate Verification'}
-                        </Button>
+                <div className="flex gap-2">
                         <Button variant="outline" onClick={handleRefresh}>
                             <RefreshCw className="mr-2 h-4 w-4" />
                             Refresh

@@ -3,8 +3,8 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, Cell } from "recharts";
-import { CheckCircle2, AlertTriangle, XCircle, TrendingUp, Users, Activity, Zap, RefreshCw, Loader2 } from "lucide-react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { CheckCircle2, AlertTriangle, XCircle, TrendingUp, Users, Activity, RefreshCw, Loader2 } from "lucide-react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 
 interface VerificationStats {
@@ -79,26 +79,6 @@ export default function Dashboard() {
     refetchInterval: 5000,
   });
 
-  // Simulate mutation
-  const simulateMutation = useMutation({
-    mutationFn: async () => {
-      const response = await fetch('/api/verify/simulate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-      });
-      if (!response.ok) throw new Error('Simulation failed');
-      return response.json();
-    },
-    onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: ['verification-stats'] });
-      queryClient.invalidateQueries({ queryKey: ['recent-verifications'] });
-      toast({
-        title: 'Verification Simulated',
-        description: `${data.record?.subject || 'Subject'} - ${data.record?.status}`
-      });
-    },
-  });
-
   const handleRefresh = () => {
     queryClient.invalidateQueries({ queryKey: ['verification-stats'] });
     queryClient.invalidateQueries({ queryKey: ['recent-verifications'] });
@@ -129,18 +109,6 @@ export default function Dashboard() {
           <p className="text-muted-foreground">Real-time verification monitoring</p>
         </div>
         <div className="flex gap-2">
-          <Button
-            onClick={() => simulateMutation.mutate()}
-            disabled={simulateMutation.isPending}
-            className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700"
-          >
-            {simulateMutation.isPending ? (
-              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-            ) : (
-              <Zap className="w-4 h-4 mr-2" />
-            )}
-            Simulate Verification
-          </Button>
           <Button variant="outline" onClick={handleRefresh}>
             <RefreshCw className="w-4 h-4 mr-2" />
             Refresh
@@ -291,7 +259,7 @@ export default function Dashboard() {
           <div className="space-y-1">
             {recentVerifications.length === 0 ? (
               <div className="text-center py-8 text-muted-foreground">
-                <p>No verifications yet. Click "Simulate Verification" to create one.</p>
+                <p>No verifications yet. Run an instant or link verification to create activity.</p>
               </div>
             ) : (
               recentVerifications.map((record) => (

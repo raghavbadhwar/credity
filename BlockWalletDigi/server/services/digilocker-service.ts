@@ -79,11 +79,24 @@ export class DigiLockerService {
     private clientId: string;
     private clientSecret: string;
     private useSandbox: boolean;
+    private isConfigured: boolean;
+    private demoMode: boolean;
 
     constructor() {
-        this.clientId = process.env.DIGILOCKER_CLIENT_ID || 'demo_client_id';
-        this.clientSecret = process.env.DIGILOCKER_CLIENT_SECRET || 'demo_client_secret';
+        const configuredClientId = process.env.DIGILOCKER_CLIENT_ID || '';
+        const configuredClientSecret = process.env.DIGILOCKER_CLIENT_SECRET || '';
+        const allowDemoRoutes =
+            process.env.NODE_ENV !== 'production' && process.env.ALLOW_DEMO_ROUTES === 'true';
+
+        this.isConfigured = !!(configuredClientId && configuredClientSecret);
+        this.demoMode = !this.isConfigured && allowDemoRoutes;
+        this.clientId = this.isConfigured ? configuredClientId : (this.demoMode ? 'demo_client_id' : '');
+        this.clientSecret = this.isConfigured ? configuredClientSecret : (this.demoMode ? 'demo_client_secret' : '');
         this.useSandbox = process.env.DIGILOCKER_SANDBOX === 'true';
+
+        if (!this.isConfigured && !this.demoMode) {
+            console.warn('[DigiLocker] Credentials are not configured. DigiLocker operations are disabled.');
+        }
     }
 
     /**
@@ -109,6 +122,10 @@ export class DigiLockerService {
      * Get authorization URL for DigiLocker OAuth flow
      */
     getAuthorizationUrl(userId: number): { url: string; state: string } {
+        if (!this.isConfigured && !this.demoMode) {
+            throw new Error('DigiLocker credentials are not configured');
+        }
+
         const { codeVerifier, codeChallenge } = this.generatePKCE();
         const state = this.generateState();
 
@@ -162,7 +179,7 @@ export class DigiLockerService {
             : DIGILOCKER_CONFIG.tokenUrl;
 
         // For demo mode, simulate token response
-        if (this.clientId === 'demo_client_id') {
+        if (this.demoMode) {
             console.log('[DigiLocker] Demo mode - simulating token exchange');
             const demoTokens: DigiLockerTokens = {
                 access_token: `demo_access_token_${crypto.randomBytes(16).toString('hex')}`,
@@ -213,7 +230,7 @@ export class DigiLockerService {
         }
 
         // Demo mode
-        if (this.clientId === 'demo_client_id') {
+        if (this.demoMode) {
             return {
                 digilockerid: tokens.digilocker_id || 'DL-DEMO123',
                 name: 'Demo User',
@@ -246,7 +263,7 @@ export class DigiLockerService {
         }
 
         // Demo mode - return sample documents
-        if (this.clientId === 'demo_client_id') {
+        if (this.demoMode) {
             return [
                 {
                     uri: 'in.gov.uidai-ADHAR-XXXXXXXX1234',
@@ -328,7 +345,7 @@ export class DigiLockerService {
         }
 
         // Demo mode - return mock document data
-        if (this.clientId === 'demo_client_id') {
+        if (this.demoMode) {
             const docType = documentUri.split('-')[1];
 
             const mockData: Record<string, any> = {
@@ -431,7 +448,7 @@ export class DigiLockerService {
      * Check if running in demo mode
      */
     isDemoMode(): boolean {
-        return this.clientId === 'demo_client_id';
+        return this.demoMode;
     }
 }
 

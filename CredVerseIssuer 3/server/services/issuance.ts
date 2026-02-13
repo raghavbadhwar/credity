@@ -1,8 +1,10 @@
 import { type InsertCredential, type Credential } from "@shared/schema";
 import { storage } from "../storage";
 import { blockchainService } from "./blockchain-service";
-import { signVcJwt, getIssuerPublicKey } from "./vc-signer";
+import { signVcJwt } from "./vc-signer";
 import { randomUUID } from "crypto";
+import { signWebhook } from "@credverse/shared-auth";
+import { registerCredentialStatus } from "./status-list-service";
 
 
 export class IssuanceService {
@@ -23,9 +25,11 @@ export class IssuanceService {
         if (!issuer) throw new Error("Issuer not found");
 
         // Construct VC Payload following W3C VC Data Model
+        const subjectDid = recipient.did || recipient.studentId;
+        const issuerDid = issuer.did || `did:web:${issuer.domain}`;
         const vcPayload = {
-            sub: recipient.did || recipient.studentId,
-            iss: issuer.did || `did:web:${issuer.domain}`,
+            sub: subjectDid,
+            iss: issuerDid,
             iat: Math.floor(Date.now() / 1000),
             nbf: Math.floor(Date.now() / 1000),
             exp: Math.floor(Date.now() / 1000) + (365 * 24 * 60 * 60), // 1 year
@@ -36,12 +40,12 @@ export class IssuanceService {
                 ],
                 type: ["VerifiableCredential", template.name],
                 issuer: {
-                    id: issuer.did || `did:web:${issuer.domain}`,
+                    id: issuerDid,
                     name: issuer.name,
                 },
                 issuanceDate: new Date().toISOString(),
                 credentialSubject: {
-                    id: recipient.did || recipient.studentId,
+                    id: subjectDid,
                     ...credentialData,
                 },
             },
@@ -54,46 +58,84 @@ export class IssuanceService {
             tenantId,
             templateId,
             issuerId,
+            format: 'vc+jwt',
+            issuerDid,
+            subjectDid,
+            issuanceFlow: 'legacy',
             recipient,
             credentialData,
             vcJwt,
             revoked: false,
         });
 
-        // Anchor credential hash on blockchain
-        console.log(`[Issuance] Anchoring credential ${credential.id} on blockchain...`);
-        const anchorResult = await blockchainService.anchorCredential({
+        const statusRegistration = await registerCredentialStatus(credential.id);
+        (credential as any).statusListId = statusRegistration.listId;
+        (credential as any).statusListIndex = statusRegistration.index;
+        (credential as any).format = 'vc+jwt';
+        (credential as any).issuanceFlow = 'legacy';
+
+        const anchorInput = {
             id: credential.id,
             issuer: vcPayload.iss,
             subject: recipient.did || recipient.studentId,
             data: credentialData,
             issuedAt: new Date().toISOString(),
-        });
+        };
+        const anchorMode = (process.env.BLOCKCHAIN_ANCHOR_MODE || 'async').toLowerCase();
+        if (anchorMode !== 'off') {
+            const anchorTask = async () => {
+                console.log(`[Issuance] Anchoring credential ${credential.id} on blockchain...`);
+                const anchorResult = await blockchainService.anchorCredential(anchorInput);
+                if (anchorResult.success) {
+                    console.log(`[Issuance] Credential ${credential.id} anchored: ${anchorResult.txHash}`);
+                    await storage.updateCredentialBlockchain(credential.id, {
+                        txHash: anchorResult.txHash,
+                        blockNumber: anchorResult.blockNumber,
+                        credentialHash: anchorResult.hash,
+                    });
+                    return anchorResult;
+                }
 
-        if (anchorResult.success) {
-            console.log(`[Issuance] Credential ${credential.id} anchored: ${anchorResult.txHash}`);
-            // Update credential with blockchain info
-            await storage.updateCredentialBlockchain(credential.id, {
-                txHash: anchorResult.txHash,
-                blockNumber: anchorResult.blockNumber,
-                credentialHash: anchorResult.hash,
-            });
+                console.warn(`[Issuance] Blockchain anchor failed for ${credential.id}: ${anchorResult.error}`);
+                return anchorResult;
+            };
+
+            if (anchorMode === 'sync') {
+                await anchorTask();
+            } else {
+                void anchorTask().catch((e) => {
+                    console.error(`[Issuance] Async anchor failed for ${credential.id}:`, e);
+                });
+            }
         } else {
-            console.warn(`[Issuance] Blockchain anchor failed for ${credential.id}: ${anchorResult.error}`);
+            console.log(`[Issuance] Blockchain anchoring disabled for credential ${credential.id}`);
         }
 
         // Webhook Notification
         if (recipient.webhookUrl) {
             console.log(`[Issuance] Sending webhook to ${recipient.webhookUrl}`);
+            const webhookBody = {
+                event: 'credential_issued',
+                credentialId: credential.id,
+                vcJwt,
+                recipient: recipient.did || recipient.email
+            };
+            const webhookSecret = process.env.CREDENTIAL_WEBHOOK_SECRET;
+            const signed = webhookSecret
+                ? signWebhook(webhookBody, webhookSecret)
+                : null;
             fetch(recipient.webhookUrl, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    event: 'credential_issued',
-                    credentialId: credential.id,
-                    vcJwt,
-                    recipient: recipient.did || recipient.email
-                })
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...(signed
+                        ? {
+                            'X-Webhook-Timestamp': signed.timestamp,
+                            'X-Webhook-Signature': `sha256=${signed.signature}`,
+                        }
+                        : {}),
+                },
+                body: signed ? signed.payload : JSON.stringify(webhookBody),
             }).catch(e => console.error("[Issuance] Webhook failed:", e));
         }
 
@@ -123,7 +165,6 @@ export class IssuanceService {
                 credentialId: credential.id,
                 templateName: template.name,
                 recipientName: recipient.name,
-                txHash: anchorResult.txHash,
                 webhookSent: !!recipient.webhookUrl
             },
         });
@@ -170,43 +211,7 @@ export class IssuanceService {
             console.log('[Issuance] Queue service not available, using fallback');
         }
 
-        // Fallback: process in background with setTimeout
-        const jobId = randomUUID();
-        console.log(`[Issuance] Starting bulk issuance job ${jobId} for ${total} credentials (in-memory)`);
-
-        // Process in background
-        setTimeout(async () => {
-            let success = 0;
-            let failed = 0;
-
-            for (const item of recipientsData) {
-                try {
-                    await this.issueCredential(
-                        tenantId,
-                        templateId,
-                        issuerId,
-                        item.recipient,
-                        item.data
-                    );
-                    success++;
-                } catch (e) {
-                    console.error(`[Issuance] Bulk job ${jobId} failed for recipient:`, e);
-                    failed++;
-                }
-            }
-
-            console.log(`[Issuance] Bulk job ${jobId} completed: ${success} success, ${failed} failed`);
-
-            await storage.createActivityLog({
-                tenantId,
-                type: 'bulk_issuance_completed',
-                title: 'Bulk Issuance Completed',
-                description: `Issued ${success}/${total} credentials successfully`,
-                metadata: { jobId, success, failed, total },
-            });
-        }, 100);
-
-        return { jobId, total, queued: false };
+        throw new Error('Bulk issuance queue is unavailable. Configure REDIS_URL or disable bulk issuance.');
     }
 
     async revokeCredential(credentialId: string, reason: string): Promise<void> {
@@ -227,6 +232,33 @@ export class IssuanceService {
 
         // Revoke in database
         await storage.revokeCredential(credentialId);
+
+        const recipient = (credential as any).recipient;
+        const webhookUrl = recipient?.webhookUrl;
+        if (webhookUrl) {
+            const webhookBody = {
+                event: 'credential_revoked',
+                credentialId,
+                reason,
+            };
+            const webhookSecret = process.env.CREDENTIAL_WEBHOOK_SECRET;
+            const signed = webhookSecret ? signWebhook(webhookBody, webhookSecret) : null;
+            fetch(webhookUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...(signed
+                        ? {
+                            'X-Webhook-Timestamp': signed.timestamp,
+                            'X-Webhook-Signature': `sha256=${signed.signature}`,
+                        }
+                        : {}),
+                },
+                body: signed ? signed.payload : JSON.stringify(webhookBody),
+            }).catch((error) => {
+                console.error('[Issuance] Revocation webhook failed:', error);
+            });
+        }
 
         // Log activity
         await storage.createActivityLog({

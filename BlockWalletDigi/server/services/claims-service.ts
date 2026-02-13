@@ -7,6 +7,7 @@
  * - Layer 2: Claims Validation (WHAT) - 30%
  * - Layer 3: Evidence Authentication (PROOF) - 30%
  */
+import { detectDeepfakeFromUrl } from './deepfake-detection-service';
 
 export interface TimelineEvent {
     event: string;
@@ -42,6 +43,8 @@ export interface ClaimVerifyResponse {
     redFlags: string[];
     aiAnalysis: {
         deepfakeDetected: boolean;
+        deepfakeVerdict: 'real' | 'fake' | 'unknown';
+        deepfakeConfidence: number | null;
         timelineConsistent: boolean;
         fraudPatternMatch: number;
         llmConfidence: number;
@@ -106,6 +109,8 @@ export async function verifyClaim(request: ClaimVerifyRequest): Promise<ClaimVer
         redFlags,
         aiAnalysis: {
             deepfakeDetected: authenticityResult.deepfakeDetected,
+            deepfakeVerdict: authenticityResult.deepfakeVerdict,
+            deepfakeConfidence: authenticityResult.deepfakeConfidence,
             timelineConsistent: integrityResult.timelineConsistent,
             fraudPatternMatch: integrityResult.fraudPatternMatch,
             llmConfidence: integrityResult.llmConfidence
@@ -249,6 +254,8 @@ interface AuthenticityResult {
     score: number;
     redFlags: string[];
     deepfakeDetected: boolean;
+    deepfakeVerdict: 'real' | 'fake' | 'unknown';
+    deepfakeConfidence: number | null;
     metadataValid: boolean;
     blockchainVerified: boolean;
 }
@@ -263,16 +270,31 @@ async function authenticateEvidence(request: ClaimVerifyRequest): Promise<Authen
             score: 60, // Some claims don't require evidence
             redFlags: ['No evidence provided'],
             deepfakeDetected: false,
+            deepfakeVerdict: 'unknown',
+            deepfakeConfidence: null,
             metadataValid: true,
             blockchainVerified: false
         };
     }
 
-    // Deepfake Detection (simplified - would use ML model in production)
-    const deepfakeDetected = false; // Placeholder - would call detection API
+    const mediaEvidence = request.evidence.filter((item) => item.type === 'image' || item.type === 'video');
+    const deepfakeResults = await Promise.all(mediaEvidence.map((item) => detectDeepfakeFromUrl(item.url)));
+    const hasFake = deepfakeResults.some((result) => result.verdict === 'fake');
+    const hasUnknown = deepfakeResults.length > 0 && deepfakeResults.every((result) => result.verdict === 'unknown');
+    const confidenceValues = deepfakeResults
+        .map((result) => result.confidence)
+        .filter((value): value is number => typeof value === 'number');
+    const averageConfidence = confidenceValues.length > 0
+        ? confidenceValues.reduce((sum, value) => sum + value, 0) / confidenceValues.length
+        : null;
+    const deepfakeDetected = hasFake;
+
     if (deepfakeDetected) {
         score = 10;
         redFlags.push('AI-generated content detected in evidence');
+    } else if (hasUnknown) {
+        score -= 10;
+        redFlags.push('Deepfake detection provider unavailable; authenticity confidence reduced');
     } else {
         score += 20;
     }
@@ -304,6 +326,8 @@ async function authenticateEvidence(request: ClaimVerifyRequest): Promise<Authen
         score,
         redFlags,
         deepfakeDetected,
+        deepfakeVerdict: deepfakeDetected ? 'fake' : hasUnknown ? 'unknown' : 'real',
+        deepfakeConfidence: averageConfidence,
         metadataValid,
         blockchainVerified
     };
@@ -453,7 +477,8 @@ function calculateCost(request: ClaimVerifyRequest): ClaimVerifyResponse['costBr
     const identityVerification = 0; // Free (already verified in wallet)
     const mlInference = 2.00; // Base ML cost
     const llmAnalysis = 0.02; // ~500 tokens at ₹0.04/1K
-    const deepfakeCheck = request.evidence.length > 0 ? 0 : 0; // Custom model = free
+    const deepfakeConfigured = Boolean(process.env.DEEPFAKE_API_URL && process.env.DEEPFAKE_API_KEY);
+    const deepfakeCheck = request.evidence.length > 0 && deepfakeConfigured ? 0.5 : 0;
     const blockchainTimestamp = request.evidence.length * 0.01; // ₹0.01 per item
 
     return {

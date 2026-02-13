@@ -42,8 +42,11 @@ export interface DigiLockerPushResult {
 class DigiLockerService {
     private config: DigiLockerConfig;
     private isConfigured: boolean;
+    private allowDemoMode: boolean;
 
     constructor() {
+        this.allowDemoMode =
+            process.env.NODE_ENV !== 'production' && process.env.ALLOW_DEMO_ROUTES === 'true';
         this.config = {
             clientId: process.env.DIGILOCKER_CLIENT_ID || '',
             clientSecret: process.env.DIGILOCKER_CLIENT_SECRET || '',
@@ -51,6 +54,10 @@ class DigiLockerService {
             redirectUri: process.env.DIGILOCKER_REDIRECT_URI || 'http://localhost:5001/api/v1/digilocker/callback',
         };
         this.isConfigured = !!(this.config.clientId && this.config.clientSecret);
+
+        if (!this.isConfigured && !this.allowDemoMode) {
+            console.warn('[Issuer DigiLocker] Credentials are not configured. Demo mode is disabled.');
+        }
     }
 
     /**
@@ -58,6 +65,9 @@ class DigiLockerService {
      */
     getAuthUrl(state: string): string {
         if (!this.isConfigured) {
+            if (!this.allowDemoMode) {
+                throw new Error('DigiLocker integration is not configured');
+            }
             return `/digilocker/demo-auth?state=${state}`;
         }
 
@@ -80,6 +90,12 @@ class DigiLockerService {
         document: DigiLockerDocument
     ): Promise<DigiLockerPushResult> {
         if (!this.isConfigured) {
+            if (!this.allowDemoMode) {
+                return {
+                    success: false,
+                    error: 'DigiLocker integration is not configured',
+                };
+            }
             // Demo mode - simulate successful push
             console.log("=".repeat(60));
             console.log("📱 DIGILOCKER PUSH (Demo Mode)");
@@ -144,6 +160,9 @@ class DigiLockerService {
      */
     async exchangeCode(code: string): Promise<{ accessToken: string; expiresIn: number } | null> {
         if (!this.isConfigured) {
+            if (!this.allowDemoMode) {
+                return null;
+            }
             // Demo mode
             return {
                 accessToken: `demo-token-${Date.now()}`,

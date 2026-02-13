@@ -1,9 +1,80 @@
 import { Router } from "express";
 import { relayerService } from "../services/relayer";
 import { storage } from "../storage";
-import { z } from "zod";
+import { getIssuerPublicKey, verifyVcJwt } from "../services/vc-signer";
 
 const router = Router();
+
+type VerificationPayload = {
+    iss?: string;
+    jti?: string;
+    id?: string;
+    vc?: unknown;
+};
+
+function decodeJwtPayload(vcJwt: string): VerificationPayload {
+    const parts = vcJwt.split(".");
+    if (parts.length !== 3) {
+        throw new Error("Invalid JWT format");
+    }
+    try {
+        return JSON.parse(Buffer.from(parts[1], "base64url").toString()) as VerificationPayload;
+    } catch {
+        return JSON.parse(Buffer.from(parts[1], "base64").toString()) as VerificationPayload;
+    }
+}
+
+function resolveCredentialId(payload: VerificationPayload): string {
+    if (typeof payload.jti === "string" && payload.jti.length > 0) return payload.jti;
+    if (typeof payload.id === "string" && payload.id.length > 0) return payload.id;
+    const vc = payload.vc;
+    if (vc && typeof vc === "object") {
+        const vcId = (vc as Record<string, unknown>).id;
+        if (typeof vcId === "string" && vcId.length > 0) return vcId;
+    }
+    return "unknown";
+}
+
+async function verifyJwtSignature(vcJwt: string, payload: VerificationPayload): Promise<{ valid: boolean; reason?: string }> {
+    if (typeof payload.iss !== "string" || payload.iss.length === 0) {
+        return { valid: false, reason: "Missing issuer DID" };
+    }
+
+    const issuerPublicKey = getIssuerPublicKey(payload.iss);
+    if (!issuerPublicKey) {
+        if (process.env.NODE_ENV === "production") {
+            return { valid: false, reason: "Issuer key not found" };
+        }
+        return { valid: true };
+    }
+
+    const signatureResult = await verifyVcJwt(vcJwt, issuerPublicKey);
+    if (!signatureResult.valid) {
+        return { valid: false, reason: signatureResult.error || "Invalid signature" };
+    }
+
+    return { valid: true };
+}
+
+async function resolveRevocationState(credentialId: string): Promise<"revoked" | "active" | "unknown"> {
+    const credential = await storage.getCredential(credentialId);
+    if (credential?.revoked) {
+        return "revoked";
+    }
+
+    const credentialHashCandidate = (credential as unknown as { credentialHash?: unknown } | undefined)?.credentialHash;
+    const onChainLookupKey =
+        typeof credentialHashCandidate === "string" && credentialHashCandidate.length > 0
+            ? credentialHashCandidate
+            : credentialId;
+
+    const chainRevoked = await relayerService.isRevoked(onChainLookupKey);
+    if (chainRevoked === null) {
+        return "unknown";
+    }
+
+    return chainRevoked ? "revoked" : "active";
+}
 
 // Helper to get IP and location
 async function getVerifierInfo(ip: string): Promise<{ location: string; organization: string }> {
@@ -34,10 +105,10 @@ router.get("/verify", async (req, res) => {
             return res.status(400).json({ message: "Missing vc query parameter" });
         }
 
-        // 1. Decode JWT
-        const parts = vcJwt.split(".");
-        if (parts.length !== 3) {
-            // Log failed verification attempt
+        let payload: VerificationPayload;
+        try {
+            payload = decodeJwtPayload(vcJwt);
+        } catch (parseError) {
             await storage.createVerificationLog({
                 tenantId: "public",
                 credentialId: "invalid-jwt",
@@ -45,30 +116,25 @@ router.get("/verify", async (req, res) => {
                 verifierIp,
                 location: "Unknown",
                 status: "failed",
-                reason: "Invalid JWT format",
+                reason: parseError instanceof Error ? parseError.message : "Invalid JWT format",
             });
             return res.status(400).json({ valid: false, message: "Invalid JWT format" });
         }
 
-        let payload: any;
-        try {
-            payload = JSON.parse(Buffer.from(parts[1], "base64url").toString());
-        } catch {
-            payload = JSON.parse(Buffer.from(parts[1], "base64").toString());
-        }
-
-        // 2. Verify Signature (Mock - in production use did-jwt)
-        const isValidSignature = true;
+        // 2. Verify signature using issuer key material
+        const signatureCheck = await verifyJwtSignature(vcJwt, payload);
+        const isValidSignature = signatureCheck.valid;
 
         // 3. Check Revocation
-        const credentialId = payload.jti || payload.id || "unknown";
-        const isRevoked = await relayerService.isRevoked(credentialId);
+        const credentialId = resolveCredentialId(payload);
+        const revocationState = await resolveRevocationState(credentialId);
+        const isRevoked = revocationState === "revoked";
 
         // Get verifier info
         const verifierInfo = await getVerifierInfo(verifierIp);
 
         // Determine verification status
-        const isValid = isValidSignature && !isRevoked;
+        const isValid = isValidSignature && revocationState === "active";
         let status: "verified" | "failed" | "suspicious" = "verified";
         let reason = "";
 
@@ -77,12 +143,15 @@ router.get("/verify", async (req, res) => {
             reason = "Credential has been revoked";
         } else if (!isValidSignature) {
             status = "failed";
-            reason = "Invalid signature";
+            reason = signatureCheck.reason || "Invalid signature";
+        } else if (revocationState === "unknown") {
+            status = "suspicious";
+            reason = "Unable to confirm revocation state";
         }
 
         // Log the verification event
         await storage.createVerificationLog({
-            tenantId: payload.iss || "public",
+            tenantId: typeof payload.iss === "string" ? payload.iss : "public",
             credentialId,
             verifierName: verifierInfo.organization,
             verifierIp,
@@ -97,6 +166,7 @@ router.get("/verify", async (req, res) => {
             valid: isValid,
             issuer_trusted: true,
             revoked: isRevoked,
+            revocation_status: revocationState,
             credential: payload.vc,
             verificationId: `ver-${Date.now()}`,
         });
@@ -134,7 +204,8 @@ router.get("/verify/:credentialId", async (req, res) => {
         }
 
         // Check if revoked
-        const isRevoked = credential.revoked || await relayerService.isRevoked(credentialId);
+        const revocationState = await resolveRevocationState(credentialId);
+        const isRevoked = revocationState === "revoked";
 
         // Get verifier info
         const verifierInfo = await getVerifierInfo(verifierIp);
@@ -146,6 +217,9 @@ router.get("/verify/:credentialId", async (req, res) => {
         if (isRevoked) {
             status = "failed";
             reason = "Credential has been revoked";
+        } else if (revocationState === "unknown") {
+            status = "suspicious";
+            reason = "Unable to confirm revocation state";
         }
 
         // Log the verification
@@ -162,9 +236,10 @@ router.get("/verify/:credentialId", async (req, res) => {
         console.log(`[VERIFY] Credential ${credentialId} verified by ${verifierInfo.organization}`);
 
         res.json({
-            valid: !isRevoked,
+            valid: revocationState === "active",
             issuer_trusted: true,
             revoked: isRevoked,
+            revocation_status: revocationState,
             credential: {
                 id: credential.id,
                 templateId: credential.templateId,
@@ -176,36 +251,6 @@ router.get("/verify/:credentialId", async (req, res) => {
     } catch (error) {
         console.error("Verification error:", error);
         res.status(500).json({ message: "Internal Server Error" });
-    }
-});
-
-// Simulate verification (for demo purposes)
-router.post("/verify/simulate", async (req, res) => {
-    try {
-        const { credentialId, verifierName } = req.body;
-        const verifierIp = (req.headers['x-forwarded-for'] as string || req.ip || '192.168.1.1').split(',')[0].trim();
-
-        // Get verifier info or use provided
-        const verifierInfo = await getVerifierInfo(verifierIp);
-        const organization = verifierName || verifierInfo.organization;
-
-        // Create a verification log
-        const log = await storage.createVerificationLog({
-            tenantId: "default-tenant-id",
-            credentialId: credentialId || `CRED-${String(Date.now()).slice(-6)}`,
-            verifierName: organization,
-            verifierIp,
-            location: verifierInfo.location,
-            status: Math.random() > 0.1 ? "verified" : "suspicious",
-            reason: undefined,
-        });
-
-        res.json({
-            success: true,
-            verificationLog: log,
-        });
-    } catch (error) {
-        res.status(500).json({ message: "Failed to simulate verification" });
     }
 });
 

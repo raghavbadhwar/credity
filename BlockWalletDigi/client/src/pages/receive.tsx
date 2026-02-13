@@ -11,7 +11,7 @@ export default function ReceiveCredential() {
   const [step, setStep] = useState<"input" | "scanning" | "processing" | "success">("input");
   const [url, setUrl] = useState("");
   const { toast } = useToast();
-  const { requestBiometricVerification } = useBiometrics();
+  const { verifyBiometrics } = useBiometrics();
 
   const handleProcess = async () => {
     if (!url && step === 'input') {
@@ -25,8 +25,8 @@ export default function ReceiveCredential() {
 
     // 1. Verify Biometrics before claiming
     try {
-      const verified = await requestBiometricVerification('1', 'claim_submit');
-      if (!verified) {
+      const verification = await verifyBiometrics('1');
+      if (!verification.success) {
         toast({ title: "Authentication Failed", description: "Biometric verification required to add credentials", variant: "destructive" });
         return;
       }

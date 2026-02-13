@@ -1,0 +1,8 @@
+node_modules
+dist
+build
+coverage
+migrations
+drizzle
+*.json
+package-lock.json

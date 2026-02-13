@@ -12,11 +12,10 @@ import {
   Copy,
   CheckCircle2,
   ShieldCheck,
-  Loader2,
-  Zap
+  Loader2
 } from "lucide-react";
 import { useState } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 
 interface WalletCredential {
   id: string;
@@ -37,7 +36,6 @@ interface WalletStats {
 }
 
 export default function ProfilePage() {
-  const queryClient = useQueryClient();
   const [copied, setCopied] = useState(false);
 
   // Initialize wallet
@@ -61,22 +59,6 @@ export default function ProfilePage() {
       return res.json();
     },
     enabled: !!walletData?.success,
-  });
-
-  // Populate demo data
-  const populateMutation = useMutation({
-    mutationFn: async () => {
-      const res = await fetch('/api/wallet/demo/populate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId: 1 }),
-      });
-      return res.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['wallet-credentials'] });
-      queryClient.invalidateQueries({ queryKey: ['wallet-init'] });
-    },
   });
 
   const credentials: WalletCredential[] = credentialsData?.credentials || [];
@@ -188,18 +170,11 @@ export default function ProfilePage() {
                   ) : (
                     <div className="text-center py-8 space-y-4">
                       <p className="text-muted-foreground text-sm">No verified credentials yet.</p>
-                      <Button
-                        onClick={() => populateMutation.mutate()}
-                        disabled={populateMutation.isPending}
-                        className="bg-gradient-to-r from-blue-600 to-indigo-600"
-                      >
-                        {populateMutation.isPending ? (
-                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                        ) : (
-                          <Zap className="w-4 h-4 mr-2" />
-                        )}
-                        Add Demo Credentials
-                      </Button>
+                      <Link href="/receive">
+                        <Button className="bg-gradient-to-r from-blue-600 to-indigo-600">
+                          Add Credential
+                        </Button>
+                      </Link>
                     </div>
                   )}
                 </CardContent>

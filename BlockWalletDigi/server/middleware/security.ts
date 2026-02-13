@@ -119,7 +119,12 @@ export function deepSanitize<T>(obj: T): T {
  */
 export function sanitizationMiddleware(req: Request, _res: Response, next: NextFunction): void {
     // Whitelist paths that need to accept URLs (don't sanitize these)
-    const whitelistedPaths = ['/api/wallet/offer/claim', '/api/credentials/import'];
+    const whitelistedPaths = [
+        '/api/wallet/offer/claim',
+        '/api/credentials/import',
+        '/api/v1/wallet/offer/claim',
+        '/api/v1/credentials/import',
+    ];
     if (whitelistedPaths.some(p => req.path.includes(p))) {
         return next();
     }
@@ -190,7 +195,12 @@ const SUSPICIOUS_PATTERNS = [
  */
 export function suspiciousRequestDetector(req: Request, res: Response, next: NextFunction): void {
     // Whitelist certain paths that need URLs in body
-    const whitelistedPaths = ['/api/wallet/offer/claim', '/api/credentials/import'];
+    const whitelistedPaths = [
+        '/api/wallet/offer/claim',
+        '/api/credentials/import',
+        '/api/v1/wallet/offer/claim',
+        '/api/v1/credentials/import',
+    ];
     if (whitelistedPaths.some(p => req.path.includes(p))) {
         return next();
     }

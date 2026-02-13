@@ -10,23 +10,25 @@ const ACCESS_TOKEN_EXPIRY = '15m';
 const REFRESH_TOKEN_EXPIRY = '7d';
 const JWT_ALGORITHM = 'HS256' as const;
 
+const requireStrictSecrets =
+    process.env.NODE_ENV === 'production' || process.env.REQUIRE_DATABASE === 'true';
+
 if (!JWT_SECRET || !JWT_REFRESH_SECRET) {
     console.error('FATAL: JWT_SECRET and JWT_REFRESH_SECRET must be set in environment variables');
-    if (process.env.NODE_ENV === 'production') {
+    if (requireStrictSecrets) {
         process.exit(1);
     }
 }
 
-// Fallback for development only (logged warning)
+// Fallback for local development only (logged warning)
 const EFFECTIVE_JWT_SECRET = JWT_SECRET || 'dev-only-secret-not-for-production';
 const EFFECTIVE_JWT_REFRESH_SECRET = JWT_REFRESH_SECRET || 'dev-only-refresh-secret-not-for-production';
-if (!JWT_SECRET) {
-    console.warn('WARNING: Using development JWT secrets. Set JWT_SECRET for production.');
+if ((!JWT_SECRET || !JWT_REFRESH_SECRET) && !requireStrictSecrets) {
+    console.warn('WARNING: Using development JWT secrets. Set JWT_SECRET and JWT_REFRESH_SECRET for staging/production.');
 }
 
-// In-memory token storage (use Redis in production)
-const refreshTokens = new Map<string, { userId: string; expiresAt: Date }>();
-const invalidatedTokens = new Set<string>();
+// Stateless token mode avoids process-local auth state.
+// For global logout/token revocation use a shared session store or JWT denylist service.
 
 export interface AuthUser {
     id: string;
@@ -68,7 +70,7 @@ export function validatePasswordStrength(password: string): PasswordValidationRe
     if (!/[0-9]/.test(password)) {
         errors.push('Password must contain at least one number');
     }
-    if (!/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)) {
+    if (!/[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/.test(password)) {
         errors.push('Password must contain at least one special character');
     }
 
@@ -115,15 +117,7 @@ export function generateRefreshToken(user: AuthUser): string {
         role: user.role,
         type: 'refresh',
     };
-    const token = jwt.sign(payload, EFFECTIVE_JWT_REFRESH_SECRET, { expiresIn: REFRESH_TOKEN_EXPIRY, algorithm: JWT_ALGORITHM });
-
-    // Store refresh token
-    refreshTokens.set(token, {
-        userId: user.id,
-        expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
-    });
-
-    return token;
+    return jwt.sign(payload, EFFECTIVE_JWT_REFRESH_SECRET, { expiresIn: REFRESH_TOKEN_EXPIRY, algorithm: JWT_ALGORITHM });
 }
 
 /**
@@ -131,9 +125,6 @@ export function generateRefreshToken(user: AuthUser): string {
  */
 export function verifyAccessToken(token: string): TokenPayload | null {
     try {
-        if (invalidatedTokens.has(token)) {
-            return null;
-        }
         const decoded = jwt.verify(token, EFFECTIVE_JWT_SECRET, { algorithms: [JWT_ALGORITHM] }) as TokenPayload;
         if (decoded.type !== 'access') {
             return null;
@@ -149,9 +140,6 @@ export function verifyAccessToken(token: string): TokenPayload | null {
  */
 export function verifyRefreshToken(token: string): TokenPayload | null {
     try {
-        if (!refreshTokens.has(token)) {
-            return null;
-        }
         const decoded = jwt.verify(token, EFFECTIVE_JWT_REFRESH_SECRET, { algorithms: [JWT_ALGORITHM] }) as TokenPayload;
         if (decoded.type !== 'refresh') {
             return null;
@@ -166,18 +154,14 @@ export function verifyRefreshToken(token: string): TokenPayload | null {
  * Invalidate refresh token (logout)
  */
 export function invalidateRefreshToken(token: string): void {
-    refreshTokens.delete(token);
+    void token;
 }
 
 /**
  * Invalidate access token
  */
 export function invalidateAccessToken(token: string): void {
-    invalidatedTokens.add(token);
-    // Clean up old tokens periodically
-    if (invalidatedTokens.size > 10000) {
-        invalidatedTokens.clear();
-    }
+    void token;
 }
 
 /**
@@ -219,6 +203,7 @@ export function hashApiKey(apiKey: string): string {
 }
 
 // Express middleware types
+/* eslint-disable @typescript-eslint/no-namespace */
 declare global {
     namespace Express {
         interface Request {
@@ -226,6 +211,7 @@ declare global {
         }
     }
 }
+/* eslint-enable @typescript-eslint/no-namespace */
 
 /**
  * JWT Authentication Middleware

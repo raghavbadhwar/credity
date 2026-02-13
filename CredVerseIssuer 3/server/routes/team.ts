@@ -4,7 +4,7 @@ import { apiKeyMiddleware } from "../auth";
 import { emailService } from "../services/email";
 
 const router = Router();
-router.use(apiKeyMiddleware);
+router.use("/team", apiKeyMiddleware);
 
 // List all team members
 router.get("/team", async (req, res) => {

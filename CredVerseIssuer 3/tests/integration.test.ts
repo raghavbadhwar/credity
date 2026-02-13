@@ -60,4 +60,15 @@ describe('Auth Integration API', () => {
 
         expect(res.status).toBe(401);
     });
+
+    it('should expose blockchain runtime status in health endpoint', async () => {
+        const res = await request(app).get('/api/health');
+        expect(res.status).toBe(200);
+        expect(res.body.status).toBe('ok');
+        expect(res.body.app).toBe('issuer');
+        expect(res.body.blockchain).toBeDefined();
+        expect(typeof res.body.blockchain.chainNetwork).toBe('string');
+        expect(typeof res.body.blockchain.writesAllowed).toBe('boolean');
+        expect(typeof res.body.blockchain.chainId).toBe('number');
+    });
 });

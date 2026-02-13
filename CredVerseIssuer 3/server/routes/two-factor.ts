@@ -18,7 +18,7 @@ const router = Router();
  */
 router.get('/2fa/status', authMiddleware, async (req, res) => {
     try {
-        const userId = req.user!.userId;
+        const userId = String(req.user!.userId);
         const status = getTwoFactorStatus(userId);
 
         res.json({
@@ -36,7 +36,7 @@ router.get('/2fa/status', authMiddleware, async (req, res) => {
  */
 router.post('/2fa/setup', authMiddleware, async (req, res) => {
     try {
-        const userId = req.user!.userId;
+        const userId = String(req.user!.userId);
         const user = await storage.getUser(userId);
 
         if (!user) {
@@ -68,7 +68,7 @@ router.post('/2fa/setup', authMiddleware, async (req, res) => {
  */
 router.post('/2fa/enable', authMiddleware, async (req, res) => {
     try {
-        const userId = req.user!.userId;
+        const userId = String(req.user!.userId);
         const { token } = req.body;
 
         if (!token || token.length !== 6) {
@@ -100,6 +100,7 @@ router.post('/2fa/enable', authMiddleware, async (req, res) => {
 router.post('/2fa/verify', async (req, res) => {
     try {
         const { userId, token, pendingToken } = req.body;
+        const normalizedUserId = String(userId);
 
         if (!userId || !token) {
             return res.status(400).json({ error: 'User ID and token are required' });
@@ -110,7 +111,7 @@ router.post('/2fa/verify', async (req, res) => {
             return res.status(400).json({ error: 'Pending authentication token required' });
         }
 
-        const result = verifyToken(userId, token);
+        const result = verifyToken(normalizedUserId, token);
 
         if (!result.success) {
             return res.status(400).json({ error: result.error });
@@ -118,7 +119,7 @@ router.post('/2fa/verify', async (req, res) => {
 
         // Generate full access tokens
         const { generateAccessToken, generateRefreshToken } = await import('../services/auth-service');
-        const user = await storage.getUser(userId);
+        const user = await storage.getUser(normalizedUserId);
 
         if (!user) {
             return res.status(404).json({ error: 'User not found' });
@@ -157,7 +158,7 @@ router.post('/2fa/verify', async (req, res) => {
  */
 router.post('/2fa/disable', authMiddleware, async (req, res) => {
     try {
-        const userId = req.user!.userId;
+        const userId = String(req.user!.userId);
         const { password, token } = req.body;
 
         if (!password) {
@@ -206,7 +207,7 @@ router.post('/2fa/disable', authMiddleware, async (req, res) => {
  */
 router.post('/2fa/backup-codes/regenerate', authMiddleware, async (req, res) => {
     try {
-        const userId = req.user!.userId;
+        const userId = String(req.user!.userId);
         const { token } = req.body;
 
         if (!token) {

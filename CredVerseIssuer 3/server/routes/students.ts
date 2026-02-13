@@ -3,7 +3,7 @@ import { storage } from "../storage";
 import { apiKeyMiddleware } from "../auth";
 
 const router = Router();
-router.use(apiKeyMiddleware);
+router.use("/students", apiKeyMiddleware);
 
 // List all students
 router.get("/students", async (req, res) => {

@@ -14,6 +14,7 @@ import { createServer } from 'http';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import authRoutes from './routes/auth';
+import mobileProxyRoutes from './routes/mobile-proxy';
 import { initGoogleOAuth } from './services/google';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -55,6 +56,7 @@ if (googleClientId && googleClientSecret) {
 
 // API Routes
 app.use('/api', authRoutes);
+app.use('/api/mobile', mobileProxyRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {

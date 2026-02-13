@@ -10,16 +10,19 @@ let db: ReturnType<typeof drizzle> | null = null;
 
 /**
  * Initialize database connection
- * Falls back to in-memory storage if DATABASE_URL is not set
+ * In production this is mandatory. In non-production, set REQUIRE_DATABASE=true
+ * to enforce persistence and prevent accidental in-memory-only execution.
  */
 export function initDatabase(): ReturnType<typeof drizzle> | null {
     const databaseUrl = process.env.DATABASE_URL;
+    const requireDatabase =
+        process.env.NODE_ENV === 'production' || process.env.REQUIRE_DATABASE === 'true';
 
     if (!databaseUrl) {
-        if (process.env.NODE_ENV === 'production') {
-            throw new Error('[Database] CRITICAL: DATABASE_URL is not set in production');
+        if (requireDatabase) {
+            throw new Error('[Database] CRITICAL: DATABASE_URL is required by current runtime policy');
         }
-        console.warn('[Database] DATABASE_URL not set, using in-memory storage (DEV only)');
+        console.warn('[Database] DATABASE_URL not set. Persistence-dependent features are disabled.');
         return null;
     }
 

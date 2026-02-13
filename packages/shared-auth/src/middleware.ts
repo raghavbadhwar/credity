@@ -3,21 +3,16 @@
  */
 import type { Request, Response, NextFunction } from 'express';
 import { verifyAccessToken } from './jwt';
-import type { TokenPayload, AuthUser } from './types';
+import type { AuthUser, TokenPayload } from './types';
 
-// Extend Express Request type
-declare global {
-    namespace Express {
-        interface Request {
-            user?: TokenPayload;
-        }
-    }
-}
+type AuthenticatedRequest = Request & {
+    user?: TokenPayload;
+};
 
 /**
  * JWT Authentication Middleware - requires valid token
  */
-export function authMiddleware(req: Request, res: Response, next: NextFunction): void {
+export function authMiddleware(req: AuthenticatedRequest, res: Response, next: NextFunction): void {
     const authHeader = req.headers.authorization;
 
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
@@ -40,7 +35,7 @@ export function authMiddleware(req: Request, res: Response, next: NextFunction):
 /**
  * Optional auth middleware - doesn't fail if no token
  */
-export function optionalAuthMiddleware(req: Request, res: Response, next: NextFunction): void {
+export function optionalAuthMiddleware(req: AuthenticatedRequest, res: Response, next: NextFunction): void {
     const authHeader = req.headers.authorization;
 
     if (authHeader && authHeader.startsWith('Bearer ')) {
@@ -58,7 +53,7 @@ export function optionalAuthMiddleware(req: Request, res: Response, next: NextFu
  * Role-based access control middleware
  */
 export function requireRole(...roles: AuthUser['role'][]) {
-    return (req: Request, res: Response, next: NextFunction): void => {
+    return (req: AuthenticatedRequest, res: Response, next: NextFunction): void => {
         if (!req.user) {
             res.status(401).json({ error: 'Authentication required' });
             return;

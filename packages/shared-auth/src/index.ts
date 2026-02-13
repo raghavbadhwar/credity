@@ -53,3 +53,58 @@ export {
     sanitizationMiddleware,
     suspiciousRequestDetector,
 } from './security';
+
+// Idempotency middleware
+export {
+    idempotencyMiddleware,
+} from './idempotency';
+
+// Signed webhook helpers
+export {
+    signWebhook,
+    verifyWebhookSignature,
+    type SignedWebhookPayload,
+} from './webhooks';
+
+// Shared contracts
+export type {
+    CredentialFormat,
+    CredentialRecordContract,
+    VerificationResultContract,
+    TrustScoreSnapshotContract,
+    ConsentGrantContract,
+    ReputationCategoryContract,
+    ReputationEventContract,
+    ReputationCategoryBreakdownContract,
+    ReputationScoreContract,
+    SafeDateScoreContract,
+    ReputationProfileContract,
+    PlatformAuthorityContract,
+} from './contracts';
+
+// Blockchain network/runtime helpers
+export type {
+    SupportedChainNetwork,
+    ChainRuntimeConfig,
+} from './blockchain-network';
+export {
+    resolveChainNetwork,
+    getChainRuntimeConfig,
+    resolveChainRpcUrl,
+    getChainWritePolicy,
+} from './blockchain-network';
+
+// PostgreSQL-backed state persistence helper
+export {
+    PostgresStateStore,
+} from './postgres-state-store';
+
+// Audit chain helpers
+export type {
+    AuditEventRecord,
+} from './audit-chain';
+export {
+    appendAuditEvent,
+    computeAuditEventHash,
+    verifyAuditChain,
+} from './audit-chain';

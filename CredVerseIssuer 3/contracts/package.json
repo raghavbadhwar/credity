@@ -3,7 +3,10 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "hardhat test",
+    "compile": "hardhat compile",
+    "lint:solidity": "solhint \"contracts/**/*.sol\"",
+    "analyze:static": "npm run lint:solidity && npm run compile && npm run test"
   },
   "keywords": [],
   "author": "",
@@ -26,6 +29,7 @@
     "ethers": "^6.16.0",
     "hardhat": "^2.27.1",
     "hardhat-gas-reporter": "^1.0.10",
+    "solhint": "^5.2.0",
     "solidity-coverage": "^0.8.16",
     "ts-node": "^10.9.2",
     "typechain": "^8.3.2"

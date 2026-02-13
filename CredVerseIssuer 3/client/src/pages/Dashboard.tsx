@@ -37,7 +37,7 @@ export default function Dashboard() {
     setIsExporting(true);
     try {
       const response = await fetch('/api/v1/reports/dashboard', {
-        headers: { 'x-api-key': 'demo-api-key' },
+        headers: { 'x-api-key': (import.meta as any).env?.VITE_API_KEY || '' },
       });
 
       if (!response.ok) throw new Error('Export failed');

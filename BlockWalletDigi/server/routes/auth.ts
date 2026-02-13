@@ -11,10 +11,13 @@ import {
     verifyAccessToken,
     authMiddleware,
     checkRateLimit,
+    validatePasswordStrength,
     AuthUser,
 } from '../services/auth-service';
 
 const router = Router();
+const allowLegacyLoginBypass =
+    process.env.NODE_ENV !== 'production' && process.env.ALLOW_DEMO_ROUTES === 'true';
 
 /**
  * Register a new user
@@ -25,6 +28,14 @@ router.post('/auth/register', async (req, res) => {
 
         if (!username || !password) {
             return res.status(400).json({ error: 'Username and password required' });
+        }
+
+        const passwordValidation = validatePasswordStrength(password);
+        if (!passwordValidation.isValid) {
+            return res.status(400).json({
+                error: 'Password does not meet security requirements',
+                details: passwordValidation.errors,
+            });
         }
 
         // Rate limit registration
@@ -101,10 +112,12 @@ router.post('/auth/login', async (req, res) => {
         }
 
         // Verify password
-        const passwordHash = (user as any).passwordHash;
+        const passwordHash = (user as any).password;
         if (!passwordHash) {
-            // Legacy user without password, allow login for demo
-            console.log('[Auth] Legacy user login (no password)');
+            if (!allowLegacyLoginBypass) {
+                return res.status(401).json({ error: 'Invalid credentials' });
+            }
+            console.warn('[Auth] Allowing legacy no-password login because ALLOW_DEMO_ROUTES=true');
         } else {
             const valid = await comparePassword(password, passwordHash);
             if (!valid) {
@@ -201,7 +214,7 @@ router.post('/auth/logout', authMiddleware, (req, res) => {
  */
 router.get('/auth/me', authMiddleware, async (req, res) => {
     try {
-        const user = await storage.getUser(req.user!.userId);
+        const user = await storage.getUser(Number(req.user!.userId));
         if (!user) {
             return res.status(404).json({ error: 'User not found' });
         }
@@ -227,7 +240,7 @@ router.patch('/auth/me', authMiddleware, async (req, res) => {
     try {
         const { name, email, bio, avatarUrl } = req.body;
 
-        const updated = await storage.updateUser(req.user!.userId, {
+        const updated = await storage.updateUser(Number(req.user!.userId), {
             name,
             email,
             bio,
@@ -257,17 +270,25 @@ router.post('/auth/change-password', authMiddleware, async (req, res) => {
     try {
         const { currentPassword, newPassword } = req.body;
 
-        if (!newPassword || newPassword.length < 8) {
-            return res.status(400).json({ error: 'Password must be at least 8 characters' });
+        if (!newPassword) {
+            return res.status(400).json({ error: 'newPassword is required' });
         }
 
-        const user = await storage.getUser(req.user!.userId);
+        const passwordValidation = validatePasswordStrength(newPassword);
+        if (!passwordValidation.isValid) {
+            return res.status(400).json({
+                error: 'Password does not meet security requirements',
+                details: passwordValidation.errors,
+            });
+        }
+
+        const user = await storage.getUser(Number(req.user!.userId));
         if (!user) {
             return res.status(404).json({ error: 'User not found' });
         }
 
         // Verify current password if exists
-        const passwordHash = (user as any).passwordHash;
+        const passwordHash = (user as any).password;
         if (passwordHash && currentPassword) {
             const valid = await comparePassword(currentPassword, passwordHash);
             if (!valid) {
@@ -277,7 +298,7 @@ router.post('/auth/change-password', authMiddleware, async (req, res) => {
 
         // Update password
         const newHash = await hashPassword(newPassword);
-        await storage.updateUser(req.user!.userId, { passwordHash: newHash } as any);
+        await storage.updateUser(Number(req.user!.userId), { password: newHash } as any);
 
         res.json({ success: true, message: 'Password updated' });
     } catch (error) {

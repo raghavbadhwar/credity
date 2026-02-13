@@ -42,7 +42,7 @@ export default function Records() {
     queryKey: ['credentials'],
     queryFn: async () => {
       const res = await fetch('/api/v1/credentials', {
-        headers: { 'x-api-key': 'demo-api-key' }
+        headers: { 'x-api-key': (import.meta as any).env?.VITE_API_KEY || '' }
       });
       if (!res.ok) throw new Error('Failed to fetch credentials');
       return res.json();
@@ -111,7 +111,7 @@ export default function Records() {
     try {
       const response = await fetch(`/api/v1/credentials/${cred.id}/offer`, {
         method: 'POST',
-        headers: { 'x-api-key': 'demo-api-key' },
+        headers: { 'x-api-key': (import.meta as any).env?.VITE_API_KEY || '' },
       });
 
       if (!response.ok) throw new Error('Failed to create offer');
@@ -146,7 +146,7 @@ export default function Records() {
     try {
       await fetch(`/api/v1/credentials/${cred.id}/revoke`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'x-api-key': 'demo-api-key' },
+        headers: { 'Content-Type': 'application/json', 'x-api-key': (import.meta as any).env?.VITE_API_KEY || '' },
         body: JSON.stringify({ reason }),
       });
       queryClient.invalidateQueries({ queryKey: ['credentials'] });

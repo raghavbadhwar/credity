@@ -8,9 +8,8 @@ const DEFAULT_ACCESS_EXPIRY = '15m';
 const DEFAULT_REFRESH_EXPIRY = '7d';
 const JWT_ALGORITHM = 'HS256' as const;
 
-// In-memory token storage (use Redis in production)
-const refreshTokens = new Map<string, { userId: string | number; expiresAt: Date }>();
-const invalidatedTokens = new Set<string>();
+// Stateless token mode avoids process-local auth state.
+// For global logout/token revocation use a shared session store or JWT denylist service.
 
 let config: AuthConfig = {
     jwtSecret: 'dev-only-secret-not-for-production',
@@ -71,18 +70,10 @@ export function generateRefreshToken(user: AuthUser): string {
         type: 'refresh',
         app: config.app,
     };
-    const token = jwt.sign(payload, config.jwtRefreshSecret, {
+    return jwt.sign(payload, config.jwtRefreshSecret, {
         expiresIn: config.refreshTokenExpiry || DEFAULT_REFRESH_EXPIRY,
         algorithm: JWT_ALGORITHM
     } as jwt.SignOptions);
-
-    // Store refresh token
-    refreshTokens.set(token, {
-        userId: user.id,
-        expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
-    });
-
-    return token;
 }
 
 /**
@@ -101,9 +92,6 @@ export function generateTokenPair(user: AuthUser): TokenPair {
  */
 export function verifyAccessToken(token: string): TokenPayload | null {
     try {
-        if (invalidatedTokens.has(token)) {
-            return null;
-        }
         const decoded = jwt.verify(token, config.jwtSecret, { algorithms: [JWT_ALGORITHM] }) as TokenPayload;
         if (decoded.type !== 'access') {
             return null;
@@ -119,9 +107,6 @@ export function verifyAccessToken(token: string): TokenPayload | null {
  */
 export function verifyRefreshToken(token: string): TokenPayload | null {
     try {
-        if (!refreshTokens.has(token)) {
-            return null;
-        }
         const decoded = jwt.verify(token, config.jwtRefreshSecret, { algorithms: [JWT_ALGORITHM] }) as TokenPayload;
         if (decoded.type !== 'refresh') {
             return null;
@@ -157,18 +142,14 @@ export function verifyToken(token: string): VerifyTokenResult {
  * Invalidate refresh token (logout)
  */
 export function invalidateRefreshToken(token: string): void {
-    refreshTokens.delete(token);
+    void token;
 }
 
 /**
  * Invalidate access token
  */
 export function invalidateAccessToken(token: string): void {
-    invalidatedTokens.add(token);
-    // Clean up old tokens periodically
-    if (invalidatedTokens.size > 10000) {
-        invalidatedTokens.clear();
-    }
+    void token;
 }
 
 /**

@@ -8,6 +8,7 @@ initAnalytics();
 import express, { type Request, Response, NextFunction } from "express";
 import helmet from "helmet";
 import cors from "cors";
+import { initAuth } from "@credverse/shared-auth";
 import { errorHandler } from "./middleware/error-handler";
 import {
   apiRateLimiter,
@@ -24,6 +25,30 @@ import { createServer } from "http";
 
 const app = express();
 const httpServer = createServer(app);
+
+const requireDatabase = process.env.NODE_ENV === 'production' || process.env.REQUIRE_DATABASE === 'true';
+const requireQueue = process.env.NODE_ENV === 'production' || process.env.REQUIRE_QUEUE === 'true';
+
+if (requireDatabase && !process.env.DATABASE_URL) {
+  console.error('[Startup] REQUIRE_DATABASE policy is enabled but DATABASE_URL is missing.');
+  process.exit(1);
+}
+if (requireQueue && !process.env.REDIS_URL) {
+  console.error('[Startup] REQUIRE_QUEUE policy is enabled but REDIS_URL is missing.');
+  process.exit(1);
+}
+if (requireDatabase) {
+  console.log('[Startup] Database persistence policy is enforced.');
+}
+if (requireQueue) {
+  console.log('[Startup] Queue-backed processing policy is enforced.');
+}
+
+initAuth({
+  jwtSecret: process.env.JWT_SECRET || '',
+  jwtRefreshSecret: process.env.JWT_REFRESH_SECRET || '',
+  app: 'issuer',
+});
 
 declare module "http" {
   interface IncomingMessage {
@@ -61,7 +86,14 @@ app.use(cors({
   },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-API-Key'],
+  allowedHeaders: [
+    'Content-Type',
+    'Authorization',
+    'X-API-Key',
+    'Idempotency-Key',
+    'X-Webhook-Signature',
+    'X-Webhook-Timestamp',
+  ],
 }));
 
 app.use(

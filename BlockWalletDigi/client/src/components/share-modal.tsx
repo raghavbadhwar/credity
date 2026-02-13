@@ -56,13 +56,13 @@ export function ShareModal({ credential, open, onOpenChange }: ShareModalProps) 
   }, [open]);
 
   // Biometrics hook
-  const { requestBiometricVerification } = useBiometrics();
+  const { verifyBiometrics } = useBiometrics();
 
   const handleShareClick = async () => {
     try {
       // PROMPT BIOMETRIC AUTH
-      const verified = await requestBiometricVerification('1', 'credential_share');
-      if (!verified) {
+      const verification = await verifyBiometrics('1');
+      if (!verification.success) {
         toast({ title: 'Authentication Failed', description: 'Biometric verification required to share credentials', variant: 'destructive' });
         return;
       }

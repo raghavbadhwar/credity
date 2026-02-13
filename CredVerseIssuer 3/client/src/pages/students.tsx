@@ -113,7 +113,7 @@ export default function Students() {
         queryKey: ['students'],
         queryFn: async () => {
             const response = await fetch('/api/v1/students', {
-                headers: { 'x-api-key': 'demo-api-key' },
+                headers: { 'x-api-key': (import.meta as any).env?.VITE_API_KEY || '' },
             });
             if (!response.ok) throw new Error('Failed to fetch students');
             return response.json();
@@ -125,7 +125,7 @@ export default function Students() {
         queryKey: ['student-credentials', profileStudent?.id],
         queryFn: async () => {
             const response = await fetch('/api/v1/credentials', {
-                headers: { 'x-api-key': 'demo-api-key' },
+                headers: { 'x-api-key': (import.meta as any).env?.VITE_API_KEY || '' },
             });
             if (!response.ok) return [];
             const all = await response.json();
@@ -145,7 +145,7 @@ export default function Students() {
         queryKey: ['templates'],
         queryFn: async () => {
             const response = await fetch('/api/v1/templates', {
-                headers: { 'x-api-key': 'demo-api-key' },
+                headers: { 'x-api-key': (import.meta as any).env?.VITE_API_KEY || '' },
             });
             if (!response.ok) return [];
             return response.json();
@@ -159,7 +159,7 @@ export default function Students() {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'x-api-key': 'demo-api-key',
+                    'x-api-key': (import.meta as any).env?.VITE_API_KEY || '',
                 },
                 body: JSON.stringify(data),
             });
@@ -184,7 +184,7 @@ export default function Students() {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
-                    'x-api-key': 'demo-api-key',
+                    'x-api-key': (import.meta as any).env?.VITE_API_KEY || '',
                 },
                 body: JSON.stringify(data),
             });
@@ -211,7 +211,7 @@ export default function Students() {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'x-api-key': 'demo-api-key',
+                    'x-api-key': (import.meta as any).env?.VITE_API_KEY || '',
                 },
                 body: JSON.stringify({
                     templateId: issueData.templateId,
@@ -230,7 +230,7 @@ export default function Students() {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'x-api-key': 'demo-api-key',
+                        'x-api-key': (import.meta as any).env?.VITE_API_KEY || '',
                     },
                     body: JSON.stringify({
                         credentialId: credential.id,
@@ -262,7 +262,7 @@ export default function Students() {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'x-api-key': 'demo-api-key',
+                    'x-api-key': (import.meta as any).env?.VITE_API_KEY || '',
                 },
                 body: JSON.stringify({ students }),
             });
@@ -285,7 +285,7 @@ export default function Students() {
         mutationFn: async (id: string) => {
             const response = await fetch(`/api/v1/students/${id}`, {
                 method: 'DELETE',
-                headers: { 'x-api-key': 'demo-api-key' },
+                headers: { 'x-api-key': (import.meta as any).env?.VITE_API_KEY || '' },
             });
             if (!response.ok) throw new Error('Failed to delete');
             return response.json();
@@ -325,7 +325,7 @@ export default function Students() {
     // Export students
     const handleExport = async () => {
         const response = await fetch('/api/v1/exports/students/csv', {
-            headers: { 'x-api-key': 'demo-api-key' },
+            headers: { 'x-api-key': (import.meta as any).env?.VITE_API_KEY || '' },
         });
         const blob = await response.blob();
         const url = URL.createObjectURL(blob);
@@ -340,7 +340,7 @@ export default function Students() {
     // Download sample CSV
     const handleDownloadSample = async () => {
         const response = await fetch('/api/v1/exports/sample-csv', {
-            headers: { 'x-api-key': 'demo-api-key' },
+            headers: { 'x-api-key': (import.meta as any).env?.VITE_API_KEY || '' },
         });
         const blob = await response.blob();
         const url = URL.createObjectURL(blob);

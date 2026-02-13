@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-import "@openzeppelin/contracts/access/AccessControl.sol";
-import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
-import "@openzeppelin/contracts/utils/Pausable.sol";
+import { AccessControl } from "@openzeppelin/contracts/access/AccessControl.sol";
+import { ReentrancyGuard } from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
+import { Pausable } from "@openzeppelin/contracts/utils/Pausable.sol";
 
 /**
  * @title CredVerseRegistry
@@ -40,6 +40,11 @@ contract CredVerseRegistry is AccessControl, ReentrancyGuard, Pausable {
     error IssuerNotRegistered(address issuerAddress);
     error IssuerIsRevoked(address issuerAddress);
     error AnchorAlreadyExists(bytes32 rootHash);
+    error IssuerAlreadyRevoked(address issuerAddress);
+    error CredentialAlreadyRevoked(bytes32 credentialHash);
+    error CredentialNotAnchored(bytes32 credentialHash);
+    error UnauthorizedCredentialRevocation(address caller, bytes32 credentialHash);
+    error InvalidIssuerMetadata();
     error InvalidAddress();
     error InvalidHash();
     error ContractPaused();
@@ -89,6 +94,9 @@ contract CredVerseRegistry is AccessControl, ReentrancyGuard, Pausable {
         if (_issuerAddress == address(0)) {
             revert InvalidAddress();
         }
+        if (bytes(_did).length == 0 || bytes(_domain).length == 0) {
+            revert InvalidIssuerMetadata();
+        }
         if (issuers[_issuerAddress].isRegistered) {
             revert IssuerAlreadyRegistered(_issuerAddress);
         }
@@ -110,6 +118,9 @@ contract CredVerseRegistry is AccessControl, ReentrancyGuard, Pausable {
     function revokeIssuer(address _issuerAddress) external onlyRole(DEFAULT_ADMIN_ROLE) nonReentrant whenNotPaused {
         if (!issuers[_issuerAddress].isRegistered) {
             revert IssuerNotRegistered(_issuerAddress);
+        }
+        if (issuers[_issuerAddress].isRevoked) {
+            revert IssuerAlreadyRevoked(_issuerAddress);
         }
         
         issuers[_issuerAddress].isRevoked = true;
@@ -145,6 +156,15 @@ contract CredVerseRegistry is AccessControl, ReentrancyGuard, Pausable {
     function revokeCredential(bytes32 _credentialHash) external onlyRole(ISSUER_ROLE) onlyActiveIssuer nonReentrant whenNotPaused {
         if (_credentialHash == bytes32(0)) {
             revert InvalidHash();
+        }
+        if (!anchors[_credentialHash].exists) {
+            revert CredentialNotAnchored(_credentialHash);
+        }
+        if (anchors[_credentialHash].submitter != msg.sender) {
+            revert UnauthorizedCredentialRevocation(msg.sender, _credentialHash);
+        }
+        if (revokedCredentials[_credentialHash]) {
+            revert CredentialAlreadyRevoked(_credentialHash);
         }
         revokedCredentials[_credentialHash] = true;
         emit CredentialRevoked(_credentialHash, msg.sender, block.timestamp);
