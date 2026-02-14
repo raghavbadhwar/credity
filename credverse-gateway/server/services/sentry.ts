@@ -20,7 +20,7 @@ export function initSentry(appName?: string): void {
         serverName: appName || APP_NAME,
         tracesSampleRate: process.env.NODE_ENV === 'production' ? 0.1 : 1.0,
 
-        beforeSend(event, hint) {
+        beforeSend(event) {
             if (process.env.NODE_ENV === 'development' && !process.env.SENTRY_DEV_ENABLED) {
                 return null;
             }
@@ -36,7 +36,7 @@ export function initSentry(appName?: string): void {
     console.log(`[Sentry] Error monitoring initialized for ${appName || APP_NAME}`);
 }
 
-export function captureException(error: Error, context?: Record<string, any>): void {
+export function captureException(error: Error, context?: Record<string, any>): void { // eslint-disable-line @typescript-eslint/no-explicit-any
     if (!SENTRY_DSN) return;
 
     Sentry.withScope((scope) => {
