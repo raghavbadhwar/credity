@@ -26,11 +26,10 @@ const sidebarItems = [
   { icon: Settings, label: "Admin Console", href: "/admin" },
 ];
 
-export function Sidebar() {
+function SidebarContent({ onClose }: { onClose?: () => void }) {
   const [location] = useLocation();
-  const [open, setOpen] = useState(false);
 
-  const SidebarContent = () => (
+  return (
     <div className="flex h-full flex-col bg-gradient-to-b from-sidebar to-sidebar/95 text-sidebar-foreground border-r border-sidebar-border shadow-xl">
       <div className="flex h-16 items-center px-6 border-b border-sidebar-border/50 backdrop-blur-sm">
         <div className="relative group">
@@ -53,7 +52,7 @@ export function Sidebar() {
                       ? "bg-sidebar-primary text-sidebar-primary-foreground shadow-md shadow-primary/20"
                       : "text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground hover:pl-4"
                   )}
-                  onClick={() => setOpen(false)}
+                  onClick={() => onClose?.()}
                 >
                   {isActive && (
                     <div className="absolute left-0 top-0 bottom-0 w-1 bg-white/20"></div>
@@ -84,6 +83,10 @@ export function Sidebar() {
       </div>
     </div>
   );
+}
+
+export function Sidebar() {
+  const [open, setOpen] = useState(false);
 
   return (
     <>
@@ -101,7 +104,7 @@ export function Sidebar() {
             </Button>
           </SheetTrigger>
           <SheetContent side="left" className="p-0 w-64 border-r-sidebar-border bg-sidebar text-sidebar-foreground">
-            <SidebarContent />
+            <SidebarContent onClose={() => setOpen(false)} />
           </SheetContent>
         </Sheet>
       </div>
