@@ -289,7 +289,11 @@ router.post('/auth/change-password', authMiddleware, async (req, res) => {
 
         // Verify current password if exists
         const passwordHash = (user as any).password;
-        if (passwordHash && currentPassword) {
+        if (passwordHash) {
+            if (!currentPassword) {
+                return res.status(400).json({ error: 'Current password is required to set a new password' });
+            }
+
             const valid = await comparePassword(currentPassword, passwordHash);
             if (!valid) {
                 return res.status(401).json({ error: 'Current password is incorrect' });
