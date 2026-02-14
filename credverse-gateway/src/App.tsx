@@ -176,7 +176,17 @@ function App() {
   );
 }
 
-function RoleButton({ title, description, icon: Icon, color, bg, hover, onClick }: any) {
+interface RoleButtonProps {
+  title: string;
+  description: string;
+  icon: React.ElementType;
+  color: string;
+  bg: string;
+  hover: string;
+  onClick: () => void;
+}
+
+function RoleButton({ title, description, icon: Icon, color, bg, hover, onClick }: RoleButtonProps) {
   return (
     <button
       onClick={onClick}
