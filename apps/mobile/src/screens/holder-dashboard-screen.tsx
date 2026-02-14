@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { ActivityIndicator, Alert, Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import * as Haptics from 'expo-haptics';
 import {
   createCredentialShareQr,
@@ -27,19 +28,86 @@ interface Props {
 
 export function HolderDashboardScreen({ onSwitchRole, onLogout }: Props) {
   const navigation = useNavigation();
-  const [loading, setLoading] = useState(true);
+  const queryClient = useQueryClient();
   const [unlocking, setUnlocking] = useState(true);
-  const [profile, setProfile] = useState<any>(null);
-  const [wallet, setWallet] = useState<any>(null);
-  const [reputation, setReputation] = useState<any>(null);
-  const [safeDate, setSafeDate] = useState<any>(null);
-  const [credentials, setCredentials] = useState<any[]>([]);
   const [selectedCredential, setSelectedCredential] = useState<any>(null);
   const [lastShareLink, setLastShareLink] = useState<string | null>(null);
   const [showZkProof, setShowZkProof] = useState(false);
-  const [consents, setConsents] = useState<any[]>([]);
-  const [dataRequests, setDataRequests] = useState<any[]>([]);
-  const [certInIncidents, setCertInIncidents] = useState<any[]>([]);
+
+  // Queries
+  const commonOptions = {
+    enabled: !unlocking,
+    staleTime: 60000,
+  };
+
+  const profileQuery = useQuery({
+    queryKey: ['holder', 'profile'],
+    queryFn: () => getRoleProfile('holder'),
+    ...commonOptions,
+  });
+
+  const walletQuery = useQuery({
+    queryKey: ['holder', 'wallet'],
+    queryFn: getHolderWalletStatus,
+    ...commonOptions,
+  });
+
+  const reputationQuery = useQuery({
+    queryKey: ['holder', 'reputation'],
+    queryFn: getHolderReputationScore,
+    ...commonOptions,
+  });
+
+  const safeDateQuery = useQuery({
+    queryKey: ['holder', 'safeDate'],
+    queryFn: getHolderSafeDateScore,
+    ...commonOptions,
+  });
+
+  const credentialsQuery = useQuery({
+    queryKey: ['holder', 'credentials'],
+    queryFn: getHolderCredentials,
+    ...commonOptions,
+  });
+
+  const consentsQuery = useQuery({
+    queryKey: ['holder', 'consents'],
+    queryFn: () => getHolderConsents(1),
+    ...commonOptions,
+  });
+
+  const dataRequestsQuery = useQuery({
+    queryKey: ['holder', 'dataRequests'],
+    queryFn: () => getHolderDataRequests(1),
+    ...commonOptions,
+  });
+
+  const incidentsQuery = useQuery({
+    queryKey: ['holder', 'incidents'],
+    queryFn: getHolderCertInIncidents,
+    ...commonOptions,
+  });
+
+  // Derived data
+  const profile = unlocking ? null : profileQuery.data;
+  const wallet = unlocking ? null : walletQuery.data;
+  const reputation = unlocking ? null : reputationQuery.data;
+  const safeDate = unlocking ? null : safeDateQuery.data;
+  const credentials = (unlocking ? [] : credentialsQuery.data) || [];
+  const consents = (unlocking ? [] : consentsQuery.data) || [];
+  const dataRequests = (unlocking ? [] : dataRequestsQuery.data) || [];
+  const certInIncidents = (unlocking ? [] : incidentsQuery.data) || [];
+
+  const isRefreshing = !unlocking && (
+    profileQuery.isFetching ||
+    walletQuery.isFetching ||
+    reputationQuery.isFetching ||
+    safeDateQuery.isFetching ||
+    credentialsQuery.isFetching ||
+    consentsQuery.isFetching ||
+    dataRequestsQuery.isFetching ||
+    incidentsQuery.isFetching
+  );
 
   const summary = useMemo(() => {
     return {
@@ -63,7 +131,7 @@ export function HolderDashboardScreen({ onSwitchRole, onLogout }: Props) {
     return 'Diamond';
   }
 
-  async function authenticateAndLoad() {
+  async function performUnlock() {
     setUnlocking(true);
     try {
       const unlocked = await requireProtectedAction('Unlock holder wallet');
@@ -71,42 +139,21 @@ export function HolderDashboardScreen({ onSwitchRole, onLogout }: Props) {
         Alert.alert('Unlock failed', 'Biometric verification is required to access holder dashboard.');
         return;
       }
-
-      setLoading(true);
-      const [
-        nextProfile,
-        nextWallet,
-        nextReputation,
-        nextSafeDate,
-        nextCredentials,
-        nextConsents,
-        nextDataRequests,
-        nextIncidents,
-      ] = await Promise.all([
-        getRoleProfile('holder'),
-        getHolderWalletStatus(),
-        getHolderReputationScore(),
-        getHolderSafeDateScore(),
-        getHolderCredentials(),
-        getHolderConsents(1),
-        getHolderDataRequests(1),
-        getHolderCertInIncidents(),
-      ]);
-      setProfile(nextProfile);
-      setWallet(nextWallet);
-      setReputation(nextReputation || null);
-      setSafeDate(nextSafeDate || null);
-      setCredentials(nextCredentials);
-      setConsents(nextConsents);
-      setDataRequests(nextDataRequests);
-      setCertInIncidents(nextIncidents);
-    } catch (error: any) {
-      Alert.alert('Load failed', error?.message || 'Unable to load holder data.');
-    } finally {
       setUnlocking(false);
-      setLoading(false);
+    } catch (error: any) {
+      Alert.alert('Unlock failed', error?.message || 'Unable to unlock wallet.');
     }
   }
+
+  async function onRefresh() {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    // Invalidate all holder queries to trigger a refetch
+    await queryClient.invalidateQueries({ queryKey: ['holder'] });
+  }
+
+  useEffect(() => {
+    performUnlock();
+  }, []);
 
   async function onGenerateShare() {
     if (!credentials.length) {
@@ -148,7 +195,7 @@ export function HolderDashboardScreen({ onSwitchRole, onLogout }: Props) {
         return;
       }
       await submitHolderDataExport(1, 'mobile_export_request');
-      await authenticateAndLoad();
+      await queryClient.invalidateQueries({ queryKey: ['holder'] });
       Alert.alert('Submitted', 'Data export request submitted.');
     } catch (error: any) {
       Alert.alert('Request failed', error?.message || 'Unable to submit data export request.');
@@ -164,7 +211,7 @@ export function HolderDashboardScreen({ onSwitchRole, onLogout }: Props) {
         return;
       }
       await submitHolderDataDelete(1, 'mobile_delete_request');
-      await authenticateAndLoad();
+      await queryClient.invalidateQueries({ queryKey: ['holder'] });
       Alert.alert('Submitted', 'Data deletion request submitted.');
     } catch (error: any) {
       Alert.alert('Request failed', error?.message || 'Unable to submit data deletion request.');
@@ -185,16 +232,12 @@ export function HolderDashboardScreen({ onSwitchRole, onLogout }: Props) {
         return;
       }
       await revokeHolderConsent(String(consentId), 1);
-      await authenticateAndLoad();
+      await queryClient.invalidateQueries({ queryKey: ['holder'] });
       Alert.alert('Consent revoked', `Consent ${consentId} has been revoked.`);
     } catch (error: any) {
       Alert.alert('Revocation failed', error?.message || 'Unable to revoke consent.');
     }
   }
-
-  useEffect(() => {
-    authenticateAndLoad();
-  }, []);
 
   async function onLogoutPress() {
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
@@ -257,11 +300,11 @@ export function HolderDashboardScreen({ onSwitchRole, onLogout }: Props) {
       <View style={styles.card}>
         <View style={styles.cardHeaderRow}>
           <Text style={styles.cardTitle}>Wallet Snapshot</Text>
-          {loading ? <ActivityIndicator color={colors.primary} /> : null}
+          {isRefreshing ? <ActivityIndicator color={colors.primary} /> : null}
         </View>
         <Text style={styles.metric}>Credentials: {summary.credentialCount}</Text>
         <Text style={styles.metric}>Trust Score: {String(summary.trust)}</Text>
-        <Pressable style={styles.primaryButton} onPress={authenticateAndLoad}>
+        <Pressable style={styles.primaryButton} onPress={onRefresh}>
           <Text style={styles.primaryButtonText}>Refresh wallet</Text>
         </Pressable>
         <Pressable style={styles.secondaryButton} onPress={() => (navigation as any).navigate('Settings')}>
@@ -297,7 +340,7 @@ export function HolderDashboardScreen({ onSwitchRole, onLogout }: Props) {
       <View style={styles.card}>
         <Text style={styles.cardTitle}>Credentials</Text>
         {!credentials.length ? <Text style={styles.meta}>No credentials available.</Text> : null}
-        {credentials.slice(0, 5).map((cred) => (
+        {credentials.slice(0, 5).map((cred: any) => (
           <Pressable key={String(cred.id)} style={styles.rowItem} onPress={() => onSelectCredential(cred.id)}>
             <Text style={styles.rowTitle}>#{cred.id}</Text>
             <Text style={styles.meta}>{cred.type || cred.templateId || 'Credential'}</Text>
