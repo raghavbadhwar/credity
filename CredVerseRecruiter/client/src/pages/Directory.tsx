@@ -53,7 +53,7 @@ export default function Directory() {
                 </div>
               </CardContent>
               <CardFooter className="pt-3 border-t text-xs text-muted-foreground flex justify-between items-center">
-                <span>ID: {Math.random().toString(36).substr(2, 8).toUpperCase()}</span>
+                <span>ID: {(index + 1).toString().padStart(8, '0')}</span>
                 <ExternalLink className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity" />
               </CardFooter>
             </Card>
