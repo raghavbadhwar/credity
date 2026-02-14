@@ -175,14 +175,22 @@ export function usePrefersReducedMotion(): boolean {
 
     useEffect(() => {
         const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
-        setPrefersReducedMotion(mediaQuery.matches);
+
+        // Use a timeout to avoid setting state during the initial render phase
+        // or ensure it runs only after mount
+        const timeoutId = setTimeout(() => {
+             setPrefersReducedMotion(mediaQuery.matches);
+        }, 0);
 
         const handleChange = (e: MediaQueryListEvent) => {
             setPrefersReducedMotion(e.matches);
         };
 
         mediaQuery.addEventListener('change', handleChange);
-        return () => mediaQuery.removeEventListener('change', handleChange);
+        return () => {
+            mediaQuery.removeEventListener('change', handleChange);
+            clearTimeout(timeoutId);
+        };
     }, []);
 
     return prefersReducedMotion;
