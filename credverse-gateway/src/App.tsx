@@ -1,7 +1,7 @@
 
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Loader2, ArrowRight, ShieldCheck, Wallet, UserCheck, LayoutGrid } from 'lucide-react';
+import { Loader2, ArrowRight, ShieldCheck, Wallet, UserCheck, LayoutGrid, LucideIcon } from 'lucide-react';
 
 // Portal URLs - configurable via environment variables
 const PORTAL_URLS = {
@@ -176,7 +176,17 @@ function App() {
   );
 }
 
-function RoleButton({ title, description, icon: Icon, color, bg, hover, onClick }: any) {
+interface RoleButtonProps {
+  title: string;
+  description: string;
+  icon: LucideIcon;
+  color: string;
+  bg: string;
+  hover: string;
+  onClick: () => void;
+}
+
+function RoleButton({ title, description, icon: Icon, color, bg, hover, onClick }: RoleButtonProps) {
   return (
     <button
       onClick={onClick}
