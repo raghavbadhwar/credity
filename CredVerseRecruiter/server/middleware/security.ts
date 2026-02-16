@@ -184,6 +184,7 @@ const SUSPICIOUS_PATTERNS = [
 export function suspiciousRequestDetector(req: Request, res: Response, next: NextFunction): void {
     const checkValue = (value: unknown): boolean => {
         if (typeof value !== 'string') return false;
+        // eslint-disable-next-line no-useless-escape
         return SUSPICIOUS_PATTERNS.some(pattern => pattern.test(value));
     };
 

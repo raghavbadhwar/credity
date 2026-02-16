@@ -429,6 +429,7 @@ function estimateLlmConfidence(description: string): number {
     if (description.length > 500) confidence += 0.1;
 
     // Check for specific details (dates, times, names)
+    // eslint-disable-next-line no-useless-escape
     const hasSpecificDetails = /\d{1,2}[:\-\/]\d{1,2}|\d{4}[-\/]\d{2}|\d{1,2}(?:am|pm)/i.test(description);
     if (hasSpecificDetails) confidence += 0.1;
 
@@ -497,5 +498,6 @@ function calculateCost(request: ClaimVerifyRequest): ClaimVerifyResponse['costBr
 export async function getClaimById(claimId: string): Promise<ClaimVerifyResponse | null> {
     // In production, would fetch from database
     // For now, return null to indicate not found
+    void claimId;
     return null;
 }
