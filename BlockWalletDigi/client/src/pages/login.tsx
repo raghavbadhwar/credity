@@ -1,12 +1,12 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Fingerprint, ScanFace, ArrowRight } from "lucide-react";
+import { Fingerprint, ScanFace } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import { useLocation } from "wouter";
 
 export default function LoginPage() {
-  const [_, setLocation] = useLocation();
+  const [, setLocation] = useLocation();
   const [isAuthenticating, setIsAuthenticating] = useState(false);
 
   const handleBiometricLogin = () => {
