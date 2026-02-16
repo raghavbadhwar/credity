@@ -2,6 +2,7 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { Fingerprint, ScanFace, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Spinner } from "@/components/ui/spinner";
 import { useLocation } from "wouter";
 
 export default function LoginPage() {
@@ -34,6 +35,8 @@ export default function LoginPage() {
               variant="outline" 
               className="w-24 h-24 rounded-full border-2 border-primary/20 hover:border-primary hover:bg-primary/5 transition-all"
               onClick={handleBiometricLogin}
+              disabled={isAuthenticating}
+              aria-label="Scan face to authenticate"
             >
               <ScanFace className="w-10 h-10 text-primary" />
             </Button>
@@ -41,9 +44,17 @@ export default function LoginPage() {
         </motion.div>
 
         <div className="space-y-4">
-          <Button className="w-full h-12 text-lg" onClick={handleBiometricLogin}>
-            <Fingerprint className="mr-2 h-5 w-5" />
-            Unlock with Biometrics
+          <Button
+            className="w-full h-12 text-lg"
+            onClick={handleBiometricLogin}
+            disabled={isAuthenticating}
+          >
+            {isAuthenticating ? (
+              <Spinner className="mr-2 h-5 w-5" />
+            ) : (
+              <Fingerprint className="mr-2 h-5 w-5" />
+            )}
+            {isAuthenticating ? "Authenticating..." : "Unlock with Biometrics"}
           </Button>
           <p className="text-xs text-muted-foreground">
             Secured by Secure Enclave & Zero-Knowledge Proofs
