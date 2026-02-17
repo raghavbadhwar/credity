@@ -96,14 +96,20 @@ router.get('/events', async (req: Request, res: Response) => {
 router.post('/events', async (req: Request, res: Response) => {
     try {
         const requiredApiKey = process.env.REPUTATION_WRITE_API_KEY;
-        if (requiredApiKey) {
-            const suppliedApiKey = String(req.header('x-api-key') || req.header('X-API-Key') || '');
-            if (!suppliedApiKey || suppliedApiKey !== requiredApiKey) {
-                return res.status(401).json({
-                    success: false,
-                    error: 'Invalid platform write API key',
-                });
-            }
+        // Secure by default: If no API key is configured, deny all writes
+        if (!requiredApiKey) {
+            return res.status(503).json({
+                success: false,
+                error: 'Reputation write API not configured',
+            });
+        }
+
+        const suppliedApiKey = String(req.header('x-api-key') || req.header('X-API-Key') || '');
+        if (!suppliedApiKey || suppliedApiKey !== requiredApiKey) {
+            return res.status(401).json({
+                success: false,
+                error: 'Invalid platform write API key',
+            });
         }
 
         const body = req.body as ReputationEventInput;
