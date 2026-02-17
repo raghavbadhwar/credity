@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Fingerprint, ScanFace, ArrowRight } from "lucide-react";
+import { Fingerprint, ScanFace, ArrowRight, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useLocation } from "wouter";
 
@@ -29,11 +29,13 @@ export default function LoginPage() {
           transition={{ repeat: Infinity, duration: 1.5 }}
         >
           <div className="relative">
-            <div className="absolute inset-0 bg-primary/20 blur-xl rounded-full" />
+            <div className="absolute inset-0 bg-primary/20 blur-xl rounded-full pointer-events-none" />
             <Button 
               variant="outline" 
               className="w-24 h-24 rounded-full border-2 border-primary/20 hover:border-primary hover:bg-primary/5 transition-all"
               onClick={handleBiometricLogin}
+              disabled={isAuthenticating}
+              aria-label="Authenticate with biometrics"
             >
               <ScanFace className="w-10 h-10 text-primary" />
             </Button>
@@ -41,9 +43,22 @@ export default function LoginPage() {
         </motion.div>
 
         <div className="space-y-4">
-          <Button className="w-full h-12 text-lg" onClick={handleBiometricLogin}>
-            <Fingerprint className="mr-2 h-5 w-5" />
-            Unlock with Biometrics
+          <Button
+            className="w-full h-12 text-lg"
+            onClick={handleBiometricLogin}
+            disabled={isAuthenticating}
+          >
+            {isAuthenticating ? (
+              <>
+                <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                Verifying...
+              </>
+            ) : (
+              <>
+                <Fingerprint className="mr-2 h-5 w-5" />
+                Unlock with Biometrics
+              </>
+            )}
           </Button>
           <p className="text-xs text-muted-foreground">
             Secured by Secure Enclave & Zero-Knowledge Proofs
