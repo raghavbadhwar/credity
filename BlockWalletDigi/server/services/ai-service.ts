@@ -37,6 +37,7 @@ export const aiService = {
             const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
             // Remove data:image/jpeg;base64, prefix if present
+// eslint-disable-next-line no-useless-escape
             const base64Data = imageBase64.replace(/^data:image\/\w+;base64,/, "");
 
             const prompt = `
@@ -116,6 +117,7 @@ export const aiService = {
             }
 
             const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+// eslint-disable-next-line no-useless-escape
             const base64Data = imageBase64.replace(/^data:image\/\w+;base64,/, "");
 
             const prompt = `

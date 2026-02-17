@@ -1,0 +1,4 @@
+## 2025-05-23 - [Authentication Bypass in Reputation Service]
+**Vulnerability:** The `POST /api/reputation/events` endpoint allowed unauthenticated writes if the `REPUTATION_WRITE_API_KEY` environment variable was not configured. The check `if (requiredApiKey)` was skipped when the variable was missing, leading to a "fail open" condition.
+**Learning:** Checking for the presence of a security configuration variable must be done *before* using it to enforce access control. If the configuration is missing, the system should "fail closed" (deny access) rather than proceeding without the check. "Secure by Default" means the absence of configuration should result in the most secure state (no access).
+**Prevention:** Always implement a guard clause that checks if the required security configuration is present. If not, return a 503 Service Unavailable or 500 Internal Server Error to prevent the endpoint from being used insecurely.

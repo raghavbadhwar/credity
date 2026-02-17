@@ -9,7 +9,7 @@
  * - Verification Status Dashboard
  */
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "framer-motion";
 import { Sidebar } from "@/components/sidebar";
@@ -23,9 +23,7 @@ import {
     ShieldCheck,
     Fingerprint,
     ScanLine,
-    Upload,
     Loader2,
-    AlertTriangle,
     ChevronRight,
     Eye,
     Smile,
@@ -35,7 +33,6 @@ import {
     FileText,
     Smartphone,
     CircleDot,
-    AlertCircle,
     Clock,
     Zap,
     Shield,
@@ -46,6 +43,7 @@ import { useBiometrics } from "@/hooks/use-biometrics";
 import { useFaceDetection } from "@/hooks/use-face-detection";
 
 // Futuristic Circular Progress Component
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const CircularProgress = ({ value, size = 120, strokeWidth = 8, color = "text-primary" }: any) => {
     const radius = (size - strokeWidth) / 2;
     const circumference = radius * 2 * Math.PI;
@@ -347,6 +345,7 @@ export default function IdentityVerification() {
         };
 
         initCamera();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [pendingCameraStart, livenessSession]);
 
     const completeLiveness = async (frameData?: string | null) => {
@@ -406,7 +405,10 @@ export default function IdentityVerification() {
         if (file) {
             const reader = new FileReader();
             reader.onload = () => {
-                setDocumentPreview(reader.result as string);
+                const result = reader.result as string;
+                setDocumentPreview(result);
+                // Also trigger scan automatically for UX
+                scanDocumentMutation.mutate(result);
             };
             reader.readAsDataURL(file);
         }

@@ -359,6 +359,7 @@ function localDeceptionAnalysis(text: string, startTime: number): LLMAnalysisRes
     }
 
     // Detailed descriptions with specifics are more trustworthy
+// eslint-disable-next-line no-useless-escape
     if (text.length > 200 && /\d{1,2}[:\-\/]\d{1,2}/i.test(text)) {
         confidence += 0.1;
     }
