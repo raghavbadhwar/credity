@@ -1,8 +1,10 @@
+import { useState } from "react";
 import { motion } from "framer-motion";
-import { ShieldCheck, Award, FileText, ExternalLink } from "lucide-react";
+import { ShieldCheck, Award, FileText, ExternalLink, Copy, Check } from "lucide-react";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { useToast } from "@/hooks/use-toast";
 
 export interface Credential {
   id: string;
@@ -20,6 +22,29 @@ interface CredentialCardProps {
 }
 
 export function CredentialCard({ credential, index }: CredentialCardProps) {
+  const { toast } = useToast();
+  const [isCopied, setIsCopied] = useState(false);
+
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(credential.id);
+      setIsCopied(true);
+      toast({
+        title: "Copied!",
+        description: "Credential ID copied to clipboard",
+        duration: 2000,
+      });
+      setTimeout(() => setIsCopied(false), 2000);
+    } catch {
+      toast({
+        title: "Failed to copy",
+        description: "Could not access clipboard",
+        variant: "destructive",
+        duration: 2000,
+      });
+    }
+  };
+
   const getIcon = () => {
     switch (credential.type) {
       case "degree": return <Award className="w-6 h-6 text-primary" />;
@@ -67,9 +92,21 @@ export function CredentialCard({ credential, index }: CredentialCardProps) {
             </div>
             <div>
               <p className="text-muted-foreground text-xs uppercase tracking-wider mb-1">ID</p>
-              <p className="font-mono text-white/90 truncate" title={credential.id}>
-                {credential.id.substring(0, 8)}...
-              </p>
+              <button
+                onClick={handleCopy}
+                className="flex items-center gap-2 hover:bg-white/5 p-1 -ml-1 rounded transition-colors group/copy focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none w-full text-left"
+                aria-label="Copy credential ID"
+                title="Click to copy ID"
+              >
+                <span className="font-mono text-white/90 truncate flex-1 block">
+                  {credential.id.substring(0, 8)}...
+                </span>
+                {isCopied ? (
+                  <Check className="w-3 h-3 text-green-500 flex-shrink-0" />
+                ) : (
+                  <Copy className="w-3 h-3 text-muted-foreground flex-shrink-0" />
+                )}
+              </button>
             </div>
           </div>
           

@@ -1,0 +1,16 @@
+
+> rest-express@1.0.0 dev:client
+> vite dev --port 5000
+
+
+  VITE v7.1.12  ready in 516 ms
+
+  ➜  Local:   http://localhost:5000/
+  ➜  Network: http://192.168.0.2:5000/
+[baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
+[RUNTIME_ERROR]{"type":"runtime-error","timestamp":1771412758223,"name":"Error","message":"Failed to execute 'writeText' on 'Clipboard': Write permission denied.","stack":""}
+[RUNTIME_ERROR]{"type":"runtime-error","timestamp":1771412784803,"name":"Error","message":"Failed to execute 'writeText' on 'Clipboard': Write permission denied.","stack":""}
+11:06:40 AM [vite] (client) hmr update /src/App.tsx, /src/index.css
+11:06:44 AM [vite] (client) hmr update /src/pages/ux-check.tsx, /src/index.css
+11:08:13 AM [vite] (client) hmr update /src/components/credential-card.tsx, /src/index.css
+11:08:56 AM [vite] (client) hmr update /src/components/credential-card.tsx, /src/index.css
