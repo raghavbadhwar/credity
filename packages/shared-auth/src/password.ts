@@ -45,8 +45,11 @@ export function validatePasswordStrength(password: string): PasswordValidationRe
     if (!/[0-9]/.test(password)) {
         errors.push('Password must contain at least one number');
     }
-    // eslint-disable-next-line no-useless-escape
-    if (!/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)) {
+
+    // Use RegExp constructor to avoid eslint no-useless-escape on forward slash in regex literal
+    // Special chars: !@#$%^&*()_+-=[]{};':"\||,.<>/?
+    const specialChars = new RegExp("[!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>/?]");
+    if (!specialChars.test(password)) {
         errors.push('Password must contain at least one special character');
     }
 
