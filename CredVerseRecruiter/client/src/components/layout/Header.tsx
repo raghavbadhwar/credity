@@ -9,15 +9,12 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 export function Header({ title }: { title: string }) {
-  const [theme, setTheme] = useState<"light" | "dark">("light");
-
-  useEffect(() => {
-    const isDark = document.documentElement.classList.contains("dark");
-    setTheme(isDark ? "dark" : "light");
-  }, []);
+  const [theme, setTheme] = useState<"light" | "dark">(() =>
+    typeof document !== 'undefined' && document.documentElement.classList.contains("dark") ? "dark" : "light"
+  );
 
   const toggleTheme = () => {
     const newTheme = theme === "light" ? "dark" : "light";
