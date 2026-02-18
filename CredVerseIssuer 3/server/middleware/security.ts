@@ -169,12 +169,14 @@ export function additionalSecurityHeaders(_req: Request, res: Response, next: Ne
 // =============================================================================
 
 const SUSPICIOUS_PATTERNS = [
+    // eslint-disable-next-line no-useless-escape
     /(\%27)|(\')|(\-\-)|(\%23)|(#)/i,     // SQL injection
     /<script\b[^>]*>([\s\S]*?)<\/script>/gi, // XSS script tags
     /javascript:/gi,                         // JavaScript protocol
     /on\w+\s*=/gi,                          // Event handlers
     /eval\s*\(/gi,                           // eval() calls
     /expression\s*\(/gi,                     // CSS expression
+    // eslint-disable-next-line no-useless-escape
     /\.\.\//g,                               // Path traversal
 ];
 
