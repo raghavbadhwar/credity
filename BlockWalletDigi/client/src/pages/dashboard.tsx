@@ -11,33 +11,18 @@ import {
   FileText,
   ShieldCheck,
   CheckCircle2,
-  MoreHorizontal,
   Filter,
   X,
   Loader2,
   Bell,
   RefreshCw,
-  Camera
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { ShareModal } from "@/components/share-modal";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { DashboardSkeleton, CredentialCardSkeleton, StatsCardSkeleton } from "@/components/ui/skeletons";
-import { ScanQRButton } from "@/components/qr-scanner";
-import { ErrorBoundary } from "@/components/error-boundary";
 import { TrustScoreCard } from "@/components/trust-score-card";
-
-interface WalletCredential {
-  id: string;
-  type: string[];
-  issuer: string;
-  issuanceDate: string;
-  data: any;
-  category: string;
-  anchorStatus: string;
-  hash: string;
-  verificationCount: number;
-}
+import { CredentialListItem, WalletCredential } from "@/components/credential-list-item";
+import { getCategoryColor } from "@/lib/utils";
 
 interface WalletStats {
   totalCredentials: number;
@@ -115,18 +100,6 @@ export default function Dashboard() {
     { icon: Plus, label: "Add Credential", href: "/receive" },
     { icon: Settings, label: "Settings", href: "/settings" },
   ];
-
-  // Category colors
-  const getCategoryColor = (category: string) => {
-    const colors: Record<string, string> = {
-      academic: "from-blue-600 to-blue-800",
-      employment: "from-purple-600 to-purple-800",
-      skill: "from-green-600 to-green-800",
-      government: "from-red-600 to-red-800",
-      medical: "from-pink-600 to-pink-800",
-    };
-    return colors[category] || "from-gray-600 to-gray-800";
-  };
 
   const isLoading = walletLoading || credentialsLoading;
 
@@ -272,28 +245,7 @@ export default function Dashboard() {
               ) : (
                 <div className="space-y-3">
                   {credentials.map((cred, i) => (
-                    <Link key={cred.id} href={`/credential/${cred.id}`}>
-                      <motion.div
-                        initial={{ opacity: 0, x: -10 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: i * 0.05 }}
-                        className="bg-card p-4 rounded-xl border border-border flex items-center gap-4 shadow-sm hover:border-primary/50 transition-colors cursor-pointer"
-                      >
-                        <div className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 bg-gradient-to-br ${getCategoryColor(cred.category)} text-white`}>
-                          <ShieldCheck className="w-6 h-6" />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium truncate">{cred.data?.name || cred.type[1] || 'Credential'}</p>
-                          <p className="text-xs text-muted-foreground">{cred.issuer}</p>
-                        </div>
-                        <div className="flex flex-col items-end gap-1">
-                          <Badge variant={cred.anchorStatus === 'anchored' ? 'default' : 'secondary'} className="text-[10px]">
-                            {cred.anchorStatus === 'anchored' ? '⛓ On-chain' : 'Pending'}
-                          </Badge>
-                          <span className="text-[10px] text-muted-foreground capitalize">{cred.category}</span>
-                        </div>
-                      </motion.div>
-                    </Link>
+                    <CredentialListItem key={cred.id} credential={cred} index={i} />
                   ))}
                 </div>
               )}
