@@ -36,7 +36,7 @@ export function initSentry(appName?: string): void {
     console.log(`[Sentry] Error monitoring initialized for ${appName || APP_NAME}`);
 }
 
-export function captureException(error: Error, context?: Record<string, any>): void {
+export function captureException(error: Error, context?: Record<string, unknown>): void {
     if (!SENTRY_DSN) return;
 
     Sentry.withScope((scope) => {
