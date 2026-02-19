@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Search, MapPin, ExternalLink, ShieldCheck } from "lucide-react";
+import { useMemo } from "react";
 
 const issuers = [
   { name: "Massachusetts Institute of Technology", location: "Cambridge, MA", type: "University", verified: true },
@@ -17,6 +18,10 @@ const issuers = [
 ];
 
 export default function Directory() {
+  // Use a stable ID generation or just use index/hash for demo.
+  // In a real app, this ID would come from the database.
+  const generateId = (index: number) => `ID-${(index + 1).toString().padStart(6, '0')}`;
+
   return (
     <DashboardLayout title="Issuer Directory">
       <div className="space-y-6">
@@ -53,7 +58,7 @@ export default function Directory() {
                 </div>
               </CardContent>
               <CardFooter className="pt-3 border-t text-xs text-muted-foreground flex justify-between items-center">
-                <span>ID: {Math.random().toString(36).substr(2, 8).toUpperCase()}</span>
+                <span>ID: {generateId(index)}</span>
                 <ExternalLink className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity" />
               </CardFooter>
             </Card>
