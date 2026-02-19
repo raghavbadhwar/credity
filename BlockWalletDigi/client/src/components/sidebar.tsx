@@ -10,7 +10,6 @@ import {
   Moon,
   Sun,
   Link2,
-  BarChart3,
   ScanFace
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -56,6 +55,7 @@ export function Sidebar() {
             size="icon"
             className="h-8 w-8 text-muted-foreground hover:text-foreground"
             onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+            aria-label="Toggle theme"
           >
             {theme === "dark" ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
           </Button>
@@ -94,10 +94,10 @@ export function Sidebar() {
           <div className="space-y-1">
             {categories.map((cat, idx) => (
               <Link key={idx} href={`/?category=${cat.label.toLowerCase()}`}>
-                <button className="w-full flex items-center gap-3 px-3 py-2 text-sm rounded-lg text-muted-foreground hover:bg-secondary hover:text-foreground transition-colors">
+                <div className="w-full flex items-center gap-3 px-3 py-2 text-sm rounded-lg text-muted-foreground hover:bg-secondary hover:text-foreground transition-colors">
                   <span className={cn("w-2.5 h-2.5 rounded-full ring-2 ring-white dark:ring-black shadow-sm", cat.color)} />
                   {cat.label}
-                </button>
+                </div>
               </Link>
             ))}
           </div>
