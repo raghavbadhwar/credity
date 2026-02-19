@@ -92,6 +92,18 @@ export async function comparePassword(password: string, hash: string): Promise<b
     return bcrypt.compare(password, hash);
 }
 
+let dummyHash: string | null = null;
+/**
+ * Get a dummy password hash for timing attack mitigation
+ */
+export async function getDummyHash(): Promise<string> {
+    if (!dummyHash) {
+        // Hash a constant string with the same cost factor as real passwords
+        dummyHash = await hashPassword('dummy_security_padding');
+    }
+    return dummyHash;
+}
+
 /**
  * Generate access token
  */
