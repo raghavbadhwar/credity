@@ -3,11 +3,13 @@
  */
 
 // Initialize Sentry BEFORE importing anything else
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { initSentry, sentryErrorHandler } from './services/sentry';
 initSentry('credverse-gateway');
 
 import 'dotenv/config';
 import express from 'express';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import { createServer } from 'http';
@@ -139,7 +141,7 @@ const gatewayHTML = `
             await setupVite(httpServer, app);
             console.log('[Gateway] Vite dev server attached');
         } catch (error) {
-            console.log('[Gateway] Vite unavailable, using inline HTML fallback');
+            console.log('[Gateway] Vite unavailable, using inline HTML fallback', error);
             app.get('/', (req, res) => {
                 res.setHeader('Content-Type', 'text/html');
                 res.send(gatewayHTML);
