@@ -608,9 +608,9 @@ function SidebarMenuSkeleton({
   showIcon?: boolean
 }) {
   // Random width between 50 to 90%.
-  const width = React.useMemo(() => {
-    return `${Math.floor(Math.random() * 40) + 50}%`
-  }, [])
+  // Fix: Move useMemo to not use Math.random() directly if possible, or accept it's client side only.
+  // Actually, random in render is bad. Use a deterministic id or just a static width for skeleton to fix "purity" error.
+  const width = "70%";
 
   return (
     <div
