@@ -45,7 +45,16 @@ export function validatePasswordStrength(password: string): PasswordValidationRe
     if (!/[0-9]/.test(password)) {
         errors.push('Password must contain at least one number');
     }
-    if (!/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)) {
+
+    const specialChars = "!@#$%^&*()_+-=[]{};':\"\\|,.<>/?";
+    let hasSpecialChar = false;
+    for (const char of password) {
+        if (specialChars.includes(char)) {
+            hasSpecialChar = true;
+            break;
+        }
+    }
+    if (!hasSpecialChar) {
         errors.push('Password must contain at least one special character');
     }
 
