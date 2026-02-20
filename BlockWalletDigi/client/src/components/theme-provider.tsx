@@ -20,6 +20,7 @@ const initialState: ThemeProviderState = {
 
 const ThemeProviderContext = createContext<ThemeProviderState>(initialState)
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function ThemeProvider({
   children,
   defaultTheme = "system",
@@ -62,6 +63,7 @@ export function ThemeProvider({
   )
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useTheme = () => {
   const context = useContext(ThemeProviderContext)
 
