@@ -3,12 +3,11 @@
  */
 
 // Initialize Sentry BEFORE importing anything else
-import { initSentry, sentryErrorHandler } from './services/sentry';
+import { initSentry } from './services/sentry';
 initSentry('credverse-gateway');
 
 import 'dotenv/config';
 import express from 'express';
-import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import { createServer } from 'http';
 import path from 'path';
