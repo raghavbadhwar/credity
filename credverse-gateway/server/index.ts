@@ -3,11 +3,11 @@
  */
 
 // Initialize Sentry BEFORE importing anything else
-import { initSentry } from './services/sentry';
+import { initSentry, captureException } from './services/sentry';
 initSentry('credverse-gateway');
 
 import 'dotenv/config';
-import express from 'express';
+import express, { type Request, type Response, type NextFunction } from 'express';
 import cookieParser from 'cookie-parser';
 import { createServer } from 'http';
 import path from 'path';
@@ -60,6 +60,20 @@ app.use('/api/mobile', mobileProxyRoutes);
 // Health check
 app.get('/api/health', (req, res) => {
     res.json({ status: 'ok', app: 'credverse-gateway' });
+});
+
+// Global Error Handler
+app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
+    const status = err.status || err.statusCode || 500;
+    const message = err.message || "Internal Server Error";
+
+    // Log error
+    if (status >= 500) {
+        console.error('[Error]', err);
+        captureException(err);
+    }
+
+    res.status(status).json({ message });
 });
 
 // Simple inline HTML for gateway login page (fallback when Vite unavailable)
