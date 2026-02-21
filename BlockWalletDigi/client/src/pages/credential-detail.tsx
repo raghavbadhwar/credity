@@ -25,6 +25,7 @@ import {
 import { motion } from "framer-motion";
 import { ShareModal } from "@/components/share-modal";
 import { useQuery } from "@tanstack/react-query";
+import { getCategoryColor } from "@/lib/utils";
 
 interface CredentialData {
   id: string;
@@ -112,16 +113,6 @@ export default function CredentialDetail() {
       </div>
     );
   }
-
-  const getCategoryColor = (category: string) => {
-    const colors: Record<string, string> = {
-      academic: "from-blue-600 to-blue-800",
-      employment: "from-purple-600 to-purple-800",
-      skill: "from-green-600 to-green-800",
-      government: "from-red-600 to-red-800",
-    };
-    return colors[category] || "from-gray-600 to-gray-800";
-  };
 
   const actions = [
     {
