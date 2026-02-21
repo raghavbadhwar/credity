@@ -36,6 +36,7 @@ export function initSentry(appName?: string): void {
     console.log(`[Sentry] Error monitoring initialized for ${appName || APP_NAME}`);
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function captureException(error: Error, context?: Record<string, any>): void {
     if (!SENTRY_DSN) return;
 

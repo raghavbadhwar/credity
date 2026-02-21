@@ -4,9 +4,9 @@ declare global {
     interface Window {
         ethereum?: {
             isMetaMask?: boolean;
-            request: (args: { method: string; params?: any[] }) => Promise<any>;
-            on: (event: string, callback: (...args: any[]) => void) => void;
-            removeListener: (event: string, callback: (...args: any[]) => void) => void;
+            request: (args: { method: string; params?: unknown[] }) => Promise<any>;
+            on: (event: string, callback: (...args: unknown[]) => void) => void;
+            removeListener: (event: string, callback: (...args: unknown[]) => void) => void;
             selectedAddress?: string;
         };
     }
@@ -90,7 +90,7 @@ export function useWallet() {
                 localStorage.setItem('walletConnected', 'true');
                 localStorage.setItem('walletAddress', accounts[0]);
             }
-        } catch (error: any) {
+        } catch (error: unknown) {
             let errorMessage = 'Failed to connect wallet';
             if (error.code === 4001) {
                 errorMessage = 'Connection rejected by user';
