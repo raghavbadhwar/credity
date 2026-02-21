@@ -65,6 +65,7 @@ export default function CredentialDetail() {
   const [match, params] = useRoute("/credential/:id");
   const [shareModalOpen, setShareModalOpen] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [copiedId, setCopiedId] = useState(false);
 
   // Fetch credential details
   const { data, isLoading, error } = useQuery({
@@ -86,6 +87,14 @@ export default function CredentialDetail() {
       navigator.clipboard.writeText(credential.hash);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
+    }
+  };
+
+  const handleCopyId = () => {
+    if (credential?.id) {
+      navigator.clipboard.writeText(credential.id);
+      setCopiedId(true);
+      setTimeout(() => setCopiedId(false), 2000);
     }
   };
 
@@ -267,7 +276,15 @@ export default function CredentialDetail() {
                 <div className="space-y-3 text-sm">
                   <div className="flex justify-between py-2 border-b border-border">
                     <span className="text-muted-foreground">Credential ID</span>
-                    <span className="font-mono text-xs truncate max-w-[150px]">{credential.id}</span>
+                    <button
+                      onClick={handleCopyId}
+                      className="flex items-center gap-1 text-primary hover:underline"
+                      title="Copy ID"
+                      aria-label={`Copy Credential ID: ${credential.id}`}
+                    >
+                      <span className="font-mono text-xs truncate max-w-[150px]">{credential.id}</span>
+                      {copiedId ? <CheckCircle2 className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
+                    </button>
                   </div>
                   <div className="flex justify-between py-2 border-b border-border">
                     <span className="text-muted-foreground">Schema Type</span>
