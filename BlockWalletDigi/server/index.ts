@@ -5,10 +5,9 @@ initSentry('credverse-wallet');
 // Initialize PostHog Analytics
 import { initAnalytics } from "./services/analytics";
 initAnalytics();
-import express, { type Request, Response, NextFunction } from "express";
-import helmet from "helmet";
-import cors from "cors";
+import express from "express";
 import { errorHandler } from "./middleware/error-handler";
+import { additionalSecurityHeaders } from "./middleware/security";
 import { setupSecurity } from "@credverse/shared-auth";
 import { initAuth } from "@credverse/shared-auth";
 import { registerRoutes } from "./routes";
@@ -50,6 +49,9 @@ const allowedOrigins = process.env.ALLOWED_ORIGINS?.split(',') || [
 ];
 
 setupSecurity(app, { allowedOrigins });
+
+// Apply additional security headers (Permissions-Policy, etc.)
+app.use(additionalSecurityHeaders);
 
 app.use(
   express.json({
