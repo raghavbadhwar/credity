@@ -19,7 +19,6 @@ import {
   Eye,
   Loader2,
   Copy,
-  ExternalLink,
   AlertTriangle
 } from "lucide-react";
 import { motion } from "framer-motion";
@@ -32,6 +31,7 @@ interface CredentialData {
   issuer: string;
   issuanceDate: string;
   expirationDate?: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   data: any;
   category: string;
   anchorStatus: string;
@@ -61,14 +61,15 @@ interface ConsentLog {
 }
 
 export default function CredentialDetail() {
-  const [location, setLocation] = useLocation();
-  const [match, params] = useRoute("/credential/:id");
+  const [, setLocation] = useLocation();
+  const [, params] = useRoute("/credential/:id");
   const [shareModalOpen, setShareModalOpen] = useState(false);
   const [copied, setCopied] = useState(false);
   const [copiedId, setCopiedId] = useState(false);
 
   // Fetch credential details
-  const { data, isLoading, error } = useQuery({
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data, isLoading, error } = useQuery<any>({
     queryKey: [`wallet-credential-${params?.id}`],
     queryFn: async () => {
       const res = await fetch(`/api/wallet/credentials/${params?.id}?userId=1`);
@@ -202,7 +203,7 @@ export default function CredentialDetail() {
               <div className="grid grid-cols-2 gap-6 pt-4 border-t border-white/20">
                 <div>
                   <p className="text-white/60 text-xs uppercase">Recipient</p>
-                  <p className="text-lg font-semibold">{typeof credential.data?.recipient === 'object' ? credential.data?.recipient?.name : credential.data?.recipient || "John Doe"}</p>
+                  <p className="text-lg font-semibold">{typeof credential.data?.recipient === 'object' ? (credential.data?.recipient as {name: string})?.name : credential.data?.recipient || "John Doe"}</p>
                 </div>
                 <div>
                   <p className="text-white/60 text-xs uppercase">Issued On</p>
@@ -386,6 +387,7 @@ export default function CredentialDetail() {
       </div>
 
       <ShareModal
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         credential={credential as any}
         open={shareModalOpen}
         onOpenChange={setShareModalOpen}
