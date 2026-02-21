@@ -85,17 +85,23 @@ export default function CredentialDetail() {
 
   const handleCopyHash = () => {
     if (credential?.hash) {
-      navigator.clipboard.writeText(credential.hash);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
+      navigator.clipboard.writeText(credential.hash)
+        .then(() => {
+          setCopied(true);
+          setTimeout(() => setCopied(false), 2000);
+        })
+        .catch((err) => console.error("Failed to copy hash:", err));
     }
   };
 
   const handleCopyId = () => {
     if (credential?.id) {
-      navigator.clipboard.writeText(credential.id);
-      setCopiedId(true);
-      setTimeout(() => setCopiedId(false), 2000);
+      navigator.clipboard.writeText(credential.id)
+        .then(() => {
+          setCopiedId(true);
+          setTimeout(() => setCopiedId(false), 2000);
+        })
+        .catch((err) => console.error("Failed to copy ID:", err));
     }
   };
 
