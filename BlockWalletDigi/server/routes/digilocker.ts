@@ -197,6 +197,8 @@ router.post("/digilocker/import-all", async (req, res) => {
 
                 imported.push(doc.name);
             } catch (e) {
+                // eslint-disable-next-line no-console
+                console.error(`Failed to import ${doc.name}`, e);
                 failed.push(doc.name);
             }
         }

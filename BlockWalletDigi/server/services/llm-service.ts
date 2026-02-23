@@ -297,6 +297,7 @@ async function callOpenAI(prompt: string): Promise<any> {
  */
 function parseJsonResponse(text: string): any {
     // Remove markdown code blocks if present
+    // eslint-disable-next-line no-useless-escape
     const cleaned = text.replace(/```json?\n?/g, '').replace(/```/g, '').trim();
     try {
         return JSON.parse(cleaned);

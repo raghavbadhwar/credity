@@ -32,6 +32,8 @@ router.patch("/user", async (req, res) => {
         const updatedUser = await storage.updateUser(userId, parseResult.data);
         res.json(updatedUser);
     } catch (error) {
+        // eslint-disable-next-line no-console
+        console.error("Update user error:", error);
         res.status(500).json({ message: "Internal Server Error" });
     }
 });

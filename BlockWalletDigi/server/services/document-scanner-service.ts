@@ -123,7 +123,8 @@ export async function scanDocument(request: DocumentScanRequest): Promise<Docume
 /**
  * Detect document type from image
  */
-function detectDocumentType(imageData: string): string {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+function detectDocumentType(_imageData: string): string {
     // In production, this would use ML model to detect document type
     // Based on layout, colors, patterns, etc.
 
@@ -140,7 +141,8 @@ function detectDocumentType(imageData: string): string {
 /**
  * Extract fields using OCR
  */
-async function extractFields(imageData: string, documentType: string): Promise<ExtractedField[]> {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+async function extractFields(_imageData: string, documentType: string): Promise<ExtractedField[]> {
     // In production, this would:
     // 1. Call OCR API (Google Vision, AWS Textract, or custom model)
     // 2. Apply document-specific field extraction rules
@@ -197,7 +199,8 @@ async function extractFields(imageData: string, documentType: string): Promise<E
 /**
  * Parse extracted fields into structured data
  */
-function parseExtractedData(fields: ExtractedField[], documentType: string): DocumentScanResult['extractedData'] {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+function parseExtractedData(fields: ExtractedField[], _documentType: string): DocumentScanResult['extractedData'] {
     const data: DocumentScanResult['extractedData'] = {};
 
     for (const field of fields) {
@@ -264,7 +267,8 @@ function normalizeDateFormat(dateStr: string): string {
 /**
  * Extract face from document photo
  */
-function extractFaceFromDocument(imageData: string): { found: boolean; imageData?: string } {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+function extractFaceFromDocument(_imageData: string): { found: boolean; imageData?: string } {
     // In production, this would:
     // 1. Detect face region in document
     // 2. Extract and crop face
@@ -280,7 +284,8 @@ function extractFaceFromDocument(imageData: string): { found: boolean; imageData
 /**
  * Run authenticity checks on document
  */
-function runAuthenticityChecks(imageData: string, documentType: string): DocumentScanResult['authenticityChecks'] {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+function runAuthenticityChecks(_imageData: string, documentType: string): DocumentScanResult['authenticityChecks'] {
     // In production, these would be actual CV/ML checks:
     // - Hologram detection
     // - Microprint verification
