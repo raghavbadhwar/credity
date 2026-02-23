@@ -4,7 +4,7 @@
  * Helper functions and hooks for improving accessibility
  */
 
-import { useEffect, useCallback, useRef } from 'react';
+import React, { useEffect, useCallback, useRef } from 'react';
 
 /**
  * Announce message to screen readers
@@ -171,11 +171,13 @@ export function useLiveRegion() {
  * Reduced motion preference hook
  */
 export function usePrefersReducedMotion(): boolean {
-    const [prefersReducedMotion, setPrefersReducedMotion] = React.useState(false);
+    const [prefersReducedMotion, setPrefersReducedMotion] = React.useState(
+        () => typeof window !== 'undefined' ? window.matchMedia('(prefers-reduced-motion: reduce)').matches : false
+    );
 
     useEffect(() => {
         const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
-        setPrefersReducedMotion(mediaQuery.matches);
+        // No initial set needed as we used lazy init
 
         const handleChange = (e: MediaQueryListEvent) => {
             setPrefersReducedMotion(e.matches);
@@ -187,6 +189,3 @@ export function usePrefersReducedMotion(): boolean {
 
     return prefersReducedMotion;
 }
-
-// Import React for the hook
-import React from 'react';
