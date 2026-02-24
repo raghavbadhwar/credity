@@ -172,6 +172,7 @@ export class MemStorage implements IStorage {
         key,
         {
           ...value,
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           issuanceDate: parseDate((value as any).issuanceDate),
         },
       ]),
@@ -181,6 +182,7 @@ export class MemStorage implements IStorage {
         key,
         {
           ...value,
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           timestamp: parseDate((value as any).timestamp),
         },
       ]),

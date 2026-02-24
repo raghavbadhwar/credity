@@ -70,3 +70,6 @@ export const useTheme = () => {
 
   return context
 }
+
+// eslint-disable-next-line react-refresh/only-export-components
+export const ThemeProviderContext2 = ThemeProviderContext;

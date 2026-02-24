@@ -263,6 +263,9 @@ export function QRScanner({ onScan, onClose, title = "Scan QR Code", description
 /**
  * Button to open QR scanner
  */
+/**
+ * Button to open QR scanner
+ */
 export function ScanQRButton({
     onScan,
     className

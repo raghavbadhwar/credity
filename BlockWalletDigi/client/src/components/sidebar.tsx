@@ -10,7 +10,7 @@ import {
   Moon,
   Sun,
   Link2,
-  BarChart3,
+  // BarChart3,
   ScanFace
 } from "lucide-react";
 import { cn } from "@/lib/utils";
