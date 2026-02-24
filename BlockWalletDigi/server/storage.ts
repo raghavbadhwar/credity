@@ -44,6 +44,8 @@ export class MemStorage implements IStorage {
   private users: Map<number, User>;
   private credentials: Map<number, Credential>;
   private activities: Map<number, Activity>;
+  private credentialsByUserId: Map<number, number[]>;
+  private activitiesByUserId: Map<number, number[]>;
   private currentUserId: number;
   private currentCredentialId: number;
   private currentActivityId: number;
@@ -52,6 +54,8 @@ export class MemStorage implements IStorage {
     this.users = new Map();
     this.credentials = new Map();
     this.activities = new Map();
+    this.credentialsByUserId = new Map();
+    this.activitiesByUserId = new Map();
     this.currentUserId = 1;
     this.currentCredentialId = 1;
     this.currentActivityId = 1;
@@ -98,9 +102,10 @@ export class MemStorage implements IStorage {
   }
 
   async listCredentials(userId: number): Promise<Credential[]> {
-    return Array.from(this.credentials.values()).filter(
-      (c) => c.userId === userId && !c.isArchived
-    );
+    const ids = this.credentialsByUserId.get(userId) || [];
+    return ids
+      .map((id) => this.credentials.get(id)!)
+      .filter((c) => c && !c.isArchived);
   }
 
   async createCredential(insertCredential: InsertCredential): Promise<Credential> {
@@ -112,14 +117,23 @@ export class MemStorage implements IStorage {
       isArchived: insertCredential.isArchived ?? false
     };
     this.credentials.set(id, credential);
+
+    const userCreds = this.credentialsByUserId.get(credential.userId) || [];
+    userCreds.push(id);
+    this.credentialsByUserId.set(credential.userId, userCreds);
+
     return credential;
   }
 
   // Activities
   async listActivities(userId: number): Promise<Activity[]> {
-    return Array.from(this.activities.values())
-      .filter((a) => a.userId === userId)
-      .sort((a, b) => (b.timestamp?.getTime() ?? 0) - (a.timestamp?.getTime() ?? 0));
+    const ids = this.activitiesByUserId.get(userId) || [];
+    return ids
+      .map((id) => this.activities.get(id)!)
+      .filter((a) => !!a)
+      .sort(
+        (a, b) => (b.timestamp?.getTime() ?? 0) - (a.timestamp?.getTime() ?? 0),
+      );
   }
 
   async createActivity(insertActivity: InsertActivity): Promise<Activity> {
@@ -127,9 +141,14 @@ export class MemStorage implements IStorage {
     const activity: Activity = {
       ...insertActivity,
       id,
-      timestamp: new Date()
+      timestamp: new Date(),
     };
     this.activities.set(id, activity);
+
+    const userActivities = this.activitiesByUserId.get(activity.userId) || [];
+    userActivities.push(id);
+    this.activitiesByUserId.set(activity.userId, userActivities);
+
     return activity;
   }
 
@@ -145,18 +164,45 @@ export class MemStorage implements IStorage {
   }
 
   importState(state: WalletStorageState): void {
-    this.users = new Map((state.users || []).map(([key, value]) => [key, value]));
-    this.credentials = new Map((state.credentials || []).map(([key, value]) => [key, {
-      ...value,
-      issuanceDate: parseDate((value as any).issuanceDate),
-    }]));
-    this.activities = new Map((state.activities || []).map(([key, value]) => [key, {
-      ...value,
-      timestamp: parseDate((value as any).timestamp),
-    }]));
+    this.users = new Map(
+      (state.users || []).map(([key, value]) => [key, value]),
+    );
+    this.credentials = new Map(
+      (state.credentials || []).map(([key, value]) => [
+        key,
+        {
+          ...value,
+          issuanceDate: parseDate((value as any).issuanceDate),
+        },
+      ]),
+    );
+    this.activities = new Map(
+      (state.activities || []).map(([key, value]) => [
+        key,
+        {
+          ...value,
+          timestamp: parseDate((value as any).timestamp),
+        },
+      ]),
+    );
     this.currentUserId = state.currentUserId || 1;
     this.currentCredentialId = state.currentCredentialId || 1;
     this.currentActivityId = state.currentActivityId || 1;
+
+    // Rebuild indices
+    this.credentialsByUserId = new Map();
+    for (const [id, cred] of this.credentials) {
+      const userCreds = this.credentialsByUserId.get(cred.userId) || [];
+      userCreds.push(id);
+      this.credentialsByUserId.set(cred.userId, userCreds);
+    }
+
+    this.activitiesByUserId = new Map();
+    for (const [id, activity] of this.activities) {
+      const userActivities = this.activitiesByUserId.get(activity.userId) || [];
+      userActivities.push(id);
+      this.activitiesByUserId.set(activity.userId, userActivities);
+    }
   }
 }
 
