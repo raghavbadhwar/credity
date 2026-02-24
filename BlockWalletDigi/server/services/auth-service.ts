@@ -291,6 +291,21 @@ export function requireRole(...roles: AuthUser['role'][]) {
  */
 const rateLimitMap = new Map<string, { count: number; resetAt: number }>();
 
+// Expose for testing
+export const _rateLimitMapForTesting = rateLimitMap;
+
+export function cleanupRateLimits(): void {
+    const now = Date.now();
+    for (const [key, record] of rateLimitMap.entries()) {
+        if (now > record.resetAt) {
+            rateLimitMap.delete(key);
+        }
+    }
+}
+
+// Cleanup every 5 minutes
+setInterval(cleanupRateLimits, 5 * 60 * 1000).unref();
+
 export function checkRateLimit(key: string, maxRequests: number, windowMs: number): boolean {
     const now = Date.now();
     const record = rateLimitMap.get(key);
