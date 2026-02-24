@@ -25,6 +25,12 @@ import {
 import { motion } from "framer-motion";
 import { ShareModal } from "@/components/share-modal";
 import { useQuery } from "@tanstack/react-query";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface CredentialData {
   id: string;
@@ -65,6 +71,7 @@ export default function CredentialDetail() {
   const [match, params] = useRoute("/credential/:id");
   const [shareModalOpen, setShareModalOpen] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [copiedId, setCopiedId] = useState(false);
 
   // Fetch credential details
   const { data, isLoading, error } = useQuery({
@@ -83,9 +90,23 @@ export default function CredentialDetail() {
 
   const handleCopyHash = () => {
     if (credential?.hash) {
-      navigator.clipboard.writeText(credential.hash);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
+      navigator.clipboard.writeText(credential.hash)
+        .then(() => {
+          setCopied(true);
+          setTimeout(() => setCopied(false), 2000);
+        })
+        .catch(err => console.error("Failed to copy hash:", err));
+    }
+  };
+
+  const handleCopyId = () => {
+    if (credential?.id) {
+      navigator.clipboard.writeText(credential.id)
+        .then(() => {
+          setCopiedId(true);
+          setTimeout(() => setCopiedId(false), 2000);
+        })
+        .catch(err => console.error("Failed to copy ID:", err));
     }
   };
 
@@ -157,7 +178,7 @@ export default function CredentialDetail() {
       <div className="flex-1 md:ml-64 flex flex-col h-screen overflow-y-auto bg-secondary/30">
         {/* Header */}
         <div className="sticky top-0 z-10 bg-card/80 backdrop-blur-md border-b border-border px-6 py-4 flex items-center gap-4">
-          <Button variant="ghost" size="icon" onClick={() => setLocation("/")}>
+          <Button variant="ghost" size="icon" onClick={() => setLocation("/")} aria-label="Go back">
             <ArrowLeft className="w-5 h-5" />
           </Button>
           <h1 className="font-semibold text-lg">Credential Details</h1>
@@ -265,9 +286,29 @@ export default function CredentialDetail() {
                   <FileText className="w-4 h-4 text-primary" /> Metadata
                 </h3>
                 <div className="space-y-3 text-sm">
-                  <div className="flex justify-between py-2 border-b border-border">
+                  <div className="flex justify-between py-2 border-b border-border items-center">
                     <span className="text-muted-foreground">Credential ID</span>
-                    <span className="font-mono text-xs truncate max-w-[150px]">{credential.id}</span>
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <button
+                            onClick={handleCopyId}
+                            className="flex items-center gap-2 hover:bg-muted p-1 rounded transition-colors group text-right max-w-[200px]"
+                            aria-label="Copy credential ID"
+                          >
+                            <span className="font-mono text-xs truncate">{credential.id}</span>
+                            {copiedId ? (
+                              <CheckCircle2 className="w-3 h-3 text-green-500 shrink-0" />
+                            ) : (
+                              <Copy className="w-3 h-3 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity shrink-0" />
+                            )}
+                          </button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>{copiedId ? "Copied!" : "Click to copy"}</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
                   </div>
                   <div className="flex justify-between py-2 border-b border-border">
                     <span className="text-muted-foreground">Schema Type</span>
