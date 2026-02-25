@@ -3,11 +3,13 @@
  */
 
 // Initialize Sentry BEFORE importing anything else
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { initSentry, sentryErrorHandler } from './services/sentry';
 initSentry('credverse-gateway');
 
 import 'dotenv/config';
 import express from 'express';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import { createServer } from 'http';
