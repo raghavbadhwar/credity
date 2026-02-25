@@ -44,6 +44,11 @@ export class MemStorage implements IStorage {
   private users: Map<number, User>;
   private credentials: Map<number, Credential>;
   private activities: Map<number, Activity>;
+  // Secondary indices for O(1) lookups
+  private usersByUsername: Map<string, number>;
+  private credentialsByUserId: Map<number, Set<number>>;
+  private activitiesByUserId: Map<number, Set<number>>;
+
   private currentUserId: number;
   private currentCredentialId: number;
   private currentActivityId: number;
@@ -52,6 +57,9 @@ export class MemStorage implements IStorage {
     this.users = new Map();
     this.credentials = new Map();
     this.activities = new Map();
+    this.usersByUsername = new Map();
+    this.credentialsByUserId = new Map();
+    this.activitiesByUserId = new Map();
     this.currentUserId = 1;
     this.currentCredentialId = 1;
     this.currentActivityId = 1;
@@ -63,9 +71,8 @@ export class MemStorage implements IStorage {
   }
 
   async getUserByUsername(username: string): Promise<User | undefined> {
-    return Array.from(this.users.values()).find(
-      (user) => user.username === username,
-    );
+    const id = this.usersByUsername.get(username);
+    return id !== undefined ? this.users.get(id) : undefined;
   }
 
   async createUser(insertUser: InsertUser): Promise<User> {
@@ -80,6 +87,7 @@ export class MemStorage implements IStorage {
       avatarUrl: insertUser.avatarUrl ?? null
     };
     this.users.set(id, user);
+    this.usersByUsername.set(user.username, id);
     return user;
   }
 
@@ -87,8 +95,15 @@ export class MemStorage implements IStorage {
     const user = await this.getUser(id);
     if (!user) throw new Error("User not found");
 
+    const oldUsername = user.username;
     const updatedUser = { ...user, ...updates };
     this.users.set(id, updatedUser);
+
+    if (updates.username && updates.username !== oldUsername) {
+      this.usersByUsername.delete(oldUsername);
+      this.usersByUsername.set(updates.username, id);
+    }
+
     return updatedUser;
   }
 
@@ -98,9 +113,17 @@ export class MemStorage implements IStorage {
   }
 
   async listCredentials(userId: number): Promise<Credential[]> {
-    return Array.from(this.credentials.values()).filter(
-      (c) => c.userId === userId && !c.isArchived
-    );
+    const ids = this.credentialsByUserId.get(userId);
+    if (!ids) return [];
+
+    const results: Credential[] = [];
+    for (const id of ids) {
+      const cred = this.credentials.get(id);
+      if (cred && !cred.isArchived) {
+        results.push(cred);
+      }
+    }
+    return results;
   }
 
   async createCredential(insertCredential: InsertCredential): Promise<Credential> {
@@ -112,14 +135,28 @@ export class MemStorage implements IStorage {
       isArchived: insertCredential.isArchived ?? false
     };
     this.credentials.set(id, credential);
+
+    if (!this.credentialsByUserId.has(credential.userId)) {
+      this.credentialsByUserId.set(credential.userId, new Set());
+    }
+    this.credentialsByUserId.get(credential.userId)!.add(id);
+
     return credential;
   }
 
   // Activities
   async listActivities(userId: number): Promise<Activity[]> {
-    return Array.from(this.activities.values())
-      .filter((a) => a.userId === userId)
-      .sort((a, b) => (b.timestamp?.getTime() ?? 0) - (a.timestamp?.getTime() ?? 0));
+    const ids = this.activitiesByUserId.get(userId);
+    if (!ids) return [];
+
+    const results: Activity[] = [];
+    for (const id of ids) {
+      const activity = this.activities.get(id);
+      if (activity) {
+        results.push(activity);
+      }
+    }
+    return results.sort((a, b) => (b.timestamp?.getTime() ?? 0) - (a.timestamp?.getTime() ?? 0));
   }
 
   async createActivity(insertActivity: InsertActivity): Promise<Activity> {
@@ -130,6 +167,12 @@ export class MemStorage implements IStorage {
       timestamp: new Date()
     };
     this.activities.set(id, activity);
+
+    if (!this.activitiesByUserId.has(activity.userId)) {
+      this.activitiesByUserId.set(activity.userId, new Set());
+    }
+    this.activitiesByUserId.get(activity.userId)!.add(id);
+
     return activity;
   }
 
@@ -148,15 +191,39 @@ export class MemStorage implements IStorage {
     this.users = new Map((state.users || []).map(([key, value]) => [key, value]));
     this.credentials = new Map((state.credentials || []).map(([key, value]) => [key, {
       ...value,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       issuanceDate: parseDate((value as any).issuanceDate),
     }]));
     this.activities = new Map((state.activities || []).map(([key, value]) => [key, {
       ...value,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       timestamp: parseDate((value as any).timestamp),
     }]));
     this.currentUserId = state.currentUserId || 1;
     this.currentCredentialId = state.currentCredentialId || 1;
     this.currentActivityId = state.currentActivityId || 1;
+
+    // Rebuild secondary indices
+    this.usersByUsername.clear();
+    for (const user of this.users.values()) {
+      this.usersByUsername.set(user.username, user.id);
+    }
+
+    this.credentialsByUserId.clear();
+    for (const cred of this.credentials.values()) {
+      if (!this.credentialsByUserId.has(cred.userId)) {
+        this.credentialsByUserId.set(cred.userId, new Set());
+      }
+      this.credentialsByUserId.get(cred.userId)!.add(cred.id);
+    }
+
+    this.activitiesByUserId.clear();
+    for (const activity of this.activities.values()) {
+      if (!this.activitiesByUserId.has(activity.userId)) {
+        this.activitiesByUserId.set(activity.userId, new Set());
+      }
+      this.activitiesByUserId.get(activity.userId)!.add(activity.id);
+    }
   }
 }
 
