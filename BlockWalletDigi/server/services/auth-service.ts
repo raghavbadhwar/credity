@@ -307,3 +307,31 @@ export function checkRateLimit(key: string, maxRequests: number, windowMs: numbe
     record.count++;
     return true;
 }
+
+/**
+ * Periodic cleanup of expired entries to prevent memory leaks
+ */
+function cleanupExpiredEntries() {
+    const now = Date.now();
+
+    // Cleanup rate limits
+    for (const [key, record] of rateLimitMap.entries()) {
+        if (now > record.resetAt) {
+            rateLimitMap.delete(key);
+        }
+    }
+
+    // Cleanup refresh tokens
+    for (const [token, record] of refreshTokens.entries()) {
+        if (now > record.expiresAt.getTime()) {
+            refreshTokens.delete(token);
+        }
+    }
+}
+
+// Run cleanup every 5 minutes
+const cleanupInterval = setInterval(cleanupExpiredEntries, 5 * 60 * 1000);
+// Ensure the interval doesn't prevent the process from exiting
+if (cleanupInterval.unref) {
+    cleanupInterval.unref();
+}
