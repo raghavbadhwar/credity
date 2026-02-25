@@ -140,7 +140,7 @@ const gatewayHTML = `
             const { setupVite } = await import('./vite');
             await setupVite(httpServer, app);
             console.log('[Gateway] Vite dev server attached');
-        } catch (error) {
+        } catch (_error) {
             console.log('[Gateway] Vite unavailable, using inline HTML fallback');
             app.get('/', (req, res) => {
                 res.setHeader('Content-Type', 'text/html');
