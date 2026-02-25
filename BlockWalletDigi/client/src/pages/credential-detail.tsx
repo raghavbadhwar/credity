@@ -24,6 +24,11 @@ import {
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { ShareModal } from "@/components/share-modal";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { useQuery } from "@tanstack/react-query";
 
 interface CredentialData {
@@ -157,7 +162,7 @@ export default function CredentialDetail() {
       <div className="flex-1 md:ml-64 flex flex-col h-screen overflow-y-auto bg-secondary/30">
         {/* Header */}
         <div className="sticky top-0 z-10 bg-card/80 backdrop-blur-md border-b border-border px-6 py-4 flex items-center gap-4">
-          <Button variant="ghost" size="icon" onClick={() => setLocation("/")}>
+          <Button variant="ghost" size="icon" onClick={() => setLocation("/")} aria-label="Go back">
             <ArrowLeft className="w-5 h-5" />
           </Button>
           <h1 className="font-semibold text-lg">Credential Details</h1>
@@ -275,10 +280,21 @@ export default function CredentialDetail() {
                   </div>
                   <div className="flex justify-between py-2 border-b border-border">
                     <span className="text-muted-foreground">Hash</span>
-                    <button onClick={handleCopyHash} className="flex items-center gap-1 text-primary hover:underline">
-                      <span className="font-mono text-xs">{credential.hash.slice(0, 12)}...</span>
-                      {copied ? <CheckCircle2 className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
-                    </button>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <button
+                          onClick={handleCopyHash}
+                          className="flex items-center gap-1 text-primary hover:underline"
+                          aria-label="Copy full hash to clipboard"
+                        >
+                          <span className="font-mono text-xs">{credential.hash.slice(0, 12)}...</span>
+                          {copied ? <CheckCircle2 className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
+                        </button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>Copy full hash</p>
+                      </TooltipContent>
+                    </Tooltip>
                   </div>
                   <div className="flex justify-between py-2 border-b border-border">
                     <span className="text-muted-foreground">Verifications</span>

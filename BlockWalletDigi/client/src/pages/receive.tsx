@@ -113,12 +113,14 @@ export default function ReceiveCredential() {
                   </div>
 
                   <div className="flex gap-2">
+                    <label htmlFor="credential-url" className="sr-only">Credential URL</label>
                     <Input
+                      id="credential-url"
                       placeholder="https://issuer.com/vc/..."
                       value={url}
                       onChange={(e) => setUrl(e.target.value)}
                     />
-                    <Button onClick={handleProcess}>
+                    <Button onClick={handleProcess} aria-label="Process Credential URL">
                       <ArrowRight className="w-4 h-4" />
                     </Button>
                   </div>
