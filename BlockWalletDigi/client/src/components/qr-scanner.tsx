@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { Camera, X, SwitchCamera, FlashlightOff, Flashlight, CheckCircle } from 'lucide-react';
 import { Button } from './ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
@@ -65,7 +65,7 @@ export function QRScanner({ onScan, onClose, title = "Scan QR Code", description
         }, 100);
     };
 
-    const startCamera = async () => {
+    const startCamera = useCallback(async () => {
         try {
             setError(null);
             setScanning(true);
@@ -96,15 +96,15 @@ export function QRScanner({ onScan, onClose, title = "Scan QR Code", description
             setError('Unable to access camera. Please check permissions.');
             setScanning(false);
         }
-    };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [facingMode]);
 
     useEffect(() => {
-        // eslint-disable-next-line react-hooks/set-state-in-effect
         startCamera();
         return () => {
             stopCamera();
         };
-    }, [facingMode]);
+    }, [startCamera]);
 
     const handleManualInput = () => {
         const input = prompt('Enter credential URL or token manually:');
