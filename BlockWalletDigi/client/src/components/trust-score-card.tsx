@@ -25,7 +25,6 @@ import { Button } from "@/components/ui/button";
 import {
     Tooltip,
     TooltipContent,
-    TooltipProvider,
     TooltipTrigger,
 } from "@/components/ui/tooltip";
 
@@ -249,16 +248,14 @@ function ScoreSection({ icon, label, score, maxScore, color, tooltip }: ScoreSec
                 <div className="flex items-center gap-2">
                     <span className={`${colorClasses[color].replace('bg-', 'text-')}`}>{icon}</span>
                     <span className="text-muted-foreground">{label}</span>
-                    <TooltipProvider>
-                        <Tooltip>
-                            <TooltipTrigger>
-                                <Info className="w-3 h-3 text-muted-foreground/50" />
-                            </TooltipTrigger>
-                            <TooltipContent>
-                                <p className="text-xs">{tooltip}</p>
-                            </TooltipContent>
-                        </Tooltip>
-                    </TooltipProvider>
+                    <Tooltip>
+                        <TooltipTrigger aria-label={`More information about ${label}`}>
+                            <Info className="w-3 h-3 text-muted-foreground/50" />
+                        </TooltipTrigger>
+                        <TooltipContent>
+                            <p className="text-xs">{tooltip}</p>
+                        </TooltipContent>
+                    </Tooltip>
                 </div>
                 <span className="font-medium">{score}/{maxScore}</span>
             </div>
