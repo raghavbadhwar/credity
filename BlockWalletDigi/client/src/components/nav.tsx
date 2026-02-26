@@ -1,5 +1,5 @@
 import { Link, useLocation } from "wouter";
-import { Wallet, User, Settings, LogOut } from "lucide-react";
+import { Wallet, User, LogOut } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export function Nav() {
@@ -8,7 +8,7 @@ export function Nav() {
   const navItems = [
     { href: "/", icon: Wallet, label: "Wallet" },
     { href: "/connect", icon: User, label: "Connect" },
-    // { href: "/settings", icon: Settings, label: "Settings" },
+    // { href: "/settings", icon: label: "Settings" },
   ];
 
   return (

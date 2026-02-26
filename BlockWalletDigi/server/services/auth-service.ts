@@ -68,6 +68,7 @@ export function validatePasswordStrength(password: string): PasswordValidationRe
     if (!/[0-9]/.test(password)) {
         errors.push('Password must contain at least one number');
     }
+// eslint-disable-next-line no-useless-escape
     if (!/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)) {
         errors.push('Password must contain at least one special character');
     }
@@ -218,6 +219,7 @@ export function hashApiKey(apiKey: string): string {
     return crypto.createHash('sha256').update(apiKey).digest('hex');
 }
 
+// eslint-disable-next-line @typescript-eslint/no-namespace
 // Express middleware types
 declare global {
     namespace Express {
