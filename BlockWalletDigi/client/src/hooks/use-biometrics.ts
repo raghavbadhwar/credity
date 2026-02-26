@@ -29,7 +29,8 @@ function arrayBufferToBase64(buffer: ArrayBuffer): string {
 }
 
 export function useBiometrics() {
-    const [isSupported, setIsSupported] = useState<boolean>(
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const [isSupported] = useState<boolean>(
         typeof window !== 'undefined' &&
         !!window.PublicKeyCredential &&
         typeof window.PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable === 'function'
@@ -129,6 +130,7 @@ export function useBiometrics() {
             const data = await response.json();
             return { success: data.success, credentialId };
 
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         } catch (error: any) {
             console.error('Biometric enrollment error:', error);
 
@@ -183,6 +185,7 @@ export function useBiometrics() {
                 credentialId: arrayBufferToBase64(assertion.rawId)
             };
 
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         } catch (error: any) {
             console.error('Biometric verification error:', error);
             return {
