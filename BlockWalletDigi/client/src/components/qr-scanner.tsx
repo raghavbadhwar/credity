@@ -19,6 +19,7 @@ export function QRScanner({ onScan, onClose, title = "Scan QR Code", description
     const videoRef = useRef<HTMLVideoElement>(null);
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const [error, setError] = useState<string | null>(null);
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
     const [_, setScanning] = useState(false);
     const [facingMode, setFacingMode] = useState<'user' | 'environment'>('environment');
     const [flash, setFlash] = useState(false);

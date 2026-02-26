@@ -324,6 +324,7 @@ export class WalletService {
             issuer: string;
             issuanceDate: Date;
             expirationDate?: Date;
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             data: any;
             jwt?: string;
             category?: string;
@@ -810,9 +811,9 @@ export class WalletService {
         let decrypted = decipher.update(ciphertext, 'hex', 'utf8');
         decrypted += decipher.final('utf8');
         return decrypted;
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     private hashCredential(data: any): string {
         const canonical = JSON.stringify(data, Object.keys(data).sort());
         return crypto.createHash('sha256').update(canonical).digest('hex');
@@ -836,17 +837,12 @@ export class WalletService {
             for (let i = 0; i < parts.length; i++) {
                 const part = parts[i];
                 if (i === parts.length - 1) {
-                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
                     if (source && source[part] !== undefined) {
-                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
                         target[part] = source[part];
                     }
                 } else {
-                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
                     if (source) source = source[part];
-                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
                     if (!target[part]) target[part] = {};
-                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
                     target = target[part];
                 }
             }

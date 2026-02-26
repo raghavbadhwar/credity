@@ -219,7 +219,6 @@ export function hashApiKey(apiKey: string): string {
     return crypto.createHash('sha256').update(apiKey).digest('hex');
 }
 
-// eslint-disable-next-line @typescript-eslint/no-namespace
 // Express middleware types
 declare global {
     namespace Express {

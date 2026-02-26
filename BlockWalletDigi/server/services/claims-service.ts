@@ -495,6 +495,7 @@ function calculateCost(request: ClaimVerifyRequest): ClaimVerifyResponse['costBr
 /**
  * Get claim by ID (for status checking)
  */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export async function getClaimById(claimId: string): Promise<ClaimVerifyResponse | null> {
     // In production, would fetch from database
     // For now, return null to indicate not found
