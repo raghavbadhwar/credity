@@ -9,7 +9,7 @@
  * - Verification Status Dashboard
  */
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "framer-motion";
 import { Sidebar } from "@/components/sidebar";
@@ -23,9 +23,7 @@ import {
     ShieldCheck,
     Fingerprint,
     ScanLine,
-    Upload,
     Loader2,
-    AlertTriangle,
     ChevronRight,
     Eye,
     Smile,
@@ -35,7 +33,6 @@ import {
     FileText,
     Smartphone,
     CircleDot,
-    AlertCircle,
     Clock,
     Zap,
     Shield,
@@ -347,6 +344,7 @@ export default function IdentityVerification() {
         };
 
         initCamera();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [pendingCameraStart, livenessSession]);
 
     const completeLiveness = async (frameData?: string | null) => {

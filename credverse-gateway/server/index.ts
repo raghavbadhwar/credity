@@ -8,7 +8,6 @@ initSentry('credverse-gateway');
 
 import 'dotenv/config';
 import express from 'express';
-import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import { createServer } from 'http';
 import path from 'path';
@@ -139,7 +138,8 @@ const gatewayHTML = `
             await setupVite(httpServer, app);
             console.log('[Gateway] Vite dev server attached');
         } catch (error) {
-            console.log('[Gateway] Vite unavailable, using inline HTML fallback');
+            console.error('[Gateway] Vite setup failed:', error);
+            console.log('[Gateway] Using inline HTML fallback');
             app.get('/', (req, res) => {
                 res.setHeader('Content-Type', 'text/html');
                 res.send(gatewayHTML);
@@ -156,4 +156,7 @@ const gatewayHTML = `
     httpServer.listen(port, '0.0.0.0', () => {
         console.log(`[Gateway] Server running on port ${port}`);
     });
+
+    // Use Sentry error handler
+    app.use(sentryErrorHandler);
 })();
