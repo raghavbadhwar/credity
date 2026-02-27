@@ -1,20 +1,30 @@
-## 2024-05-22 - CI Failure Analysis
-**Learning:** Removing `CredentialCard` caused a ripple effect of linting errors in `BlockWalletDigi` because imports were likely not fully cleaned up or shared dependencies triggered new checks.
-**Action:**  Thoroughly check all imports and re-run lint locally (`npm run lint` in `BlockWalletDigi`) before submitting. The "unused variable" errors suggest `CredentialCardSkeleton` might still be imported but now unused, or other latent lint issues were exposed.
+## 2024-05-22 - Persistent Linting Failures
+**Learning:** Even after my initial fixes, many lint errors remain. Specifically:
+1. `BlockWalletDigi`:
+    - `Fast refresh only works when a file only exports components` in `ui/navigation-menu.tsx`, `ui/form.tsx`, `ui/button.tsx`, `ui/button-group.tsx`, `ui/badge.tsx`. This usually means a utility or constant is exported alongside the component.
+    - `Unexpected any` in `.github` (which seems odd, likely linting config files or hidden files?). Wait, the annotation says `File: .github`. This is likely a misinterpretation of the file path by the reporter or the lint error is in a workflow file? No, checking the logs, the error is in `/home/runner/work/credity/credity/.github/...`? Or maybe it's misreporting the file. Let me check the logs more closely.
+    - Ah, looking at `BlockWalletDigi` logs:
+      `[FAILURE] File: .github, Line: 259 Message: Unexpected any.`
+      This is very strange.
+    - `React Hook useEffect has a missing dependency: 'startCamera'` in `.github`? This suggests `.github` might be a directory being linted that contains JS/TS files?
+2. `CredVerseRecruiter`:
+    - `Save` and `Lock` unused in `AdminConsole.tsx`. I missed these in the previous cleanup.
+    - `Fast refresh` errors in `ui/*` components.
+3. `credverse-gateway`:
+    - `sentryErrorHandler` unused in `index.ts`. I thought I fixed this? Maybe I removed the usage but not the import, or vice versa?
+    - `error` unused in `index.ts`.
+    - `hint` unused in `sentry.ts`.
+    - `Unexpected any` in `mobile-proxy.ts`.
 
-**Specific Failures to Address:**
-1.  **CredVerseRecruiter**: `Input` defined but never used in `AdminConsole.tsx`, `actionTypes` unused in `use-toast.ts`, and `Fast refresh` errors in UI components.
-2.  **CredVerseIssuer**: Similar patterns - `Unexpected any`, `Fast refresh` errors, unused variables in multiple files.
-3.  **BlockWalletDigi**:
-    *   `CredentialCardSkeleton` defined but unused in `dashboard.tsx` (Directly related to my change!).
-    *   `Fast refresh` errors in `theme-provider.tsx`.
-    *   `BarChart3` unused in `sidebar.tsx`.
-    *   `scanning` unused in `qr-scanner.tsx`.
-    *   `Settings` unused in `nav.tsx`.
-    *   Missing deps in `useEffect` in `identity-verification.tsx`.
-4.  **credverse-gateway**: Unused variables (`cors`, `sentryErrorHandler`, `hint`), `prefer-const` violations.
+**Action:**
+- I must fix the "Fast Refresh" errors by ensuring components are the *only* exports, or suppress the warning if it's a false positive in library code.
+- Fix the remaining unused variables in `AdminConsole.tsx`.
+- Investigate why `credverse-gateway` fixes didn't stick or were incomplete.
+- The `.github` file errors are confusing. I need to find what file this actually is.
 
-**Strategy:**
-I need to fix the specific lint errors in `BlockWalletDigi` that I likely exacerbated (or at least the one I directly caused: `CredentialCardSkeleton`).
-I also need to address the other reported failures to ensure a clean CI run, as the system seems to require *all* checks to pass.
-Prioritize `BlockWalletDigi` fixes first.
+**Plan:**
+1.  Check `CredVerseRecruiter/client/src/pages/AdminConsole.tsx` again.
+2.  Check `credverse-gateway/server/index.ts`.
+3.  Check `credverse-gateway/server/services/sentry.ts`.
+4.  Check `BlockWalletDigi/client/src/components/ui/*.tsx` for multiple exports.
+5.  Search for files in `.github` that might be getting linted.
