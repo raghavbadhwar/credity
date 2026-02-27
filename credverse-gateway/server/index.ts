@@ -8,7 +8,6 @@ initSentry('credverse-gateway');
 
 import 'dotenv/config';
 import express from 'express';
-import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import { createServer } from 'http';
 import path from 'path';
