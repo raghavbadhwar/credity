@@ -31,6 +31,7 @@ router.patch("/user", authMiddleware, async (req, res) => {
         const updatedUser = await storage.updateUser(userId, parseResult.data);
         res.json(updatedUser);
     } catch (error) {
+        console.error('Update user error:', error);
         res.status(500).json({ message: "Internal Server Error" });
     }
 });
