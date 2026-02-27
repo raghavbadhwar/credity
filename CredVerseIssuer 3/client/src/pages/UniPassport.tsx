@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ShieldCheck, QrCode, Share2, Download, ExternalLink, CheckCircle2, History } from "lucide-react";
+import { ShieldCheck, QrCode, Share2, Download, ExternalLink, CheckCircle2,  } from "lucide-react";
 import logo from "@assets/ChatGPT_Image_Oct_22,_2025,_12_35_14_AM_1764878404699.png";
 import { cn } from "@/lib/utils";
 import { useStore, type Record } from "@/lib/store";
@@ -167,7 +167,7 @@ export default function UniPassport() {
 
                 <Card>
                   <CardHeader>
-                    <CardTitle className="text-lg">Verification History</CardTitle>
+                    <CardTitle className="text-lg">Verification </CardTitle>
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-4">

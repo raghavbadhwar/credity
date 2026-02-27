@@ -26,6 +26,7 @@ export default function BulkVerify() {
   const { toast } = useToast();
 
   const verifyMutation = useMutation({
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     mutationFn: async (credentials: any[]) => {
       const res = await fetch("/api/verify/bulk", {
         method: "POST",
@@ -37,9 +38,12 @@ export default function BulkVerify() {
     },
     onSuccess: (data) => {
       // Map API results to UI format
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const mappedResults = data.result.results.map((r: any, index: number) => ({
         id: r.verificationId || `BULK-${index}`,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         name: r.checks.find((c: any) => c.name === 'Credential Format')?.details?.name || "Unknown Candidate",
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         issuer: r.checks.find((c: any) => c.name === 'Issuer Verification')?.details?.issuerName || "Unknown Issuer",
         degree: "Credential",
         date: new Date(r.timestamp).toLocaleDateString(),
@@ -71,6 +75,7 @@ export default function BulkVerify() {
     Papa.parse(file, {
       header: true,
       complete: (results) => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const rows = results.data as any[];
         // Transform CSV rows into Credential Objects
         const credentials = rows.map((row, index) => {

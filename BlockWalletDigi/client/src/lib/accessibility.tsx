@@ -181,10 +181,6 @@ export function usePrefersReducedMotion(): boolean {
 
     useEffect(() => {
         const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
-        // Update only if changed (redundant if init state is correct but safe)
-        if (mediaQuery.matches !== prefersReducedMotion) {
-            setPrefersReducedMotion(mediaQuery.matches);
-        }
 
         const handleChange = (e: MediaQueryListEvent) => {
             setPrefersReducedMotion(e.matches);
@@ -192,7 +188,7 @@ export function usePrefersReducedMotion(): boolean {
 
         mediaQuery.addEventListener('change', handleChange);
         return () => mediaQuery.removeEventListener('change', handleChange);
-    }, [prefersReducedMotion]);
+    }, []);
 
     return prefersReducedMotion;
 }

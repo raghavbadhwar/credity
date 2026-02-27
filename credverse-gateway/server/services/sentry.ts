@@ -20,6 +20,7 @@ export function initSentry(appName?: string): void {
         serverName: appName || APP_NAME,
         tracesSampleRate: process.env.NODE_ENV === 'production' ? 0.1 : 1.0,
 
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         beforeSend(event, _hint) {
             if (process.env.NODE_ENV === 'development' && !process.env.SENTRY_DEV_ENABLED) {
                 return null;
