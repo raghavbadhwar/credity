@@ -171,11 +171,20 @@ export function useLiveRegion() {
  * Reduced motion preference hook
  */
 export function usePrefersReducedMotion(): boolean {
-    const [prefersReducedMotion, setPrefersReducedMotion] = React.useState(false);
+    // Initialize with correct value to avoid effect sync update
+    const [prefersReducedMotion, setPrefersReducedMotion] = React.useState(() => {
+        if (typeof window !== 'undefined') {
+            return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        }
+        return false;
+    });
 
     useEffect(() => {
         const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
-        setPrefersReducedMotion(mediaQuery.matches);
+        // Update only if changed (redundant if init state is correct but safe)
+        if (mediaQuery.matches !== prefersReducedMotion) {
+            setPrefersReducedMotion(mediaQuery.matches);
+        }
 
         const handleChange = (e: MediaQueryListEvent) => {
             setPrefersReducedMotion(e.matches);
@@ -183,7 +192,7 @@ export function usePrefersReducedMotion(): boolean {
 
         mediaQuery.addEventListener('change', handleChange);
         return () => mediaQuery.removeEventListener('change', handleChange);
-    }, []);
+    }, [prefersReducedMotion]);
 
     return prefersReducedMotion;
 }

@@ -8,3 +8,10 @@
   ➜  Local:   http://localhost:5000/
   ➜  Network: http://192.168.0.2:5000/
 [baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
+10:54:55 AM [vite] (client) hmr update /src/index.css
+10:55:06 AM [vite] (client) hmr update /src/pages/connections.tsx, /src/index.css
+10:55:28 AM [vite] (client) hmr update /src/pages/connections.tsx, /src/index.css
+10:55:49 AM [vite] (client) hmr update /src/index.css
+10:55:56 AM [vite] (client) hmr update /src/index.css
+10:56:04 AM [vite] (client) hmr update /src/index.css, /src/components/sidebar.tsx
+10:56:12 AM [vite] (client) hmr update /src/components/theme-provider.tsx, /src/index.css

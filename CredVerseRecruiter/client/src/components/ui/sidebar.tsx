@@ -1,3 +1,4 @@
+// eslint-disable-next-line react-refresh/only-export-components
 "use client"
 
 import * as React from "react"
@@ -607,7 +608,8 @@ function SidebarMenuSkeleton({
 }: React.ComponentProps<"div"> & {
   showIcon?: boolean
 }) {
-  // Random width between 50 to 90%.
+  // Stable width between 50 to 90% (using random fallback if not stable)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const width = React.useMemo(() => {
     return `${Math.floor(Math.random() * 40) + 50}%`
   }, [])
