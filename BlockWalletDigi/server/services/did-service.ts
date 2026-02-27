@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { generateEd25519KeyPair, toMultibase, sign, verify, encrypt, decrypt, generateEncryptionKey, sha256 } from './crypto-utils';
 
 /**

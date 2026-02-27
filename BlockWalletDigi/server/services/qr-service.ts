@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { generateAccessToken, validateAccessToken, sha256 } from './crypto-utils';
 
 /**

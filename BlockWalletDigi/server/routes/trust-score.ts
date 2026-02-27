@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * Trust Score API Routes
  * Provides endpoints for trust score calculation and improvement suggestions

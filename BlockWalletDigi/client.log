@@ -74,3 +74,13 @@
 11:12:47 AM [vite] (client) hmr update /src/components/theme-provider.tsx, /src/index.css
 11:14:48 AM [vite] (client) hmr update /src/index.css
 11:14:58 AM [vite] (client) hmr update /src/index.css, /src/components/share-modal.tsx
+11:32:47 AM [vite] (client) hmr update /src/pages/identity-verification.tsx, /src/index.css
+11:33:00 AM [vite] (client) hmr update /src/pages/dashboard.tsx, /src/index.css
+11:33:00 AM [vite] (client) hmr update /src/pages/dashboard.tsx, /src/index.css
+11:33:00 AM [vite] (client) hmr update /src/pages/digital-id.tsx, /src/index.css
+11:33:00 AM [vite] (client) hmr update /src/pages/profile.tsx, /src/index.css
+11:33:00 AM [vite] (client) hmr update /src/pages/receive.tsx, /src/index.css
+11:33:00 AM [vite] (client) hmr update /src/pages/settings.tsx, /src/index.css
+11:33:00 AM [vite] (client) hmr update /src/index.css, /src/pages/receive.tsx, /src/pages/identity-verification.tsx, /src/components/share-modal.tsx
+11:33:50 AM [vite] (client) hmr update /src/index.css, /src/pages/receive.tsx, /src/pages/identity-verification.tsx, /src/components/share-modal.tsx
+11:34:12 AM [vite] (client) hmr update /src/index.css, /src/pages/identity-verification.tsx

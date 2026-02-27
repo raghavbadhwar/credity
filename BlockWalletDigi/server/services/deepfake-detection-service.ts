@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 export interface DeepfakeDetectionResult {
     verdict: 'real' | 'fake' | 'unknown';
     confidence: number | null;

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import {
   type User, type InsertUser,
   type Credential, type InsertCredential,
