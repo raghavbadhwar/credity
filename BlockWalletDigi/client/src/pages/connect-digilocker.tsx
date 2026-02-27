@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useLocation, useSearch } from "wouter";
 import { Sidebar } from "@/components/sidebar";
 import { Button } from "@/components/ui/button";
@@ -44,9 +44,11 @@ const docTypeIcons: Record<string, any> = {
 export default function ConnectDigiLocker() {
   const [, setLocation] = useLocation();
   const searchString = useSearch();
-  const searchParams = new URLSearchParams(searchString);
   const { toast } = useToast();
   const queryClient = useQueryClient();
+
+  // Wrap searchParams in useMemo to ensure stable dependency for useEffect
+  const searchParams = useMemo(() => new URLSearchParams(searchString), [searchString]);
 
   const [importing, setImporting] = useState<string | null>(null);
 
