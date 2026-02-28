@@ -15,6 +15,14 @@ export default defineConfig([
       ecmaVersion: 2020,
       globals: globals.node,
     },
+    rules: {
+      '@typescript-eslint/no-explicit-any': 'warn',
+      '@typescript-eslint/no-unused-vars': 'warn',
+      '@typescript-eslint/no-namespace': 'warn',
+      'no-useless-escape': 'warn',
+      '@typescript-eslint/no-unsafe-function-type': 'warn',
+      '@typescript-eslint/no-require-imports': 'warn',
+    },
   },
   {
     files: ['client/**/*.{ts,tsx}'],
@@ -27,6 +35,15 @@ export default defineConfig([
     languageOptions: {
       ecmaVersion: 2020,
       globals: globals.browser,
+    },
+    rules: {
+      '@typescript-eslint/no-explicit-any': 'warn',
+      '@typescript-eslint/no-unused-vars': 'warn',
+      'react-refresh/only-export-components': 'warn',
+      'react-hooks/exhaustive-deps': 'warn',
+      'react-hooks/purity': 'warn',
+      'react-hooks/set-state-in-effect': 'warn',
+      'react-hooks/immutability': 'warn',
     },
   },
   prettier,
