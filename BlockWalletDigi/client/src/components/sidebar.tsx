@@ -10,7 +10,6 @@ import {
   Moon,
   Sun,
   Link2,
-  BarChart3,
   ScanFace
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -56,6 +55,7 @@ export function Sidebar() {
             size="icon"
             className="h-8 w-8 text-muted-foreground hover:text-foreground"
             onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+            aria-label="Toggle theme"
           >
             {theme === "dark" ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
           </Button>
