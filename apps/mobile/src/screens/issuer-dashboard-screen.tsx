@@ -248,7 +248,7 @@ export function IssuerDashboardScreen({ onSwitchRole, onLogout }: Props) {
             <Text style={styles.meta}>{cred?.recipient?.name || cred?.recipient || 'Recipient'}</Text>
           </View>
         ))}
-        <Pressable style={styles.primaryButton} onPress={refresh}>
+        <Pressable style={styles.primaryButton} onPress={() => refresh()}>
           <Text style={styles.primaryButtonText}>Refresh</Text>
         </Pressable>
       </View>
