@@ -85,22 +85,6 @@ export function QRScanner({ onScan, onClose, title = "Scan QR Code", description
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [facingMode]);
 
-    const stopCamera = () => {
-        if (intervalRef.current) {
-            clearInterval(intervalRef.current);
-            intervalRef.current = null;
-        }
-
-        if (streamRef.current) {
-            streamRef.current.getTracks().forEach(track => track.stop());
-            streamRef.current = null;
-        }
-
-        if (videoRef.current) {
-            videoRef.current.srcObject = null;
-        }
-    };
-
     const startScanning = () => {
         // Simple QR detection using canvas
         // In production, use html5-qrcode library for better detection
