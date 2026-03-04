@@ -43,21 +43,25 @@ export function Header({ title }: { title: string }) {
 
         <Button variant="ghost" size="icon" onClick={toggleTheme} className="text-muted-foreground hover:text-foreground">
           {theme === "light" ? <Moon className="h-5 w-5" /> : <Sun className="h-5 w-5" />}
+          <span className="sr-only">Toggle theme</span>
         </Button>
 
         <Button variant="ghost" size="icon" className="text-muted-foreground">
           <HelpCircle className="h-5 w-5" />
+          <span className="sr-only">Help</span>
         </Button>
 
         <Button variant="ghost" size="icon" className="relative text-muted-foreground">
           <Bell className="h-5 w-5" />
           <span className="absolute top-2 right-2 h-2 w-2 rounded-full bg-destructive border border-background" />
+          <span className="sr-only">Notifications</span>
         </Button>
 
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" className="relative h-9 w-9 rounded-full bg-muted">
               <User className="h-5 w-5 text-muted-foreground" />
+              <span className="sr-only">User menu</span>
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
