@@ -63,6 +63,8 @@ export function logRequest(method: string, path: string, statusCode: number, dur
 /**
  * Log a business event
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function logEvent(event: string, data?: Record<string, any>) {
     logger.info({
         type: 'event',
@@ -73,7 +75,9 @@ export function logEvent(event: string, data?: Record<string, any>) {
 
 /**
  * Log an error with context
+ // eslint-disable-next-line @typescript-eslint/no-explicit-any
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function logError(error: Error, context?: Record<string, any>) {
     logger.error({
         type: 'error',

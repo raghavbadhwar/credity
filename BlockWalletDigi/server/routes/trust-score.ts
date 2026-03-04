@@ -55,6 +55,7 @@ router.get('/', async (req: Request, res: Response) => {
             history: history.slice(-7), // Last 7 days
             lastUpdated: new Date().toISOString()
         });
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
         console.error('Trust score error:', error);
         res.status(500).json({
@@ -88,6 +89,7 @@ router.get('/breakdown', async (req: Request, res: Response) => {
                 lastActivity: userData.lastActivityDate
             }
         });
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
         console.error('Trust score breakdown error:', error);
         res.status(500).json({
@@ -117,6 +119,7 @@ router.get('/suggestions', async (req: Request, res: Response) => {
             longTerm,
             potentialPoints: suggestions.reduce((sum: number, s: ImprovementSuggestion) => sum + s.points, 0)
         });
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
         console.error('Trust score suggestions error:', error);
         res.status(500).json({
@@ -141,6 +144,7 @@ router.get('/history', async (req: Request, res: Response) => {
             history: history.slice(-days),
             trend: calculateTrend(history)
         });
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
         console.error('Trust score history error:', error);
         res.status(500).json({

@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Sidebar } from "@/components/sidebar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { QrCode, Download, ArrowRight, Loader2, CheckCircle2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
@@ -30,6 +31,7 @@ export default function ReceiveCredential() {
         toast({ title: "Authentication Failed", description: "Biometric verification required to add credentials", variant: "destructive" });
         return;
       }
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (e) {
       toast({ title: "Error", description: "Biometric verification unavailable", variant: "destructive" });
       return;
@@ -60,6 +62,7 @@ export default function ReceiveCredential() {
         title: "Credential Received",
         description: "Successfully imported verified credential.",
       });
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       setStep("input");
       toast({

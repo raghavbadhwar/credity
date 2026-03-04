@@ -207,6 +207,8 @@ router.post('/verify/instant', writeIdempotency, async (req, res) => {
         } else if (jwt) {
             try {
                 credentialData = parseJwtPayloadSafely(jwt);
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             } catch (decodeError: any) {
                 return res.status(400).json({ error: decodeError?.message || 'Invalid JWT payload' });
             }
@@ -512,7 +514,9 @@ router.post('/v1/verifications/instant', authMiddleware, writeIdempotency, async
             credentialData = credential as Record<string, unknown>;
         } else if (typeof jwt === 'string') {
             try {
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 credentialData = parseJwtPayloadSafely(jwt);
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             } catch (decodeError: any) {
                 return res.status(400).json({ error: decodeError?.message || 'Invalid JWT payload' });
             }

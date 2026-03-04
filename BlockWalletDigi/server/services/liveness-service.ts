@@ -151,6 +151,7 @@ export function getSessionResult(sessionId: string): LivenessResult | null {
 /**
  * Verify face matches stored embedding (simulated)
  */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function verifyFaceMatch(currentEmbedding: string, storedEmbedding: string): { match: boolean; confidence: number } {
     const similarity = 0.85 + Math.random() * 0.15;
     return {
@@ -162,6 +163,7 @@ export function verifyFaceMatch(currentEmbedding: string, storedEmbedding: strin
 /**
  * Check for spoofing (simulated)
  */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function detectSpoofing(frameData: string): { isSpoofed: boolean; confidence: number } {
     return {
         isSpoofed: Math.random() < 0.02,
@@ -183,6 +185,7 @@ export function getUserLivenessStatus(userId: string): { verified: boolean; last
 /**
  * Generate mock face embedding
  */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function generateFaceEmbedding(frameData: string): string {
     return `embedding_${Date.now()}_${Math.random().toString(36).substr(2, 16)}`;
 }

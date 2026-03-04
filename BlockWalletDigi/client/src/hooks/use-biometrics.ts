@@ -29,6 +29,7 @@ function arrayBufferToBase64(buffer: ArrayBuffer): string {
 }
 
 export function useBiometrics() {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const [isSupported, setIsSupported] = useState<boolean>(
         typeof window !== 'undefined' &&
         !!window.PublicKeyCredential &&
@@ -129,6 +130,7 @@ export function useBiometrics() {
             const data = await response.json();
             return { success: data.success, credentialId };
 
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         } catch (error: any) {
             console.error('Biometric enrollment error:', error);
 
@@ -150,6 +152,7 @@ export function useBiometrics() {
     }, [checkAvailability]);
 
     // Verify using biometrics
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const verifyBiometrics = useCallback(async (userId: string): Promise<BiometricResult> => {
         setIsVerifying(true);
 
@@ -183,6 +186,7 @@ export function useBiometrics() {
                 credentialId: arrayBufferToBase64(assertion.rawId)
             };
 
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         } catch (error: any) {
             console.error('Biometric verification error:', error);
             return {

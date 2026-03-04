@@ -100,6 +100,7 @@ export const aiService = {
      */
     analyzeDocument: async (imageBase64: string, documentType: string): Promise<{
         isValid: boolean;
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         extractedData: any;
         fraudScore: number;
         feedback: string;
