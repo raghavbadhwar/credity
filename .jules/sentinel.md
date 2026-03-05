@@ -1,0 +1,4 @@
+## 2025-02-14 - [DOM XSS in Gateway HTML Fallback]
+**Vulnerability:** Reflected DOM-based XSS vulnerability in `credverse-gateway/server/index.ts` inline HTML fallback page.
+**Learning:** The fallback HTML page took URL parameters (`name`, `error`) via `URLSearchParams` and injected them directly into the DOM using `statusDiv.innerHTML`. This allowed arbitrary Javascript execution if a user clicked a crafted link containing malicious payload in these parameters. The vulnerability existed because of the insecure usage of `innerHTML` for displaying untrusted user input without sanitization.
+**Prevention:** Avoid `innerHTML` when displaying user inputs or URL parameters. Use `textContent` instead to safely insert text into the DOM, which automatically encodes special HTML characters, thereby mitigating XSS risks.
