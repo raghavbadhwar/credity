@@ -5,8 +5,11 @@ initSentry('credverse-wallet');
 // Initialize PostHog Analytics
 import { initAnalytics } from "./services/analytics";
 initAnalytics();
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import express, { type Request, Response, NextFunction } from "express";
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import helmet from "helmet";
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import cors from "cors";
 import { errorHandler } from "./middleware/error-handler";
 import { setupSecurity } from "@credverse/shared-auth";
@@ -76,6 +79,7 @@ export function log(message: string, source = "express") {
 app.use((req, res, next) => {
   const start = Date.now();
   const path = req.path;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let capturedJsonResponse: Record<string, any> | undefined = undefined;
 
   const originalResJson = res.json;

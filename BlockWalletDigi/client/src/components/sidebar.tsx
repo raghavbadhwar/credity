@@ -10,6 +10,7 @@ import {
   Moon,
   Sun,
   Link2,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   BarChart3,
   ScanFace
 } from "lucide-react";

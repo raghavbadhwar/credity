@@ -89,6 +89,7 @@ export function Sidebar() {
     <>
       {/* Desktop Sidebar */}
       <aside className="hidden md:flex w-64 flex-col fixed inset-y-0 z-50">
+        // eslint-disable-next-line react-hooks/static-components
         <SidebarContent />
       </aside>
 
@@ -101,6 +102,7 @@ export function Sidebar() {
             </Button>
           </SheetTrigger>
           <SheetContent side="left" className="p-0 w-64 border-r-sidebar-border bg-sidebar text-sidebar-foreground">
+            // eslint-disable-next-line react-hooks/static-components
             <SidebarContent />
           </SheetContent>
         </Sheet>

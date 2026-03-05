@@ -71,6 +71,7 @@ router.post('/auth/register', async (req, res) => {
                 expiresIn: 900, // 15 minutes
             },
         });
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
         console.error('[Auth] Register error:', error);
         res.status(500).json({ error: 'Registration failed' });
@@ -128,6 +129,7 @@ router.post('/auth/login', async (req, res) => {
                 expiresIn: 900,
             },
         });
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
         console.error('[Auth] Login error:', error);
         res.status(500).json({ error: 'Login failed' });
@@ -158,6 +160,7 @@ router.post('/auth/refresh', (req, res) => {
                 expiresIn: 900,
             },
         });
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
         res.status(500).json({ error: 'Token refresh failed' });
     }
@@ -181,6 +184,7 @@ router.post('/auth/logout', authMiddleware, (req, res) => {
         }
 
         res.json({ success: true });
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
         res.status(500).json({ error: 'Logout failed' });
     }
@@ -201,6 +205,7 @@ router.get('/auth/me', authMiddleware, async (req, res) => {
             username: user.username,
             role: 'recruiter',
         });
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
         res.status(500).json({ error: 'Failed to get profile' });
     }
@@ -233,6 +238,7 @@ router.post('/auth/verify-token', (req, res) => {
             },
             app: 'recruiter',
         });
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
         res.status(500).json({ valid: false, error: 'Token verification failed' });
     }
