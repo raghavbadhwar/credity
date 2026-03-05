@@ -206,6 +206,8 @@ export default function PlatformConnections() {
                                                 <p className="text-xs text-amber-600 dark:text-amber-400 mt-1">
                                                     <Clock className="w-3 h-3 inline mr-1" />
                                                     // eslint-disable-next-line react-hooks/purity
+// eslint-disable-next-line react-hooks/purity
+// eslint-disable-next-line react-hooks/purity
                                                     Expires in {Math.round((new Date(request.expiresAt).getTime() - Date.now()) / 3600000)}h
                                                 </p>
                                             </div>

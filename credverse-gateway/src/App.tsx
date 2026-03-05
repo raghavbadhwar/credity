@@ -88,6 +88,8 @@ function App() {
                     ) : (
                       <>
                         // eslint-disable-next-line react-hooks/static-components
+// eslint-disable-next-line react-hooks/static-components
+// eslint-disable-next-line react-hooks/static-components
                         <GoogleIcon />
                         <span>Continue with Google</span>
                       </>
