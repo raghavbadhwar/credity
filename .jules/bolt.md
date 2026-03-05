@@ -1,0 +1,3 @@
+## 2025-02-14 - O(1) Memory Storage Hydration
+**Learning:** When implementing O(1) secondary Map indices in in-memory storage classes backed by file persistence (e.g., `MemStorage` using `PostgresStateStore` with `importState`), the secondary indices must be manually rebuilt during hydration. The persistent state only exports/imports the primary entities (arrays of tuples). Failing to rebuild secondary indices during `importState` leaves them empty, causing O(1) lookups to silently fail after a server restart.
+**Action:** Always check the `importState` or `load` methods when adding new properties to an in-memory storage class to ensure they are properly initialized/rebuilt from the loaded primary state.
