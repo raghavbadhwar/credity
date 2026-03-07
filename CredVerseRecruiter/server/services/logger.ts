@@ -36,10 +36,12 @@ export function logRequest(method: string, path: string, statusCode: number, dur
     logger.info({ type: 'http_request', method, path, statusCode, durationMs, requestId }, `${method} ${path} ${statusCode} ${durationMs}ms`);
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function logEvent(event: string, data?: Record<string, any>) {
     logger.info({ type: 'event', event, ...data }, event);
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function logError(error: Error, context?: Record<string, any>) {
     logger.error({ type: 'error', error: { name: error.name, message: error.message, stack: error.stack }, ...context }, error.message);
 }

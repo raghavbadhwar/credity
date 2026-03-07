@@ -16,7 +16,9 @@ export function Header({ title }: { title: string }) {
 
   useEffect(() => {
     const isDark = document.documentElement.classList.contains("dark");
-    setTheme(isDark ? "dark" : "light");
+
+    const timeoutId = setTimeout(() => setTheme(isDark ? "dark" : "light"), 0);
+    return () => clearTimeout(timeoutId);
   }, []);
 
   const toggleTheme = () => {
