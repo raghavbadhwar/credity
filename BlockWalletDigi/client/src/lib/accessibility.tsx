@@ -176,15 +176,11 @@ export function useLiveRegion() {
  */
 // eslint-disable-next-line react-refresh/only-export-components
 export function usePrefersReducedMotion(): boolean {
-    const [prefersReducedMotion, setPrefersReducedMotion] = useState(() => {
-        if (typeof window !== 'undefined') {
-            return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-        }
-        return false;
-    });
+    const [prefersReducedMotion, setPrefersReducedMotion] = React.useState(false);
 
     useEffect(() => {
         const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+        setPrefersReducedMotion(mediaQuery.matches);
 
         const handleChange = (e: MediaQueryListEvent) => {
             setPrefersReducedMotion(e.matches);

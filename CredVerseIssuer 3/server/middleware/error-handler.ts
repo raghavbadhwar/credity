@@ -3,7 +3,14 @@ import { ZodError } from "zod";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function errorHandler(err: any, req: Request, res: Response, next: NextFunction) {
+export function errorHandler(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  err: any,
+  req: Request,
+  res: Response,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  next: NextFunction
+) {
     const status = err.status || err.statusCode || 500;
     const message = err.message || "Internal Server Error";
 
