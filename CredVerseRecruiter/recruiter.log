@@ -1,0 +1,58 @@
+
+> rest-express@1.0.0 lint
+> eslint .
+
+[baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
+
+/app/CredVerseRecruiter/client/src/components/layout/Header.tsx
+  19:5  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+/app/CredVerseRecruiter/client/src/components/layout/Header.tsx:19:5
+  17 |   useEffect(() => {
+  18 |     const isDark = document.documentElement.classList.contains("dark");
+> 19 |     setTheme(isDark ? "dark" : "light");
+     |     ^^^^^^^^ Avoid calling setState() directly within an effect
+  20 |   }, []);
+  21 |
+  22 |   const toggleTheme = () => {  react-hooks/set-state-in-effect
+
+/app/CredVerseRecruiter/client/src/pages/AdminConsole.tsx
+  13:1  warning  Unused eslint-disable directive (no problems were reported from '@typescript-eslint/no-unused-vars')
+
+/app/CredVerseRecruiter/client/src/pages/Directory.tsx
+  56:28  error  Error: Cannot call impure function during render
+
+`Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
+
+/app/CredVerseRecruiter/client/src/pages/Directory.tsx:56:28
+  54 |               </CardContent>
+  55 |               <CardFooter className="pt-3 border-t text-xs text-muted-foreground flex justify-between items-center">
+> 56 |                 <span>ID: {Math.random().toString(36).substr(2, 8).toUpperCase()}</span>
+     |                            ^^^^^^^^^^^^^ Cannot call impure function
+  57 |                 <ExternalLink className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity" />
+  58 |               </CardFooter>
+  59 |             </Card>  react-hooks/purity
+
+/app/CredVerseRecruiter/server/index.ts
+  8:1  warning  Unused eslint-disable directive (no problems were reported from '@typescript-eslint/no-unused-vars')
+  9:1  warning  Unused eslint-disable directive (no problems were reported from '@typescript-eslint/no-unused-vars')
+
+/app/CredVerseRecruiter/server/middleware/error-handler.ts
+  4:1   warning  Unused eslint-disable directive (no problems were reported from '@typescript-eslint/no-unused-vars')
+  6:69  error    'next' is defined but never used                                                                      @typescript-eslint/no-unused-vars
+
+/app/CredVerseRecruiter/server/middleware/security.ts
+  172:5  warning  Unused eslint-disable directive (no problems were reported from 'no-useless-escape')
+
+/app/CredVerseRecruiter/server/services/verification-engine.ts
+  538:9   warning  Unused eslint-disable directive (no problems were reported from '@typescript-eslint/no-unused-vars')
+  540:13  error    'dataToHash' is assigned a value but never used                                                       @typescript-eslint/no-unused-vars
+
+✖ 10 problems (4 errors, 6 warnings)
+  0 errors and 6 warnings potentially fixable with the `--fix` option.

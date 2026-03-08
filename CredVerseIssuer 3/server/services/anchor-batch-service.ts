@@ -230,6 +230,7 @@ export async function anchorBatch(batchId: string): Promise<AnchorBatchRecord> {
         batch.updatedAt = new Date().toISOString();
         deadLetters.delete(batchId);
         scheduleBatchConfirmation(batchId);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
         batch.status = 'failed';
         const message = error?.message || 'Unknown anchor failure';

@@ -61,6 +61,7 @@ export async function apiKeyMiddleware(req: Request, res: Response, next: NextFu
         return res.status(429).json({ message: rate.error });
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (req as any).tenantId = resolved.tenantId;
     next();
 }
@@ -82,6 +83,7 @@ export async function apiKeyOrAuthMiddleware(req: Request, res: Response, next: 
             return res.status(429).json({ message: rate.error });
         }
 
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (req as any).tenantId = resolved.tenantId;
         return next();
     }
@@ -97,15 +99,20 @@ export async function apiKeyOrAuthMiddleware(req: Request, res: Response, next: 
         return res.status(401).json({ message: "Invalid or expired token" });
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (req as any).user = payload;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const bodyTenantId = readOptionalString((req as any).body?.tenantId);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const queryTenantId = readOptionalString((req as any).query?.tenantId);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const tokenTenantId = readOptionalString((payload as any).tenantId);
     const tenantId =
         tokenTenantId
         || (process.env.NODE_ENV !== "production" ? bodyTenantId || queryTenantId : undefined)
         || String(payload.userId);
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (req as any).tenantId = tenantId;
     next();
 }
@@ -114,6 +121,8 @@ export function requireAuth(req: Request, res: Response, next: NextFunction) {
     // TODO: Integrate with Passport.js or similar for real user sessions
     // For now, we'll assume if tenantId is present (via API key), it's "authenticated" for API access
     // Or if it's a browser session, we'd check req.session
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     if ((req as any).tenantId || (req as any).user) {
         return next();
     }

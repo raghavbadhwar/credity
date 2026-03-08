@@ -1,10 +1,165 @@
 
-> rest-express@1.0.0 dev
-> NODE_ENV=development tsx server/index.ts
+> rest-express@1.0.0 lint
+> eslint .
 
-2:53:03 AM [express] serving on port 5002
-[Wallet] Claiming offer from: http://localhost:5001/api/v1/public/issuance/offer/consume?token=386b7eaf-2a87-408d-ac10-98d88e731fe4
-2:53:32 AM [express] POST /api/wallet/offer/claim 200 in 23ms :: {"success":true,"credential":{"id":"cred-1765056212408-vygvbk","type":["VerifiableCredential","Imported"],"issuer":"c6ab8857-6bbf-4a31-8a17-cfe2f99e9c21","issuanceDate":"2025-12-06T21:23:32.407Z","data":{"name":"Test Cert"},"jwt":"eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkaWQ6a2V5OjEyMyIsImlzcyI6ImRpZDp3ZWI6dGVzdC5jb20iLCJpYXQiOjE3NjUwNTYyMTIsIm5iZiI6MTc2NTA1NjIxMiwiZXhwIjoxNzk2NTkyMjEyLCJ2YyI6eyJAY29udGV4dCI6WyJodHRwczovL3d3dy53My5vcmcvMjAxOC9jcmVkZW50aWFscy92MSIsImh0dHBzOi8vY3JlZHZlcnNlLmlvL2NvbnRleHQvdjEiXSwidHlwZSI6WyJWZXJpZmlhYmxlQ3JlZGVudGlhbCIsIkRlZ3JlZSJdLCJpc3N1ZXIiOnsiaWQiOiJkaWQ6d2ViOnRlc3QuY29tIiwibmFtZSI6IlRlc3QgSXNzdWVyIn0sImlzc3VhbmNlRGF0ZSI6IjIwMjUtMTItMDZUMjE6MjM6MzIuMjgxWiIsImNyZWRlbnRpYWxTdWJqZWN0Ijp7ImlkIjoiZGlkOmtleToxMjMiLCJuYW1lIjoiVGVzdCBDZXJ0In19fQ.sig_98707f9c9b1741bfa1ee3aeeb6e7f694","encryptedData":"5707b64508ddf8c49098a360b061bdcd:c09e0cc149ef0b78167ebb4cfe0776e7:94d351fb7fa19a8091490acf1bc68ea438a3cfa0","hash":"bbd51fdb8f4d03bba3a7d4cb75f2ba210997e5fb7dd4023337844156543cabf4","anchorStatus":"pending","category":"other","verificationCount":0},"message":"Credential claimed successfully"}
-2:53:51 AM [express] GET /api/health 200 in 37ms
-[Wallet] Claiming offer from: http://localhost:5001/api/v1/public/issuance/offer/consume?token=2453479c-e32f-43e7-a3a9-c770d1e1e01d
-2:53:52 AM [express] POST /api/wallet/offer/claim 200 in 20ms :: {"success":true,"credential":{"id":"cred-1765056232071-b22cko","type":["VerifiableCredential","Imported"],"issuer":"507a3694-0c3e-4c9b-b36a-7cb2bedc2099","issuanceDate":"2025-12-06T21:23:52.070Z","data":{"name":"Test Cert"},"jwt":"eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkaWQ6a2V5OjEyMyIsImlzcyI6ImRpZDp3ZWI6dGVzdC5jb20iLCJpYXQiOjE3NjUwNTYyMzEsIm5iZiI6MTc2NTA1NjIzMSwiZXhwIjoxNzk2NTkyMjMxLCJ2YyI6eyJAY29udGV4dCI6WyJodHRwczovL3d3dy53My5vcmcvMjAxOC9jcmVkZW50aWFscy92MSIsImh0dHBzOi8vY3JlZHZlcnNlLmlvL2NvbnRleHQvdjEiXSwidHlwZSI6WyJWZXJpZmlhYmxlQ3JlZGVudGlhbCIsIkRlZ3JlZSJdLCJpc3N1ZXIiOnsiaWQiOiJkaWQ6d2ViOnRlc3QuY29tIiwibmFtZSI6IlRlc3QgSXNzdWVyIn0sImlzc3VhbmNlRGF0ZSI6IjIwMjUtMTItMDZUMjE6MjM6NTEuNjY5WiIsImNyZWRlbnRpYWxTdWJqZWN0Ijp7ImlkIjoiZGlkOmtleToxMjMiLCJuYW1lIjoiVGVzdCBDZXJ0In19fQ.sig_dad3d9fe21cb4a79b4e2ecfb9d488af8","encryptedData":"9d8daaa8542789e2bf242607df258265:6a48ac846ccc7d75b0536aea84d5107a:c825c7daeed641719c3403e195f3ca14f9b4bf55","hash":"bbd51fdb8f4d03bba3a7d4cb75f2ba210997e5fb7dd4023337844156543cabf4","anchorStatus":"pending","category":"other","verificationCount":0},"message":"Credential claimed successfully"}
+[baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
+
+/app/BlockWalletDigi/client/src/components/qr-scanner.tsx
+  32:9   error    Error: Cannot access variable before it is declared
+
+`startCamera` is accessed before it is declared, which prevents the earlier access from updating when this value changes over time.
+
+/app/BlockWalletDigi/client/src/components/qr-scanner.tsx:32:9
+  30 |
+  31 |     useEffect(() => {
+> 32 |         startCamera();
+     |         ^^^^^^^^^^^ `startCamera` accessed before it is declared
+  33 |         return () => {
+  34 |             stopCamera();
+  35 |         };
+
+/app/BlockWalletDigi/client/src/components/qr-scanner.tsx:38:5
+  36 |     }, [facingMode]);
+  37 |
+> 38 |     const startCamera = async () => {
+     |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 39 |         try {
+     | ^^^^^^^^^^^^^
+> 40 |             setError(null);
+     …
+     | ^^^^^^^^^^^^^
+> 68 |         }
+     | ^^^^^^^^^^^^^
+> 69 |     };
+     | ^^^^^^^ `startCamera` is declared here
+  70 |
+  71 |     const stopCamera = () => {
+  72 |         if (intervalRef.current) {                                                                                          react-hooks/immutability
+  34:13  error    Error: Cannot access variable before it is declared
+
+`stopCamera` is accessed before it is declared, which prevents the earlier access from updating when this value changes over time.
+
+/app/BlockWalletDigi/client/src/components/qr-scanner.tsx:34:13
+  32 |         startCamera();
+  33 |         return () => {
+> 34 |             stopCamera();
+     |             ^^^^^^^^^^ `stopCamera` accessed before it is declared
+  35 |         };
+  36 |     }, [facingMode]);
+  37 |
+
+/app/BlockWalletDigi/client/src/components/qr-scanner.tsx:71:5
+  69 |     };
+  70 |
+> 71 |     const stopCamera = () => {
+     |     ^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 72 |         if (intervalRef.current) {
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 73 |             clearInterval(intervalRef.current);
+     …
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 84 |         }
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 85 |     };
+     | ^^^^^^^ `stopCamera` is declared here
+  86 |
+  87 |     const startScanning = () => {
+  88 |         // Simple QR detection using canvas  react-hooks/immutability
+  36:8   warning  React Hook useEffect has a missing dependency: 'startCamera'. Either include it or remove the dependency array                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               react-hooks/exhaustive-deps
+
+/app/BlockWalletDigi/client/src/components/share-modal.tsx
+   53:7   error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+/app/BlockWalletDigi/client/src/components/share-modal.tsx:53:7
+  51 |   useEffect(() => {
+  52 |     if (!open) {
+> 53 |       setShareResult(null);
+     |       ^^^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  54 |       setQrCodeUrl(null);
+  55 |       setSelectedFields([]);
+  56 |     }  react-hooks/set-state-in-effect
+  262:51  error  Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   @typescript-eslint/no-explicit-any
+
+/app/BlockWalletDigi/client/src/components/ui/sidebar.tsx
+  612:26  error  Error: Cannot call impure function during render
+
+`Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
+
+/app/BlockWalletDigi/client/src/components/ui/sidebar.tsx:612:26
+  610 |   // Random width between 50 to 90%.
+  611 |   const width = React.useMemo(() => {
+> 612 |     return `${Math.floor(Math.random() * 40) + 50}%`
+      |                          ^^^^^^^^^^^^^ Cannot call impure function
+  613 |   }, [])
+  614 |
+  615 |   return (  react-hooks/purity
+
+/app/BlockWalletDigi/client/src/pages/connect-digilocker.tsx
+  77:6  warning  React Hook useEffect has missing dependencies: 'queryClient' and 'toast'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+
+/app/BlockWalletDigi/client/src/pages/connections.tsx
+  208:117  error  Error: Cannot call impure function during render
+
+`Date.now` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
+
+/app/BlockWalletDigi/client/src/pages/connections.tsx:208:117
+  206 |                                                 <p className="text-xs text-amber-600 dark:text-amber-400 mt-1">
+  207 |                                                     <Clock className="w-3 h-3 inline mr-1" />
+> 208 |                                                     Expires in {Math.round((new Date(request.expiresAt).getTime() - Date.now()) / 3600000)}h
+      |                                                                                                                     ^^^^^^^^^^ Cannot call impure function
+  209 |                                                 </p>
+  210 |                                             </div>
+  211 |                                         </div>  react-hooks/purity
+
+/app/BlockWalletDigi/client/src/pages/dashboard.tsx
+  27:1  warning  Unused eslint-disable directive (no problems were reported from '@typescript-eslint/no-unused-vars')
+  28:1  warning  Unused eslint-disable directive (no problems were reported from '@typescript-eslint/no-unused-vars')
+
+/app/BlockWalletDigi/client/src/pages/digital-id.tsx
+  2:1  warning  Unused eslint-disable directive (no problems were reported from '@typescript-eslint/no-unused-vars')
+  3:1  warning  Unused eslint-disable directive (no problems were reported from '@typescript-eslint/no-unused-vars')
+  4:1  warning  Unused eslint-disable directive (no problems were reported from '@typescript-eslint/no-unused-vars')
+
+/app/BlockWalletDigi/client/src/pages/identity-verification.tsx
+  186:5  warning  Unused eslint-disable directive (no problems were reported from '@typescript-eslint/no-unused-vars')
+  367:8  warning  React Hook useEffect has missing dependencies: 'completeLiveness', 'startCamera', 'startDetection', 'stopCamera', 'stopDetection', 'takeSnapshot', and 'toast'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+
+/app/BlockWalletDigi/client/src/pages/receive.tsx
+  5:1  warning  Unused eslint-disable directive (no problems were reported from '@typescript-eslint/no-unused-vars')
+  6:1  warning  Unused eslint-disable directive (no problems were reported from '@typescript-eslint/no-unused-vars')
+
+/app/BlockWalletDigi/server/index.ts
+  8:1  warning  Unused eslint-disable directive (no problems were reported from '@typescript-eslint/no-unused-vars')
+  9:1  warning  Unused eslint-disable directive (no problems were reported from '@typescript-eslint/no-unused-vars')
+
+/app/BlockWalletDigi/server/middleware/error-handler.ts
+  4:1   warning  Unused eslint-disable directive (no problems were reported from '@typescript-eslint/no-unused-vars')
+  6:69  error    'next' is defined but never used                                                                      @typescript-eslint/no-unused-vars
+
+/app/BlockWalletDigi/server/middleware/security.ts
+  184:5  warning  Unused eslint-disable directive (no problems were reported from 'no-useless-escape')
+
+/app/BlockWalletDigi/server/services/auth-service.ts
+  71:5  warning  Unused eslint-disable directive (no problems were reported from 'no-useless-escape')
+
+/app/BlockWalletDigi/server/services/claims-service.ts
+  432:5  warning  Unused eslint-disable directive (no problems were reported from 'no-useless-escape')
+
+/app/BlockWalletDigi/server/services/liveness-service.ts
+  154:1  warning  Unused eslint-disable directive (no problems were reported from '@typescript-eslint/no-unused-vars')
+
+/app/BlockWalletDigi/server/services/selective-disclosure.ts
+  54:5  warning  Unused eslint-disable directive (no problems were reported from '@typescript-eslint/no-explicit-any')
+  71:5  warning  Unused eslint-disable directive (no problems were reported from '@typescript-eslint/no-explicit-any')
+
+/app/BlockWalletDigi/server/services/wallet-service.ts
+  826:5  warning  Unused eslint-disable directive (no problems were reported from '@typescript-eslint/no-explicit-any')
+
+✖ 28 problems (7 errors, 21 warnings)
+  0 errors and 18 warnings potentially fixable with the `--fix` option.

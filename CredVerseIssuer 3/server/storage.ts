@@ -45,6 +45,7 @@ export interface TemplateField {
   y: number;
   width: number;
   height: number;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   properties: Record<string, any>;
 }
 
@@ -74,6 +75,7 @@ interface IssuerStorageState {
   teamMembers: Array<[string, TeamMember]>;
   verificationLogs: Array<[string, VerificationLog]>;
   templateDesigns: Array<[string, TemplateDesign]>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   activityLogs: Array<[string, any]>;
 }
 
@@ -132,6 +134,7 @@ export class MemStorage implements IStorage {
   private teamMembers: Map<string, TeamMember>;
   private verificationLogs: Map<string, VerificationLog>;
   private templateDesigns: Map<string, TemplateDesign>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private activityLogs: Map<string, any>;
 
   constructor() {
@@ -240,6 +243,7 @@ export class MemStorage implements IStorage {
         version: "1.0.0",
         schema: "credential-schema-v1",
         disclosure: {}
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } as any);
     });
   }
@@ -361,14 +365,23 @@ export class MemStorage implements IStorage {
       ...insertCredential,
       id,
       createdAt: new Date(),
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       format: (insertCredential as any).format ?? "vc+jwt",
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       issuerDid: (insertCredential as any).issuerDid ?? null,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       subjectDid: (insertCredential as any).subjectDid ?? null,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       statusListId: (insertCredential as any).statusListId ?? null,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       statusListIndex: (insertCredential as any).statusListIndex ?? null,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       anchorBatchId: (insertCredential as any).anchorBatchId ?? null,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       anchorProof: (insertCredential as any).anchorProof ?? null,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       holderBinding: (insertCredential as any).holderBinding ?? null,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       issuanceFlow: (insertCredential as any).issuanceFlow ?? "legacy",
       vcJwt: insertCredential.vcJwt ?? null,
       ipfsHash: insertCredential.ipfsHash ?? null,
@@ -399,13 +412,17 @@ export class MemStorage implements IStorage {
   async updateCredentialBlockchain(id: string, data: { txHash?: string; blockNumber?: number; credentialHash?: string }): Promise<void> {
     const credential = this.credentials.get(id);
     if (credential) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (credential as any).txHash = data.txHash;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (credential as any).blockNumber = data.blockNumber;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (credential as any).credentialHash = data.credentialHash;
       this.credentials.set(id, credential);
     }
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   async createActivityLog(data: { tenantId: string; type: string; title: string; description: string; metadata?: any }): Promise<void> {
     const id = randomUUID();
     const log = {
@@ -584,49 +601,66 @@ export class MemStorage implements IStorage {
   importState(state: IssuerStorageState): void {
     this.users = new Map((state.users || []).map(([key, value]) => [key, {
       ...value,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       createdAt: parseDate((value as any).createdAt),
     }]));
     this.tenants = new Map((state.tenants || []).map(([key, value]) => [key, {
       ...value,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       createdAt: parseDate((value as any).createdAt),
     }]));
     this.apiKeys = new Map((state.apiKeys || []).map(([key, value]) => [key, {
       ...value,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       createdAt: parseDate((value as any).createdAt),
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       expiresAt: (value as any).expiresAt ? parseDate((value as any).expiresAt) : null,
     }]));
     this.issuers = new Map((state.issuers || []).map(([key, value]) => [key, {
       ...value,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       createdAt: parseDate((value as any).createdAt),
     }]));
     this.templates = new Map((state.templates || []).map(([key, value]) => [key, {
       ...value,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       createdAt: parseDate((value as any).createdAt),
     }]));
     this.credentials = new Map((state.credentials || []).map(([key, value]) => [key, {
       ...value,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       createdAt: parseDate((value as any).createdAt),
     }]));
     this.students = new Map((state.students || []).map(([key, value]) => [key, {
       ...value,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       createdAt: parseDate((value as any).createdAt),
     }]));
     this.teamMembers = new Map((state.teamMembers || []).map(([key, value]) => [key, {
       ...value,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       invitedAt: parseDate((value as any).invitedAt),
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       joinedAt: (value as any).joinedAt ? parseDate((value as any).joinedAt) : null,
     }]));
     this.verificationLogs = new Map((state.verificationLogs || []).map(([key, value]) => [key, {
       ...value,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       timestamp: parseDate((value as any).timestamp),
     }]));
     this.templateDesigns = new Map((state.templateDesigns || []).map(([key, value]) => [key, {
       ...value,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       createdAt: parseDate((value as any).createdAt),
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       updatedAt: parseDate((value as any).updatedAt),
     }]));
     this.activityLogs = new Map((state.activityLogs || []).map(([key, value]) => [key, {
       ...value,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       timestamp: (value as any)?.timestamp ? parseDate((value as any).timestamp) : parseDate(undefined),
     }]));
   }

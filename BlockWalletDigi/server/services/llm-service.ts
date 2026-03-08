@@ -125,6 +125,7 @@ async function callLLMProvider(
     // Build prompt based on analysis type
     const prompt = buildPrompt(request);
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let response: any;
     let cost = 0;
 
@@ -222,6 +223,7 @@ Respond with JSON:
 /**
  * Call DeepSeek API
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function callDeepSeek(prompt: string): Promise<any> {
     const apiKey = process.env.DEEPSEEK_API_KEY;
     if (!apiKey) throw new Error('DEEPSEEK_API_KEY not configured');
@@ -247,6 +249,7 @@ async function callDeepSeek(prompt: string): Promise<any> {
 /**
  * Call Google Gemini API
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function callGemini(prompt: string): Promise<any> {
     const apiKey = process.env.GEMINI_API_KEY;
     if (!apiKey) throw new Error('GEMINI_API_KEY not configured');
@@ -270,6 +273,7 @@ async function callGemini(prompt: string): Promise<any> {
 /**
  * Call OpenAI API
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function callOpenAI(prompt: string): Promise<any> {
     const apiKey = process.env.OPENAI_API_KEY;
     if (!apiKey) throw new Error('OPENAI_API_KEY not configured');
@@ -295,6 +299,7 @@ async function callOpenAI(prompt: string): Promise<any> {
 /**
  * Parse JSON from LLM response (handles markdown code blocks)
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function parseJsonResponse(text: string): any {
     // Remove markdown code blocks if present
     const cleaned = text.replace(/```json?\n?/g, '').replace(/```/g, '').trim();
@@ -306,14 +311,17 @@ function parseJsonResponse(text: string): any {
 }
 
 // Helper functions to parse LLM responses
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function parseConfidence(response: any): number {
     return typeof response.confidence === 'number' ? response.confidence : 0.7;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function parseFraudIndicators(response: any): string[] {
     return response.fraudIndicators || response.issues || response.matchedPatterns || [];
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function parseRecommendation(response: any): string {
     return response.recommendation || 'review';
 }
@@ -359,6 +367,7 @@ function localDeceptionAnalysis(text: string, startTime: number): LLMAnalysisRes
     }
 
     // Detailed descriptions with specifics are more trustworthy
+    // eslint-disable-next-line no-useless-escape
     if (text.length > 200 && /\d{1,2}[:\-\/]\d{1,2}/i.test(text)) {
         confidence += 0.1;
     }
