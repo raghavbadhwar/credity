@@ -7,7 +7,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { Copy, QrCode, Link as LinkIcon, Check, Share2, Clock, Mail, MessageCircle, Loader2, Shield, Eye, EyeOff, ExternalLink } from "lucide-react";
 import { Credential } from "@shared/schema";
 import { useMutation, useQuery } from "@tanstack/react-query";
@@ -131,7 +130,6 @@ export function ShareModal({ credential, open, onOpenChange }: ShareModalProps) 
   const handleShare = async (type: 'email' | 'whatsapp' | 'native') => {
     if (!shareResult?.shareUrl) return;
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const title = `Credential Verification: ${(credential.data as any)?.name || 'Credential'}`;
     const text = `Verify my ${credential.issuer} credential: ${shareResult.shareUrl}`;
 
@@ -258,7 +256,6 @@ export function ShareModal({ credential, open, onOpenChange }: ShareModalProps) 
                       {field.replace(/_/g, " ").replace(/([A-Z])/g, " $1")}
                     </Label>
                     <span className="text-xs text-muted-foreground truncate max-w-[100px]">
-                      // eslint-disable-next-line @typescript-eslint/no-explicit-any
                       {String((credential.data as any)?.[field] || '').slice(0, 20)}
                     </span>
                   </div>

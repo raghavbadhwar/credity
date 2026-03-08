@@ -20,7 +20,6 @@ router.get('/compliance/consents', async (req, res) => {
 
         const consents = await walletService.listConsentGrants(userId);
         res.json({ count: consents.length, consents });
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
         res.status(500).json({ error: error?.message || 'Failed to list consents' });
     }
@@ -56,7 +55,6 @@ router.post('/compliance/consents', async (req, res) => {
         });
 
         res.status(201).json(consent);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
         res.status(500).json({ error: error?.message || 'Failed to create consent grant' });
     }
@@ -75,7 +73,6 @@ router.post('/compliance/consents/:consentId/revoke', async (req, res) => {
         }
 
         res.json(revoked);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
         res.status(500).json({ error: error?.message || 'Failed to revoke consent grant' });
     }
@@ -90,7 +87,6 @@ router.get('/compliance/data-requests', async (req, res) => {
 
         const requests = await walletService.listDataRequests(userId);
         res.json({ count: requests.length, requests });
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
         res.status(500).json({ error: error?.message || 'Failed to list data requests' });
     }
@@ -109,7 +105,6 @@ router.post('/compliance/data-requests/export', async (req, res) => {
         });
 
         res.status(202).json(request);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
         res.status(500).json({ error: error?.message || 'Failed to submit export request' });
     }
@@ -131,7 +126,6 @@ router.post('/compliance/data-requests/delete', async (req, res) => {
         });
 
         res.status(202).json(request);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
         res.status(500).json({ error: error?.message || 'Failed to submit delete request' });
     }
@@ -141,7 +135,6 @@ router.get('/compliance/certin/incidents', async (_req, res) => {
     try {
         const incidents = await walletService.listCertInIncidents();
         res.json({ count: incidents.length, incidents });
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
         res.status(500).json({ error: error?.message || 'Failed to list incidents' });
     }
@@ -163,7 +156,6 @@ router.post('/compliance/certin/incidents', async (req, res) => {
         });
 
         res.status(201).json(incident);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
         res.status(500).json({ error: error?.message || 'Failed to create incident record' });
     }

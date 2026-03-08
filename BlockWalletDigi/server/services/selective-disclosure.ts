@@ -14,7 +14,6 @@ export interface SelectiveDisclosureRequest {
 export interface DisclosureToken {
     id: string;
     credentialId: string;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     disclosedData: Record<string, any>;
     hiddenFields: string[];
     proof: {
@@ -51,8 +50,6 @@ export class SelectiveDisclosureService {
     /**
      * Check if a field path exists in an object
      */
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     private getFieldValue(obj: any, path: string): any {
         const parts = path.split('.');
         let current = obj;
@@ -68,8 +65,6 @@ export class SelectiveDisclosureService {
     /**
      * Set a field value in an object using dot notation path
      */
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     private setFieldValue(obj: any, path: string, value: any): void {
         const parts = path.split('.');
         let current = obj;
@@ -87,11 +82,9 @@ export class SelectiveDisclosureService {
     /**
      * Get all field paths from a credential
      */
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     getCredentialFields(credentialData: any): string[] {
         const fields: string[] = [];
 
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const traverse = (obj: any, prefix: string = '') => {
             for (const key in obj) {
                 const path = prefix ? `${prefix}.${key}` : key;
@@ -113,12 +106,10 @@ export class SelectiveDisclosureService {
      */
     createDisclosureToken(
         credentialId: string,
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         fullCredentialData: any,
         request: SelectiveDisclosureRequest
     ): DisclosureToken {
         const allFields = this.getCredentialFields(fullCredentialData);
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const disclosedData: Record<string, any> = {};
         const hiddenFields: string[] = [];
 
@@ -227,9 +218,7 @@ export class SelectiveDisclosureService {
     /**
      * Hash the disclosed data for integrity verification
      */
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     private hashDisclosure(data: any): string {
-        // eslint-disable-next-line @typescript-eslint/no-require-imports
         const crypto = require('crypto');
         const canonical = JSON.stringify(data, Object.keys(data).sort());
         return crypto.createHash('sha256').update(canonical).digest('hex');

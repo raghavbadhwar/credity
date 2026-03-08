@@ -1,4 +1,3 @@
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { generateAccessToken, validateAccessToken, sha256 } from './crypto-utils';
 
 /**
@@ -57,7 +56,6 @@ export class QRService {
      */
     generateQRPayload(
         credentialId: string,
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         credentialData: any,
         options: QRGenerationOptions
     ): QRPayload {
@@ -87,7 +85,6 @@ export class QRService {
      */
     createShareLink(
         credentialId: string,
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         credentialData: any,
         options: QRGenerationOptions
     ): ShareLink {

@@ -2,7 +2,6 @@ import { Router } from "express";
 import { storage } from "../storage";
 import { insertTemplateSchema } from "@shared/schema";
 import { apiKeyMiddleware } from "../auth";
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { z } from "zod";
 
 const router = Router();
@@ -22,7 +21,6 @@ router.get("/templates/public/:id", async (req, res) => {
             version: template.version,
             issuerId: template.tenantId // or issuer identity
         });
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
         res.status(500).json({ message: "Internal Server Error" });
     }
@@ -33,7 +31,6 @@ router.use("/templates", apiKeyMiddleware);
 
 router.post("/templates", async (req, res) => {
     try {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const tenantId = (req as any).tenantId;
         const parseResult = insertTemplateSchema.safeParse({ ...req.body, tenantId });
 
@@ -43,7 +40,6 @@ router.post("/templates", async (req, res) => {
 
         const template = await storage.createTemplate(parseResult.data);
         res.status(201).json(template);
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
         res.status(500).json({ message: "Internal Server Error" });
     }
@@ -51,11 +47,9 @@ router.post("/templates", async (req, res) => {
 
 router.get("/templates", async (req, res) => {
     try {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const tenantId = (req as any).tenantId;
         const templates = await storage.listTemplates(tenantId);
         res.json(templates);
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
         res.status(500).json({ message: "Internal Server Error" });
     }
@@ -69,7 +63,6 @@ router.post("/templates/:id/render", async (req, res) => {
             return res.status(404).json({ message: "Template not found" });
         }
 
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const tenantId = (req as any).tenantId;
         if (template.tenantId !== tenantId) {
             return res.status(403).json({ message: "Forbidden" });
@@ -84,7 +77,6 @@ router.post("/templates/:id/render", async (req, res) => {
         }
 
         res.json({ rendered });
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
         res.status(500).json({ message: "Internal Server Error" });
     }

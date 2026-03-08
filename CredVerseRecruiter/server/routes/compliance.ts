@@ -103,7 +103,6 @@ async function queuePersist(): Promise<void> {
   await persistChain;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function actorFromRequest(req: any): string {
   return req?.user?.userId || "recruiter-system";
 }

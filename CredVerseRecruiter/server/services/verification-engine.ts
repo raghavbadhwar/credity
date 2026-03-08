@@ -21,7 +21,6 @@ export interface VerificationCheck {
     name: string;
     status: 'passed' | 'failed' | 'warning' | 'skipped';
     message: string;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     details?: any;
 }
 
@@ -29,7 +28,6 @@ export interface CredentialPayload {
     jwt?: string;
     qrData?: string;
     credentialId?: string;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     raw?: any;
 }
 
@@ -188,7 +186,6 @@ export class VerificationEngine {
 
         try {
             // Parse credential
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             let credential: any;
             if (payload.jwt) {
                 credential = this.parseJWT(payload.jwt);
@@ -333,7 +330,6 @@ export class VerificationEngine {
     /**
      * Parse JWT credential
      */
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     private parseJWT(jwt: string): any {
         try {
             const parts = jwt.split('.');
@@ -349,7 +345,6 @@ export class VerificationEngine {
     /**
      * Parse QR data
      */
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     private parseQRData(qrData: string): any {
         try {
             return JSON.parse(qrData);
@@ -365,7 +360,6 @@ export class VerificationEngine {
     /**
      * Verify credential signature
      */
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     private async verifySignature(credential: any): Promise<VerificationCheck> {
         // Get issuer identifier (could be DID or plain name)
         const issuer = credential.issuer?.id || credential.iss || credential.issuer;
@@ -385,7 +379,6 @@ export class VerificationEngine {
     /**
      * Verify issuer with remote registry fallback
      */
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     private async verifyIssuer(credential: any): Promise<VerificationCheck> {
         // Handle different credential formats (VC vs raw)
         const issuerDid = typeof credential.issuer === 'string'
@@ -457,7 +450,6 @@ export class VerificationEngine {
     /**
      * Check credential expiration
      */
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     private checkExpiration(credential: any): VerificationCheck {
         const expDate = credential.expirationDate || credential.exp;
 
@@ -485,7 +477,6 @@ export class VerificationEngine {
     /**
      * Check revocation status - REAL CHECK
      */
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     private async checkRevocation(credential: any): Promise<VerificationCheck> {
         const credentialId = credential.id || credential.jti;
 
@@ -531,12 +522,9 @@ export class VerificationEngine {
     /**
      * Check on-chain anchor
      */
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     private async checkOnChainAnchor(credential: any): Promise<VerificationCheck> {
         // Hash the credential data to find it on-chain
         // The issuance process hashes the credential content
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        // eslint-disable-next-line prefer-const
         let dataToHash = Buffer.isBuffer(credential) ? credential.toString() : credential;
 
         // If it's a JWT payload, we might need to verify the hash of the original JWT or the payload depending on how issuer anchored it.
@@ -577,7 +565,6 @@ export class VerificationEngine {
     /**
      * Resolve DID Document
      */
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     private async resolveDID(credential: any): Promise<VerificationCheck> {
         const did = credential.issuer?.id || credential.iss || credential.holder || credential.sub;
 
@@ -639,7 +626,6 @@ export class VerificationEngine {
     /**
      * Hash credential for verification
      */
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     private hashCredential(credential: any): string {
         const canonical = JSON.stringify(credential, Object.keys(credential).sort());
         return crypto.createHash('sha256').update(canonical).digest('hex');

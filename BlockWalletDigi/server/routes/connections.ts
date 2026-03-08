@@ -119,7 +119,6 @@ router.get('/', async (req: Request, res: Response) => {
                 totalAccessCount: userConnections.reduce((sum, c) => sum + c.accessCount, 0)
             }
         });
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
         console.error('Connections list error:', error);
         res.status(500).json({
@@ -146,7 +145,6 @@ router.get('/requests', async (req: Request, res: Response) => {
             requests: userRequests,
             pendingCount: userRequests.length
         });
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
         console.error('Requests list error:', error);
         res.status(500).json({
@@ -201,7 +199,6 @@ router.post('/requests/:id/approve', async (req: Request, res: Response) => {
             connection,
             message: `Connected to ${request.platformName}`
         });
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
         console.error('Approve request error:', error);
         res.status(500).json({
@@ -234,7 +231,6 @@ router.post('/requests/:id/deny', async (req: Request, res: Response) => {
             success: true,
             message: `Denied request from ${request.platformName}`
         });
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
         console.error('Deny request error:', error);
         res.status(500).json({
@@ -272,7 +268,6 @@ router.put('/:id/permissions', async (req: Request, res: Response) => {
             connection,
             message: 'Permissions updated'
         });
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
         console.error('Update permissions error:', error);
         res.status(500).json({
@@ -305,7 +300,6 @@ router.delete('/:id', async (req: Request, res: Response) => {
             success: true,
             message: `Disconnected from ${connection.platformName}`
         });
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
         console.error('Disconnect error:', error);
         res.status(500).json({
@@ -346,7 +340,6 @@ router.get('/:id/activity', async (req: Request, res: Response) => {
             },
             activity
         });
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
         console.error('Activity log error:', error);
         res.status(500).json({

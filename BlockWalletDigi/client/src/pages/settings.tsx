@@ -57,7 +57,6 @@ interface WalletStatusData {
 }
 
 interface NotifData {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   notifications?: any[];
   unreadCount?: number;
 }

@@ -83,7 +83,6 @@ router.post('/auth/register', async (req, res) => {
                 expiresIn: 900, // 15 minutes
             },
         });
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
         console.error('[Auth] Register error:', error);
         res.status(500).json({ error: 'Registration failed' });
@@ -113,7 +112,6 @@ router.post('/auth/login', async (req, res) => {
         }
 
         // Verify password
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const passwordHash = (user as any).password;
         if (!passwordHash) {
             if (!allowLegacyLoginBypass) {
@@ -153,7 +151,6 @@ router.post('/auth/login', async (req, res) => {
                 expiresIn: 900,
             },
         });
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
         console.error('[Auth] Login error:', error);
         res.status(500).json({ error: 'Login failed' });
@@ -184,7 +181,6 @@ router.post('/auth/refresh', (req, res) => {
                 expiresIn: 900,
             },
         });
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
         res.status(500).json({ error: 'Token refresh failed' });
     }
@@ -208,7 +204,6 @@ router.post('/auth/logout', authMiddleware, (req, res) => {
         }
 
         res.json({ success: true });
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
         res.status(500).json({ error: 'Logout failed' });
     }
@@ -233,7 +228,6 @@ router.get('/auth/me', authMiddleware, async (req, res) => {
             avatarUrl: user.avatarUrl,
             bio: user.bio,
         });
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
         res.status(500).json({ error: 'Failed to get profile' });
     }
@@ -264,7 +258,6 @@ router.patch('/auth/me', authMiddleware, async (req, res) => {
                 avatarUrl: updated.avatarUrl,
             },
         });
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
         res.status(500).json({ error: 'Failed to update profile' });
     }
@@ -295,7 +288,6 @@ router.post('/auth/change-password', authMiddleware, async (req, res) => {
         }
 
         // Verify current password if exists
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const passwordHash = (user as any).password;
         if (passwordHash && currentPassword) {
             const valid = await comparePassword(currentPassword, passwordHash);
@@ -306,11 +298,9 @@ router.post('/auth/change-password', authMiddleware, async (req, res) => {
 
         // Update password
         const newHash = await hashPassword(newPassword);
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         await storage.updateUser(Number(req.user!.userId), { password: newHash } as any);
 
         res.json({ success: true, message: 'Password updated' });
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
         res.status(500).json({ error: 'Failed to change password' });
     }
@@ -343,7 +333,6 @@ router.post('/auth/verify-token', (req, res) => {
             },
             app: 'wallet',
         });
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
         res.status(500).json({ valid: false, error: 'Token verification failed' });
     }

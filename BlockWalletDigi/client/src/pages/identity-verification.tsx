@@ -9,7 +9,6 @@
  * - Verification Status Dashboard
  */
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { useState, useRef, useEffect } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "framer-motion";
@@ -24,10 +23,8 @@ import {
     ShieldCheck,
     Fingerprint,
     ScanLine,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     Upload,
     Loader2,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     AlertTriangle,
     ChevronRight,
     Eye,
@@ -38,7 +35,6 @@ import {
     FileText,
     Smartphone,
     CircleDot,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     AlertCircle,
     Clock,
     Zap,
@@ -50,7 +46,6 @@ import { useBiometrics } from "@/hooks/use-biometrics";
 import { useFaceDetection } from "@/hooks/use-face-detection";
 
 // Futuristic Circular Progress Component
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const CircularProgress = ({ value, size = 120, strokeWidth = 8, color = "text-primary" }: any) => {
     const radius = (size - strokeWidth) / 2;
     const circumference = radius * 2 * Math.PI;
@@ -150,7 +145,6 @@ export default function IdentityVerification() {
 
     // Real biometrics hook (WebAuthn)
     const {
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         isSupported: biometricsSupported,
         isEnrolling,
         enrollBiometrics: enrollWithWebAuthn,
@@ -163,7 +157,6 @@ export default function IdentityVerification() {
         canvasRef,
         isActive: cameraActive,
         faceDetected,
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         motionDetected,
         startCamera,
         stopCamera,
@@ -173,23 +166,16 @@ export default function IdentityVerification() {
     } = useFaceDetection();
 
     const [activeTab, setActiveTab] = useState<'overview' | 'liveness' | 'biometrics' | 'documents'>('overview');
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const [livenessSession, setLivenessSession] = useState<any>(null);
     const [currentChallenge, setCurrentChallenge] = useState<Challenge | null>(null);
     const [challengeTimer, setChallengeTimer] = useState(5);
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const [documentPreview, setDocumentPreview] = useState<string | null>(null);
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const [livenessProgress, setLivenessProgress] = useState(0);
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const [biometricAvailable, setBiometricAvailable] = useState<{ available: boolean; platformAuthenticator: boolean } | null>(null);
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const [challengeCompleted, setChallengeCompleted] = useState<Record<string, boolean>>({});
     const [pendingCameraStart, setPendingCameraStart] = useState(false);
 
     // Fetch verification status
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { data: status, isLoading } = useQuery<{ success: boolean } & VerificationStatus>({
         queryKey: ['identity-status'],
         queryFn: async () => {
@@ -200,7 +186,6 @@ export default function IdentityVerification() {
     });
 
     // Start liveness session mutation
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const startLivenessMutation = useMutation({
         mutationFn: async () => {
             const res = await fetch('/api/identity/liveness/start', {
@@ -261,7 +246,6 @@ export default function IdentityVerification() {
                     variant: 'destructive'
                 });
             }
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         } catch (error: any) {
             toast({
                 title: 'Biometric Error',
@@ -277,7 +261,6 @@ export default function IdentityVerification() {
     }, [checkAvailability]);
 
     // Scan document mutation
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const scanDocumentMutation = useMutation({
         mutationFn: async (imageData: string) => {
             const res = await fetch('/api/identity/document/scan', {
@@ -392,7 +375,6 @@ export default function IdentityVerification() {
             } else {
                 throw new Error(data.details || data.error);
             }
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         } catch (error: any) {
             toast({
                 title: 'Verification Failed',
@@ -402,7 +384,6 @@ export default function IdentityVerification() {
         }
     };
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const cancelLiveness = () => {
         stopDetection();
         stopCamera();
@@ -420,7 +401,6 @@ export default function IdentityVerification() {
     }, [currentChallenge, challengeTimer]);
 
     // Handle file upload
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file) {
@@ -494,7 +474,6 @@ export default function IdentityVerification() {
                         ].map((tab) => (
                             <button
                                 key={tab.id}
-                                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                                 onClick={() => setActiveTab(tab.id as any)}
                                 className={`flex-1 relative flex items-center justify-center gap-2 py-3 px-4 rounded-lg text-sm font-medium transition-all duration-300 z-10 ${activeTab === tab.id ? 'text-primary' : 'text-muted-foreground hover:text-foreground'
                                     }`}

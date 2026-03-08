@@ -39,7 +39,6 @@ router.get('/inbox', async (req, res) => {
             })),
             count: pending.length,
         });
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
         res.status(500).json({ error: error.message });
     }
@@ -82,7 +81,6 @@ router.post('/inbox/:offerId/accept', async (req, res) => {
                 issuer: credential.issuer,
             },
         });
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
         console.error('Accept offer error:', error);
         res.status(500).json({ error: error.message });
@@ -105,7 +103,6 @@ router.post('/inbox/:offerId/reject', async (req, res) => {
         const success = rejectCredentialOffer(offerId, wallet.did);
 
         res.json({ success });
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
         res.status(500).json({ error: error.message });
     }
@@ -138,7 +135,6 @@ router.get('/inbox/:offerId', async (req, res) => {
             createdAt: offer.createdAt,
             expiresAt: offer.expiresAt,
         });
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
         res.status(500).json({ error: error.message });
     }
@@ -163,7 +159,6 @@ router.post('/webhook/register', async (req, res) => {
             secret,
             message: 'Webhook registered. Include X-CredVerse-Signature header with HMAC-SHA256 verification.',
         });
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
         res.status(500).json({ error: error.message });
     }
@@ -201,7 +196,6 @@ router.post('/push', async (req, res) => {
             status: result.status,
             message: 'Credential offer sent to wallet',
         });
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
         res.status(500).json({ error: error.message });
     }

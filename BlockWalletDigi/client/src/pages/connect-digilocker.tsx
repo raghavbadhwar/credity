@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { useLocation, useSearch } from "wouter";
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { motion, AnimatePresence } from "framer-motion";
 import { Sidebar } from "@/components/sidebar";
 import { Button } from "@/components/ui/button";
@@ -33,7 +32,6 @@ interface DigiLockerDocument {
   date: string;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const docTypeIcons: Record<string, any> = {
   ADHAR: Fingerprint,
   PAN: CreditCard,
@@ -44,7 +42,6 @@ const docTypeIcons: Record<string, any> = {
 };
 
 export default function ConnectDigiLocker() {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [, setLocation] = useLocation();
   const searchString = useSearch();
   const searchParams = new URLSearchParams(searchString);

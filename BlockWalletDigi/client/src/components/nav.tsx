@@ -1,5 +1,4 @@
 import { Link, useLocation } from "wouter";
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { Wallet, User, Settings, LogOut } from "lucide-react";
 import { cn } from "@/lib/utils";
 

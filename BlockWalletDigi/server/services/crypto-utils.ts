@@ -9,7 +9,6 @@ import crypto from 'crypto';
 const ALGORITHM = 'aes-256-gcm';
 const KEY_LENGTH = 32; // 256 bits
 const IV_LENGTH = 16;
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const AUTH_TAG_LENGTH = 16;
 
 export interface EncryptedData {
@@ -182,7 +181,6 @@ export function generateAccessToken(payload: object, expiryMinutes: number): { t
 /**
  * Validate access token
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function validateAccessToken(token: string): { valid: boolean; payload?: any; expired?: boolean } {
     try {
         const payload = JSON.parse(Buffer.from(token, 'base64url').toString());

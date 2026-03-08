@@ -169,7 +169,6 @@ export function generateOID4VCIOfferUrl(params: {
  */
 export function parseOID4VPRequest(url: string): {
     responseUri: string;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     presentationDefinition: any;
     nonce: string;
 } | null {

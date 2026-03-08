@@ -81,7 +81,6 @@ router.get('/events', async (req: Request, res: Response) => {
             events,
             count: events.length,
         });
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
         return res.status(400).json({
             success: false,
@@ -132,7 +131,6 @@ router.post('/events', async (req: Request, res: Response) => {
             reputation: reputationScore,
             safe_date: safeDate,
         });
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
         return res.status(400).json({
             success: false,
@@ -154,7 +152,6 @@ router.get('/score', async (req: Request, res: Response) => {
             success: true,
             reputation: reputationScore,
         });
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
         return res.status(400).json({
             success: false,
@@ -176,7 +173,6 @@ router.get('/safedate', async (req: Request, res: Response) => {
             success: true,
             safe_date: safeDate,
         });
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
         return res.status(400).json({
             success: false,

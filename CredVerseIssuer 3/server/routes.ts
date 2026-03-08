@@ -1,7 +1,5 @@
 import type { Express } from "express";
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { createServer, type Server } from "http";
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { storage } from "./storage";
 import registryRoutes from "./routes/registry";
 import templateRoutes from "./routes/templates";

@@ -31,7 +31,6 @@ router.patch("/user", async (req, res) => {
 
         const updatedUser = await storage.updateUser(userId, parseResult.data);
         res.json(updatedUser);
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
         res.status(500).json({ message: "Internal Server Error" });
     }

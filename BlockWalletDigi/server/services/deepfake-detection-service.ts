@@ -45,7 +45,6 @@ export async function detectDeepfakeFromUrl(url: string): Promise<DeepfakeDetect
             confidence: score,
             provider: data.provider || 'remote_api',
         };
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
         return {
             verdict: 'unknown',

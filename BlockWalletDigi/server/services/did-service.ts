@@ -144,12 +144,10 @@ export class DIDService {
      * Create a Verifiable Presentation
      */
     async createPresentation(
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         credentials: any[],
         didKeyPair: DIDKeyPair,
         domain?: string,
         challenge?: string
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     ): Promise<any> {
         const presentation = {
             '@context': ['https://www.w3.org/2018/credentials/v1'],
@@ -193,7 +191,6 @@ export class DIDService {
     /**
      * Hash credential for on-chain anchoring
      */
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     hashCredential(credential: any): string {
         const canonical = JSON.stringify(credential, Object.keys(credential).sort());
         return sha256(canonical);

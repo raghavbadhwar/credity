@@ -336,7 +336,6 @@ export class DigiLockerService {
      * Pull a specific document from DigiLocker
      */
     async pullDocument(userId: number, documentUri: string): Promise<{
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         document: any;
         rawData?: string;
     }> {
@@ -349,7 +348,6 @@ export class DigiLockerService {
         if (this.demoMode) {
             const docType = documentUri.split('-')[1];
 
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const mockData: Record<string, any> = {
                 ADHAR: {
                     type: 'Aadhaar',

@@ -17,7 +17,6 @@ interface VerificationCheck {
   name: string;
   status: 'passed' | 'failed' | 'warning' | 'skipped';
   message: string;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   details?: any;
 }
 
@@ -63,7 +62,6 @@ export default function InstantVerify() {
 
   // Verification mutation
   const verifyMutation = useMutation({
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     mutationFn: async (payload: { jwt?: string; credential?: any }) => {
       const response = await fetch('/api/verify/instant', {
         method: 'POST',
@@ -112,7 +110,6 @@ export default function InstantVerify() {
     },
   });
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleVerify = (jwt?: string, credential?: any) => {
     setViewState("verifying");
     setProgress(0);
@@ -158,7 +155,6 @@ export default function InstantVerify() {
     setLinkInput("");
   };
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'verified': return 'emerald';

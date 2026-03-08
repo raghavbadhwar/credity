@@ -172,7 +172,6 @@ function App() {
   );
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function RoleButton({ title, description, icon: Icon, color, bg, hover, onClick }: any) {
   return (
     <button

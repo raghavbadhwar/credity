@@ -12,10 +12,8 @@ import {
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { useState, useCallback } from "react";
 import { useLocation } from "wouter";
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
     DndContext,
@@ -58,7 +56,6 @@ interface TemplateField {
     y: number;
     width: number;
     height: number;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     properties: Record<string, any>;
 }
 
@@ -294,7 +291,6 @@ export default function TemplateBuilder() {
     };
 
     // Update field property
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const updateFieldProperty = (key: string, value: any) => {
         if (!selectedFieldId) return;
         setFields(fields.map(f =>
@@ -311,7 +307,6 @@ export default function TemplateBuilder() {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
                     'x-api-key': (import.meta as any).env?.VITE_API_KEY || '',
                 },
                 body: JSON.stringify({

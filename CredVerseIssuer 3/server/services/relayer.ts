@@ -68,7 +68,6 @@ export class RelayerService {
             account: this.account,
             chain: this.chain,
             transport: http(rpcUrl),
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         }).extend(publicActions) as any;
 
         console.log(`[Relayer] Configured for ${network} (chainId=${this.chain.id})`);

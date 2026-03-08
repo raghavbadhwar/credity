@@ -4,7 +4,6 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { Textarea } from "@/components/ui/textarea";
 import {
     Table,
@@ -46,8 +45,6 @@ import {
 } from "@/components/ui/select";
 import {
     Search, Upload, Plus, MoreHorizontal, GraduationCap, User, FileCheck, Download,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     Loader2, Eye, Edit, FileText, Award, Mail, Phone, Calendar, MapPin, Smartphone
 } from "lucide-react";
 import { useState, useRef } from "react";
@@ -56,10 +53,6 @@ import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 interface Student {
@@ -72,7 +65,6 @@ interface Student {
     status: "Active" | "Alumni" | "Suspended";
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 interface StudentCredential {
     id: string;
     type: string;
@@ -84,12 +76,10 @@ export default function Students() {
     const [search, setSearch] = useState("");
     const [isAddOpen, setIsAddOpen] = useState(false);
     const [isImportOpen, setIsImportOpen] = useState(false);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const [csvData, setCsvData] = useState<any[]>([]);
     const fileInputRef = useRef<HTMLInputElement>(null);
     const { toast } = useToast();
     const queryClient = useQueryClient();
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const [, navigate] = useLocation();
 
     // Profile/Edit sheet state
@@ -123,7 +113,6 @@ export default function Students() {
         queryKey: ['students'],
         queryFn: async () => {
             const response = await fetch('/api/v1/students', {
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 headers: { 'x-api-key': (import.meta as any).env?.VITE_API_KEY || '' },
             });
             if (!response.ok) throw new Error('Failed to fetch students');
@@ -132,21 +121,17 @@ export default function Students() {
     });
 
     // Fetch credentials for a student
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { data: studentCredentials = [] } = useQuery<any[]>({
         queryKey: ['student-credentials', profileStudent?.id],
         queryFn: async () => {
             const response = await fetch('/api/v1/credentials', {
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 headers: { 'x-api-key': (import.meta as any).env?.VITE_API_KEY || '' },
             });
             if (!response.ok) return [];
             const all = await response.json();
             // Filter by student ID in recipient data
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             return all.filter((c: any) => {
                 if (typeof c.recipient === 'object' && c.recipient !== null) {
-                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
                     return (c.recipient as any).studentId === profileStudent?.studentId;
                 }
                 return false;
@@ -156,12 +141,10 @@ export default function Students() {
     });
 
     // Fetch templates for issuing
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { data: templates = [] } = useQuery<any[]>({
         queryKey: ['templates'],
         queryFn: async () => {
             const response = await fetch('/api/v1/templates', {
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 headers: { 'x-api-key': (import.meta as any).env?.VITE_API_KEY || '' },
             });
             if (!response.ok) return [];
@@ -176,7 +159,6 @@ export default function Students() {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
                     'x-api-key': (import.meta as any).env?.VITE_API_KEY || '',
                 },
                 body: JSON.stringify(data),
@@ -202,7 +184,6 @@ export default function Students() {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
-                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
                     'x-api-key': (import.meta as any).env?.VITE_API_KEY || '',
                 },
                 body: JSON.stringify(data),
@@ -230,7 +211,6 @@ export default function Students() {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
                     'x-api-key': (import.meta as any).env?.VITE_API_KEY || '',
                 },
                 body: JSON.stringify({
@@ -250,7 +230,6 @@ export default function Students() {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
                         'x-api-key': (import.meta as any).env?.VITE_API_KEY || '',
                     },
                     body: JSON.stringify({
@@ -278,13 +257,11 @@ export default function Students() {
 
     // Import students mutation
     const importMutation = useMutation({
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         mutationFn: async (students: any[]) => {
             const response = await fetch('/api/v1/students/import', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
                     'x-api-key': (import.meta as any).env?.VITE_API_KEY || '',
                 },
                 body: JSON.stringify({ students }),
@@ -308,7 +285,6 @@ export default function Students() {
         mutationFn: async (id: string) => {
             const response = await fetch(`/api/v1/students/${id}`, {
                 method: 'DELETE',
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 headers: { 'x-api-key': (import.meta as any).env?.VITE_API_KEY || '' },
             });
             if (!response.ok) throw new Error('Failed to delete');
@@ -333,7 +309,6 @@ export default function Students() {
 
             const data = lines.slice(1).map(line => {
                 const values = line.split(',').map(v => v.trim());
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 const obj: any = {};
                 headers.forEach((header, i) => {
                     obj[header] = values[i] || '';
@@ -350,7 +325,6 @@ export default function Students() {
     // Export students
     const handleExport = async () => {
         const response = await fetch('/api/v1/exports/students/csv', {
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             headers: { 'x-api-key': (import.meta as any).env?.VITE_API_KEY || '' },
         });
         const blob = await response.blob();
@@ -366,7 +340,6 @@ export default function Students() {
     // Download sample CSV
     const handleDownloadSample = async () => {
         const response = await fetch('/api/v1/exports/sample-csv', {
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             headers: { 'x-api-key': (import.meta as any).env?.VITE_API_KEY || '' },
         });
         const blob = await response.blob();
@@ -613,7 +586,6 @@ export default function Students() {
                                     <Label>Status</Label>
                                     <Select
                                         value={editData.status}
-                                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
                                         onValueChange={(v) => setEditData({ ...editData, status: v as any })}
                                     >
                                         <SelectTrigger>
@@ -658,7 +630,6 @@ export default function Students() {
                                         <SelectValue placeholder="Select a template" />
                                     </SelectTrigger>
                                     <SelectContent>
-                                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
                                         {templates.map((t: any) => (
                                             <SelectItem key={t.id} value={t.id}>{t.name}</SelectItem>
                                         ))}
@@ -793,7 +764,6 @@ export default function Students() {
                                         </p>
                                     ) : (
                                         <div className="space-y-2">
-                                            // eslint-disable-next-line @typescript-eslint/no-explicit-any
                                             {studentCredentials.map((cred: any) => (
                                                 <div key={cred.id} className="flex items-center justify-between p-3 border rounded-lg">
                                                     <div className="flex items-center gap-3">
