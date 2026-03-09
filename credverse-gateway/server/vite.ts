@@ -38,8 +38,8 @@ export async function setupVite(server: Server, app: Express) {
             );
 
             let template = await fs.promises.readFile(clientTemplate, "utf-8");
-            const page = await vite.transformIndexHtml(url, template);
-            res.status(200).set({ "Content-Type": "text/html" }).end(page);
+            template = await vite.transformIndexHtml(url, template);
+            res.status(200).set({ "Content-Type": "text/html" }).end(template);
         } catch (e) {
             vite.ssrFixStacktrace(e as Error);
             next(e);
