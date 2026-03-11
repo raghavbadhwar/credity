@@ -1,0 +1,1 @@
+## 2026-03-11 - [Idempotency Cache Iteration]\n**Learning:** Pruning a Map by iterating its entire contents via entries() takes O(N) time and should be throttled on a per-request middleware.\n**Action:** Added a throttle that prevents pruning more than once a minute, avoiding unnecessary iterations.
