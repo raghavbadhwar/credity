@@ -4,6 +4,7 @@ declare global {
     interface Window {
         ethereum?: {
             isMetaMask?: boolean;
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             request: (args: { method: string; params?: any[] }) => Promise<any>;
             on: (event: string, callback: (...args: any[]) => void) => void;
             removeListener: (event: string, callback: (...args: any[]) => void) => void;
