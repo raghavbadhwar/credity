@@ -3,6 +3,7 @@ import { ShieldCheck, Award, FileText, ExternalLink } from "lucide-react";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { memo } from "react";
 
 export interface Credential {
   id: string;
@@ -19,7 +20,11 @@ interface CredentialCardProps {
   index: number;
 }
 
-export function CredentialCard({ credential, index }: CredentialCardProps) {
+// ⚡ Bolt Optimization:
+// What: Wrapped CredentialCard in memo().
+// Why: Prevents unnecessary re-renders when parent lists update unrelated state (e.g. filters, other items).
+// Expected Impact: Reduces React reconciliation overhead for long credential lists.
+export const CredentialCard = memo(function CredentialCard({ credential, index }: CredentialCardProps) {
   const getIcon = () => {
     switch (credential.type) {
       case "degree": return <Award className="w-6 h-6 text-primary" />;
@@ -91,4 +96,4 @@ export function CredentialCard({ credential, index }: CredentialCardProps) {
       </Card>
     </motion.div>
   );
-}
+});
