@@ -45,18 +45,6 @@ import { useToast } from "@/hooks/use-toast";
 import { useBiometrics } from "@/hooks/use-biometrics";
 import { useFaceDetection } from "@/hooks/use-face-detection";
 
-/*
- * 💡 What: Extracted `VERIFICATION_TABS` array outside the component body.
- * 🎯 Why: Previously, this array of tab objects was being created inline on every render inside `map()`.
- * 📊 Impact: Prevents unnecessary object allocations on every render, reducing GC pressure and re-renders.
- */
-const VERIFICATION_TABS = [
-    { id: 'overview', label: 'Overview', icon: ShieldCheck },
-    { id: 'liveness', label: 'Liveness', icon: Camera },
-    { id: 'biometrics', label: 'Biometrics', icon: Fingerprint },
-    { id: 'documents', label: 'Documents', icon: ScanLine },
-];
-
 // Futuristic Circular Progress Component
 const CircularProgress = ({ value, size = 120, strokeWidth = 8, color = "text-primary" }: any) => {
     const radius = (size - strokeWidth) / 2;
@@ -478,7 +466,12 @@ export default function IdentityVerification() {
 
                     {/* Modern Tabs */}
                     <div className="flex bg-secondary/30 rounded-xl p-1 relative">
-                        {VERIFICATION_TABS.map((tab) => (
+                        {[
+                            { id: 'overview', label: 'Overview', icon: ShieldCheck },
+                            { id: 'liveness', label: 'Liveness', icon: Camera },
+                            { id: 'biometrics', label: 'Biometrics', icon: Fingerprint },
+                            { id: 'documents', label: 'Documents', icon: ScanLine },
+                        ].map((tab) => (
                             <button
                                 key={tab.id}
                                 onClick={() => setActiveTab(tab.id as any)}
