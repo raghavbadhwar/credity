@@ -41,5 +41,11 @@ export default defineConfig([
       'react-refresh/only-export-components': 'off',
     },
   },
+  {
+    files: ['**/components/ui/**/*.{ts,tsx}', '**/components/theme-provider.tsx'],
+    rules: {
+      'react-refresh/only-export-components': 'off',
+    },
+  },
   prettier,
 ]);
