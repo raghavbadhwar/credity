@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { useState, useEffect } from "react"
 import * as React from "react"
 
@@ -16,6 +18,7 @@ type ToasterToast = ToastProps & {
   action?: ToastActionElement
 }
 
+export type ActionTypeKeys = keyof typeof actionTypes;
 const actionTypes = {
   ADD_TOAST: "ADD_TOAST",
   UPDATE_TOAST: "UPDATE_TOAST",

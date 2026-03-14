@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 import { Link, useLocation } from "wouter";
 import {
   Wallet,
