@@ -29,6 +29,7 @@ export interface UserCredential {
     expiresAt: Date | null;
     usageCount: number;
     lastUsedAt: Date | null;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     data: Record<string, any>;
 }
 

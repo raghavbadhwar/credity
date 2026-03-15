@@ -20,7 +20,6 @@ router.get("/issuance/offer/consume", async (req, res) => {
             credential,
             vcJwt: credential.vcJwt
         });
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
         res.status(500).json({ message: "Internal Server Error" });
     }
@@ -39,7 +38,6 @@ router.get("/registry/issuers/:id", async (req, res) => {
             trustStatus: issuer.trustStatus,
             meta: issuer.meta
         });
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
         res.status(500).json({ message: "Internal Server Error" });
     }
@@ -59,7 +57,6 @@ router.get("/registry/issuers/did/:did", async (req, res) => {
             trustStatus: issuer.trustStatus,
             meta: issuer.meta
         });
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
         res.status(500).json({ message: "Internal Server Error" });
     }
@@ -77,7 +74,6 @@ router.get("/templates/:id", async (req, res) => {
             version: template.version,
             issuerId: template.tenantId
         });
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
         res.status(500).json({ message: "Internal Server Error" });
     }

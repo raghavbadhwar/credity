@@ -52,7 +52,6 @@ let persistChain = Promise.resolve();
 const router = Router();
 const writeIdempotency = idempotencyMiddleware({ ttlMs: 6 * 60 * 60 * 1000 });
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function buildBaseUrl(req: any): string {
     return `${req.protocol}://${req.get('host')}`;
 }
@@ -155,7 +154,6 @@ router.post('/api/v1/oid4vci/credential-offers', apiKeyOrAuthMiddleware, writeId
         if (pruned) {
             await queuePersist();
         }
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const tenantId = (req as any).tenantId;
         const { templateId, issuerId, recipient, credentialData, format = 'sd-jwt-vc' } = req.body || {};
         if (!templateId || !issuerId || !recipient || !credentialData) {
@@ -188,7 +186,6 @@ router.post('/api/v1/oid4vci/credential-offers', apiKeyOrAuthMiddleware, writeId
             },
             expires_in: 600,
         });
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
         res.status(500).json({ error: error.message || 'Failed to create credential offer' });
     }
@@ -227,7 +224,6 @@ router.post('/api/v1/oid4vci/token', async (req, res) => {
             c_nonce: issueRandomId('nonce'),
             c_nonce_expires_in: 600,
         });
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
         res.status(500).json({ error: error?.message || 'token_endpoint_failure' });
     }
@@ -275,7 +271,6 @@ router.post('/api/v1/oid4vci/credential', writeIdempotency, async (req, res) => 
                 status_list_index: status.index,
             },
         });
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
         res.status(500).json({ error: error.message || 'Credential issuance failed' });
     }
@@ -302,7 +297,6 @@ router.get('/api/v1/status/bitstring/:listId', async (req, res) => {
             digest: list.digest,
             updated_at: list.updatedAt,
         });
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
         res.status(500).json({ message: error?.message || 'Failed to resolve status list' });
     }
@@ -315,7 +309,6 @@ router.post('/api/v1/credentials/:id/revoke', apiKeyOrAuthMiddleware, writeIdemp
         if (!credential) {
             return res.status(404).json({ message: 'Credential not found' });
         }
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const tenantId = (req as any).tenantId;
         if (credential.tenantId !== tenantId) {
             return res.status(403).json({ message: 'Forbidden' });
@@ -330,7 +323,6 @@ router.post('/api/v1/credentials/:id/revoke', apiKeyOrAuthMiddleware, writeIdemp
             credential_id: credentialId,
             status: status ? { list_id: status.listId, index: status.index, revoked: status.revoked } : null,
         });
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
         res.status(500).json({ message: error.message || 'Failed to revoke credential' });
     }
@@ -346,12 +338,10 @@ router.post('/api/v1/anchors/batches', apiKeyOrAuthMiddleware, writeIdempotency,
         const records = await Promise.all(
             credentialIds.map((id: string) => storage.getCredential(id))
         );
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const validRecords = records.filter(Boolean) as any[];
         if (validRecords.length !== credentialIds.length) {
             return res.status(400).json({ message: 'One or more credentials do not exist' });
         }
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const tenantId = (req as any).tenantId;
         const hasForeignTenantRecord = validRecords.some((record) => record.tenantId !== tenantId);
         if (hasForeignTenantRecord) {
@@ -371,7 +361,6 @@ router.post('/api/v1/anchors/batches', apiKeyOrAuthMiddleware, writeIdempotency,
             status: batch.status,
             merkle_root: batch.merkleRoot,
         });
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
         res.status(500).json({ message: error.message || 'Failed to create anchor batch' });
     }
@@ -384,7 +373,6 @@ router.get('/api/v1/anchors/batches/:batchId', async (req, res) => {
             return res.status(404).json({ message: 'Batch not found' });
         }
         res.json(batch);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
         res.status(500).json({ message: error?.message || 'Failed to load anchor batch' });
     }
@@ -399,7 +387,6 @@ router.post('/api/v1/anchors/batches/:batchId/replay', apiKeyOrAuthMiddleware, w
             tx_hash: replayed.txHash,
             attempt_count: replayed.attemptCount,
         });
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
         const message = error?.message || 'Failed to replay anchor batch';
         const status = message.toLowerCase().includes('not found') ? 404 : 500;
@@ -415,7 +402,6 @@ router.get('/api/v1/anchors/dead-letter', apiKeyOrAuthMiddleware, async (req, re
             count: entries.length,
             entries,
         });
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
         res.status(500).json({ message: error?.message || 'Failed to load dead-letter entries' });
     }
@@ -428,7 +414,6 @@ router.get('/api/v1/anchors/proofs/:credentialId', async (req, res) => {
             return res.status(404).json({ message: 'Proof not found' });
         }
         res.json(proof);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
         res.status(500).json({ message: error?.message || 'Failed to load anchor proof' });
     }

@@ -1,4 +1,3 @@
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { Router, Response } from "express";
 import { storage } from "../storage";
 import { apiKeyMiddleware } from "../auth";
@@ -8,7 +7,6 @@ const router = Router();
 router.use("/exports", apiKeyMiddleware);
 
 // Helper to convert array to CSV
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function arrayToCSV(data: any[], columns: string[]): string {
     const header = columns.join(",");
     const rows = data.map(item =>
@@ -27,7 +25,6 @@ function arrayToCSV(data: any[], columns: string[]): string {
 // Export credentials as CSV
 router.get("/exports/credentials/csv", async (req, res) => {
     try {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const tenantId = (req as any).tenantId;
         const credentials = await storage.listCredentials(tenantId);
 
@@ -41,7 +38,6 @@ router.get("/exports/credentials/csv", async (req, res) => {
         res.setHeader("Content-Type", "text/csv");
         res.setHeader("Content-Disposition", "attachment; filename=credentials.csv");
         res.send(csv);
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
         res.status(500).json({ message: "Failed to export credentials" });
     }
@@ -50,7 +46,6 @@ router.get("/exports/credentials/csv", async (req, res) => {
 // Export students as CSV
 router.get("/exports/students/csv", async (req, res) => {
     try {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const tenantId = (req as any).tenantId;
         const students = await storage.listStudents(tenantId);
 
@@ -60,7 +55,6 @@ router.get("/exports/students/csv", async (req, res) => {
         res.setHeader("Content-Type", "text/csv");
         res.setHeader("Content-Disposition", "attachment; filename=students.csv");
         res.send(csv);
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
         res.status(500).json({ message: "Failed to export students" });
     }
@@ -69,7 +63,6 @@ router.get("/exports/students/csv", async (req, res) => {
 // Export verification logs as CSV
 router.get("/exports/verification-logs/csv", async (req, res) => {
     try {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const tenantId = (req as any).tenantId;
         const logs = await storage.listVerificationLogs(tenantId);
 
@@ -82,7 +75,6 @@ router.get("/exports/verification-logs/csv", async (req, res) => {
         res.setHeader("Content-Type", "text/csv");
         res.setHeader("Content-Disposition", "attachment; filename=verification-logs.csv");
         res.send(csv);
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
         res.status(500).json({ message: "Failed to export logs" });
     }
@@ -96,7 +88,6 @@ router.get("/exports/credentials/:id/pdf", async (req, res) => {
             return res.status(404).json({ message: "Credential not found" });
         }
 
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const tenantId = (req as any).tenantId;
         if (credential.tenantId !== tenantId) {
             return res.status(403).json({ message: "Forbidden" });
@@ -131,7 +122,6 @@ router.get("/exports/credentials/:id/pdf", async (req, res) => {
         doc.moveDown(0.5);
 
         const recipientName = typeof credential.recipient === 'object' && credential.recipient !== null
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             ? (credential.recipient as any).name || 'Recipient'
             : String(credential.recipient || 'Recipient');
         doc.fontSize(28).font("Helvetica-Bold").fillColor("#1E40AF")

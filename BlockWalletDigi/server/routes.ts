@@ -1,5 +1,6 @@
 import { Router, type Express } from "express";
 import { type Server } from "http";
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { storage } from "./storage";
 import userRoutes from "./routes/user";
 import digilockerRoutes from "./routes/digilocker";

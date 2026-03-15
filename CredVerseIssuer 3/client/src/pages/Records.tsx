@@ -10,7 +10,6 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { Search, Filter, Download, MoreHorizontal, ShieldCheck, AlertCircle, ExternalLink, Send, Copy, Loader2 } from "lucide-react";
 import {
   DropdownMenu,
@@ -20,7 +19,6 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
 
@@ -44,7 +42,6 @@ export default function Records() {
     queryKey: ['credentials'],
     queryFn: async () => {
       const res = await fetch('/api/v1/credentials', {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         headers: { 'x-api-key': (import.meta as any).env?.VITE_API_KEY || '' }
       });
       if (!res.ok) throw new Error('Failed to fetch credentials');
@@ -114,7 +111,6 @@ export default function Records() {
     try {
       const response = await fetch(`/api/v1/credentials/${cred.id}/offer`, {
         method: 'POST',
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         headers: { 'x-api-key': (import.meta as any).env?.VITE_API_KEY || '' },
       });
 
@@ -134,7 +130,6 @@ export default function Records() {
         ),
         duration: 15000,
       });
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
       toast({
         title: "Offer Failed",
@@ -151,7 +146,6 @@ export default function Records() {
     try {
       await fetch(`/api/v1/credentials/${cred.id}/revoke`, {
         method: 'POST',
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         headers: { 'Content-Type': 'application/json', 'x-api-key': (import.meta as any).env?.VITE_API_KEY || '' },
         body: JSON.stringify({ reason }),
       });
@@ -161,7 +155,6 @@ export default function Records() {
         description: `Credential revoked. Reason: ${reason}`,
         variant: "destructive"
       });
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (e) {
       toast({ title: "Revocation Failed", variant: "destructive" });
     }

@@ -1,15 +1,8 @@
 import { useState } from "react";
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { Badge } from "@/components/ui/badge";
-
-
-
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { ShieldCheck, QrCode, Share2, Download, ExternalLink, CheckCircle2, History } from "lucide-react";
 import logo from "@assets/ChatGPT_Image_Oct_22,_2025,_12_35_14_AM_1764878404699.png";
 import { cn } from "@/lib/utils";

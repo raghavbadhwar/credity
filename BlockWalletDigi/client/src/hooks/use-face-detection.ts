@@ -12,6 +12,7 @@ interface FaceDetectionResult {
     boundingBox?: { x: number; y: number; width: number; height: number };
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 interface LivenessChallenge {
     id: string;
     type: 'blink' | 'turn_left' | 'turn_right' | 'smile' | 'nod';

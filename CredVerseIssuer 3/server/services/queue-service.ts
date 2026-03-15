@@ -44,9 +44,7 @@ export interface IssuanceJobData {
     templateId: string;
     issuerId: string;
     recipients: Array<{
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         recipient: any;
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         data: any;
     }>;
 }
@@ -218,8 +216,6 @@ async function addDeadLetterEntry(payload: DeadLetterPayload): Promise<string | 
  * Start the issuance worker
  */
 export function startIssuanceWorker(
-
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     processCredential: (tenantId: string, templateId: string, issuerId: string, recipient: any, data: any) => Promise<void>
 ): void {
     if (!redisConnection) {
@@ -256,7 +252,6 @@ export function startIssuanceWorker(
                 try {
                     await processCredential(tenantId, templateId, issuerId, recipient, data);
                     result.success++;
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 } catch (error: any) {
                     result.failed++;
                     result.errors.push(`Recipient ${i + 1}: ${error.message}`);

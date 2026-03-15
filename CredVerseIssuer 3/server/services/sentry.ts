@@ -61,7 +61,6 @@ export function initSentry(appName?: string): void {
 /**
  * Capture an exception manually
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function captureException(error: Error, context?: Record<string, any>): void {
     if (!SENTRY_DSN) return;
 
@@ -103,7 +102,6 @@ export function clearUser(): void {
 /**
  * Add breadcrumb for error context
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function addBreadcrumb(message: string, category: string, data?: Record<string, any>): void {
     if (!SENTRY_DSN) return;
 

@@ -147,7 +147,6 @@ class DigiLockerService {
                 transactionId: result.transactionid,
                 digiLockerUri: result.uri,
             };
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         } catch (error: any) {
             return {
                 success: false,

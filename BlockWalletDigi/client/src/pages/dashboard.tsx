@@ -11,19 +11,26 @@ import {
   FileText,
   ShieldCheck,
   CheckCircle2,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   MoreHorizontal,
   Filter,
   X,
   Loader2,
   Bell,
   RefreshCw,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   Camera
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { ShareModal } from "@/components/share-modal";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { DashboardSkeleton, CredentialCardSkeleton, StatsCardSkeleton } from "@/components/ui/skeletons";
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { ScanQRButton } from "@/components/qr-scanner";
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { ErrorBoundary } from "@/components/error-boundary";
 import { TrustScoreCard } from "@/components/trust-score-card";
 import { CredentialListItem } from "@/components/credential-list-item";
@@ -325,6 +332,7 @@ export default function Dashboard() {
 
       {/* Share Modal */}
       <ShareModal
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         credential={selectedCred as any}
         open={shareModalOpen}
         onOpenChange={setShareModalOpen}

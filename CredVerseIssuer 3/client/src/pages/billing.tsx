@@ -4,9 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     CreditCard, CheckCircle, AlertCircle, Download, Calendar,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     Zap, Building, Users, FileCheck, ExternalLink
 } from "lucide-react";
 import { Progress } from "@/components/ui/progress";

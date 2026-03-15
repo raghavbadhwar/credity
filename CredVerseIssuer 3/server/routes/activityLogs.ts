@@ -59,7 +59,6 @@ seedActivityLogs("default-tenant-id");
 // Get all activity logs
 router.get("/activity-logs", async (req, res) => {
     try {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const tenantId = (req as any).tenantId;
         const { userId, entityType, limit } = req.query;
 
@@ -80,7 +79,6 @@ router.get("/activity-logs", async (req, res) => {
         }
 
         res.json(logs);
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
         res.status(500).json({ message: "Failed to fetch activity logs" });
     }
@@ -89,13 +87,11 @@ router.get("/activity-logs", async (req, res) => {
 // Get activity for specific user (for team View Activity Log)
 router.get("/activity-logs/user/:userId", async (req, res) => {
     try {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const tenantId = (req as any).tenantId;
         const logs = Array.from(activityLogs.values())
             .filter(l => l.tenantId === tenantId && l.userId === req.params.userId)
             .sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
         res.json(logs);
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
         res.status(500).json({ message: "Failed to fetch user activity" });
     }
@@ -104,7 +100,6 @@ router.get("/activity-logs/user/:userId", async (req, res) => {
 // Log activity (internal use)
 router.post("/activity-logs", async (req, res) => {
     try {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const tenantId = (req as any).tenantId;
         const { userId, userName, action, details, entityType, entityId } = req.body;
 
@@ -124,7 +119,6 @@ router.post("/activity-logs", async (req, res) => {
 
         activityLogs.set(id, log);
         res.status(201).json(log);
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
         res.status(500).json({ message: "Failed to log activity" });
     }
@@ -133,7 +127,6 @@ router.post("/activity-logs", async (req, res) => {
 // Generate dashboard report
 router.get("/reports/dashboard", async (req, res) => {
     try {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const tenantId = (req as any).tenantId;
 
         const credentials = await storage.listCredentials(tenantId);
@@ -169,7 +162,6 @@ ${logs.slice(0, 10).map(l => `${l.credentialId},${l.verifierName},${l.verifierLo
         res.setHeader("Content-Type", "text/csv");
         res.setHeader("Content-Disposition", `attachment; filename=dashboard-report-${new Date().toISOString().split('T')[0]}.csv`);
         res.send(csv);
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
         res.status(500).json({ message: "Failed to generate report" });
     }

@@ -1,8 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import { ZodError } from "zod";
 
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars
 export function errorHandler(err: any, req: Request, res: Response, next: NextFunction) {
     const status = err.status || err.statusCode || 500;
     const message = err.message || "Internal Server Error";
@@ -21,7 +19,6 @@ export function errorHandler(err: any, req: Request, res: Response, next: NextFu
     }
 
     // Handle JSON Parse Errors
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     if (err instanceof SyntaxError && (err as any).status === 400 && 'body' in err) {
         return res.status(400).json({ message: "Invalid JSON payload" });
     }
@@ -35,7 +32,6 @@ export function errorHandler(err: any, req: Request, res: Response, next: NextFu
 }
 
 // Wrapper for async route handlers
-// eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
 export const asyncHandler = (fn: Function) => (req: Request, res: Response, next: NextFunction) => {
     Promise.resolve(fn(req, res, next)).catch(next);
 };
