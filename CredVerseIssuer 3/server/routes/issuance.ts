@@ -17,6 +17,8 @@ const router = Router();
 router.use(apiKeyOrAuthMiddleware);
 const writeIdempotency = idempotencyMiddleware({ ttlMs: 6 * 60 * 60 * 1000 });
 
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function authorizeQueueOperations(req: any, res: any): boolean {
     const hasApiKey = typeof req.headers?.["x-api-key"] === "string";
     if (hasApiKey) {
@@ -41,6 +43,7 @@ router.post("/credentials/:id/offer", writeIdempotency, async (req, res) => {
             return res.status(404).json({ message: "Credential not found" });
         }
 
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const tenantId = (req as any).tenantId;
         if (credential.tenantId !== tenantId) {
             return res.status(403).json({ message: "Forbidden" });
@@ -57,6 +60,7 @@ router.post("/credentials/:id/offer", writeIdempotency, async (req, res) => {
             deepLink: deepLink, // Deep link to open wallet app
             qrCodeData: deepLink // Data to embed in QR code
         });
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
         res.status(500).json({ message: "Internal Server Error" });
     }
@@ -64,6 +68,7 @@ router.post("/credentials/:id/offer", writeIdempotency, async (req, res) => {
 
 router.post("/credentials/issue", writeIdempotency, async (req, res) => {
     try {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const tenantId = (req as any).tenantId;
         const { templateId, issuerId, recipient, credentialData } = req.body;
 
@@ -80,6 +85,7 @@ router.post("/credentials/issue", writeIdempotency, async (req, res) => {
         );
 
         res.status(201).json(credential);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
         const message = error.message || "Internal Server Error";
         const status = message.includes("queue") || message.includes("REDIS_URL") ? 503 : 500;
@@ -89,6 +95,7 @@ router.post("/credentials/issue", writeIdempotency, async (req, res) => {
 
 router.post("/credentials/bulk-issue", writeIdempotency, async (req, res) => {
     try {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const tenantId = (req as any).tenantId;
         const { templateId, issuerId, recipientsData } = req.body;
 
@@ -104,6 +111,7 @@ router.post("/credentials/bulk-issue", writeIdempotency, async (req, res) => {
         );
 
         res.status(202).json(result);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
         res.status(500).json({ message: error.message || "Internal Server Error" });
     }
@@ -111,6 +119,7 @@ router.post("/credentials/bulk-issue", writeIdempotency, async (req, res) => {
 
 router.get("/queue/stats", async (_req, res) => {
     try {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         if (!authorizeQueueOperations(_req as any, res)) {
             return;
         }
@@ -128,6 +137,7 @@ router.get("/queue/stats", async (_req, res) => {
                 stats,
             },
         });
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
         res.status(500).json({ message: error.message || "Failed to fetch queue stats" });
     }
@@ -135,6 +145,7 @@ router.get("/queue/stats", async (_req, res) => {
 
 router.get("/queue/jobs/:jobId", async (req, res) => {
     try {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         if (!authorizeQueueOperations(req as any, res)) {
             return;
         }
@@ -151,6 +162,7 @@ router.get("/queue/jobs/:jobId", async (req, res) => {
         }
 
         res.json(status);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
         res.status(500).json({ message: error.message || "Failed to fetch queue job status" });
     }
@@ -158,6 +170,7 @@ router.get("/queue/jobs/:jobId", async (req, res) => {
 
 router.get("/queue/dead-letter", async (req, res) => {
     try {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         if (!authorizeQueueOperations(req as any, res)) {
             return;
         }
@@ -174,6 +187,7 @@ router.get("/queue/dead-letter", async (req, res) => {
             count: entries.length,
             entries,
         });
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
         res.status(500).json({ message: error.message || "Failed to fetch dead-letter queue" });
     }
@@ -181,6 +195,7 @@ router.get("/queue/dead-letter", async (req, res) => {
 
 router.post("/queue/dead-letter/:entryId/replay", writeIdempotency, async (req, res) => {
     try {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         if (!authorizeQueueOperations(req as any, res)) {
             return;
         }
@@ -196,6 +211,7 @@ router.post("/queue/dead-letter/:entryId/replay", writeIdempotency, async (req, 
             success: true,
             ...replay,
         });
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
         const message = error?.message || "Failed to replay dead-letter entry";
         const status = message.toLowerCase().includes("not found") ? 404 : 500;
@@ -211,12 +227,14 @@ router.get("/credentials/:id", async (req, res) => {
             return res.status(404).json({ message: "Credential not found" });
         }
 
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const tenantId = (req as any).tenantId;
         if (credential.tenantId !== tenantId) {
             return res.status(403).json({ message: "Forbidden" });
         }
 
         res.json(credential);
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
         res.status(500).json({ message: "Internal Server Error" });
     }
@@ -225,9 +243,11 @@ router.get("/credentials/:id", async (req, res) => {
 // List all credentials for tenant
 router.get("/credentials", async (req, res) => {
     try {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const tenantId = (req as any).tenantId;
         const credentials = await storage.listCredentials(tenantId);
         res.json(credentials);
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
         res.status(500).json({ message: "Internal Server Error" });
     }
@@ -242,6 +262,7 @@ router.post("/credentials/:id/revoke", writeIdempotency, async (req, res) => {
             return res.status(404).json({ message: "Credential not found" });
         }
 
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const tenantId = (req as any).tenantId;
         if (credential.tenantId !== tenantId) {
             return res.status(403).json({ message: "Forbidden" });
@@ -252,6 +273,7 @@ router.post("/credentials/:id/revoke", writeIdempotency, async (req, res) => {
         await revokeCredentialStatus(req.params.id);
 
         res.json({ message: "Credential revoked successfully", id: req.params.id });
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
         res.status(500).json({ message: "Internal Server Error" });
     }

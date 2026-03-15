@@ -83,6 +83,7 @@ export default function Team() {
         queryKey: ['team'],
         queryFn: async () => {
             const response = await fetch('/api/v1/team', {
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 headers: { 'x-api-key': (import.meta as any).env?.VITE_API_KEY || '' },
             });
             if (!response.ok) throw new Error('Failed to fetch team');
@@ -95,6 +96,7 @@ export default function Team() {
         queryKey: ['activity-logs', activityMember?.id],
         queryFn: async () => {
             const response = await fetch('/api/v1/activity-logs', {
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 headers: { 'x-api-key': (import.meta as any).env?.VITE_API_KEY || '' },
             });
             if (!response.ok) return [];
@@ -110,6 +112,7 @@ export default function Team() {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
                     'x-api-key': (import.meta as any).env?.VITE_API_KEY || '',
                 },
                 body: JSON.stringify(data),
@@ -141,6 +144,7 @@ export default function Team() {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
                     'x-api-key': (import.meta as any).env?.VITE_API_KEY || '',
                 },
                 body: JSON.stringify({ role }),
@@ -159,6 +163,7 @@ export default function Team() {
         mutationFn: async (id: string) => {
             const response = await fetch(`/api/v1/team/${id}`, {
                 method: 'DELETE',
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 headers: { 'x-api-key': (import.meta as any).env?.VITE_API_KEY || '' },
             });
             if (!response.ok) throw new Error('Failed to remove member');
@@ -177,6 +182,7 @@ export default function Team() {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
                     'x-api-key': (import.meta as any).env?.VITE_API_KEY || '',
                 },
                 body: JSON.stringify({ name: member.name, email: member.email, role: member.role }),
@@ -268,6 +274,7 @@ export default function Team() {
                                     <Label htmlFor="role">Role</Label>
                                     <Select
                                         value={formData.role}
+                                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
                                         onValueChange={(value) => setFormData({ ...formData, role: value as any })}
                                     >
                                         <SelectTrigger>

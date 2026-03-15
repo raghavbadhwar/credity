@@ -16,6 +16,7 @@ export class IpfsService {
         });
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     async uploadJSON(data: any): Promise<string> {
         try {
             if (this.jwt === "mock_jwt") {

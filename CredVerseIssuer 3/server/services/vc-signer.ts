@@ -1,3 +1,4 @@
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { sign, verify, generateEd25519KeyPair, sha256, encrypt, decrypt, type KeyPair, type EncryptedData } from './crypto-utils';
 
 /**
@@ -60,6 +61,7 @@ export function getOrCreateIssuerKey(issuerId: string): { publicKey: string; pri
  * Sign a VC-JWT with Ed25519
  * Creates a proper JWT with cryptographic signature
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function signVcJwt(payload: any, issuerDid: string): Promise<string> {
     // Get issuer's keypair
     const { privateKey } = getOrCreateIssuerKey(issuerDid);
@@ -85,6 +87,7 @@ export async function signVcJwt(payload: any, issuerDid: string): Promise<string
 /**
  * Verify a VC-JWT signature
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function verifyVcJwt(jwt: string, publicKey: string): Promise<{ valid: boolean; payload?: any; error?: string }> {
     try {
         const parts = jwt.split('.');
@@ -111,6 +114,7 @@ export async function verifyVcJwt(jwt: string, publicKey: string): Promise<{ val
         }
 
         return { valid: true, payload };
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
         return { valid: false, error: 'Failed to verify JWT' };
     }
@@ -127,6 +131,7 @@ export function getIssuerPublicKey(issuerId: string): string | null {
 /**
  * Hash credential data for blockchain anchoring
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function hashCredential(credentialData: any): string {
     const canonical = JSON.stringify(credentialData, Object.keys(credentialData).sort());
     return sha256(canonical);
