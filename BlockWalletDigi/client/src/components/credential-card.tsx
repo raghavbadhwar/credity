@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { motion } from "framer-motion";
 import { ShieldCheck, Award, FileText, ExternalLink } from "lucide-react";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -19,7 +20,11 @@ interface CredentialCardProps {
   index: number;
 }
 
-export function CredentialCard({ credential, index }: CredentialCardProps) {
+// ⚡ Bolt Performance Optimization
+// What: Wrapped CredentialCard in React.memo
+// Why: Prevents unnecessary re-renders of list items when the parent component re-renders (e.g. state changes)
+// Expected Impact: Measurably reduces React render cycle time, specifically helpful for long credential lists
+export const CredentialCard = memo(({ credential, index }: CredentialCardProps) => {
   const getIcon = () => {
     switch (credential.type) {
       case "degree": return <Award className="w-6 h-6 text-primary" />;
@@ -91,4 +96,6 @@ export function CredentialCard({ credential, index }: CredentialCardProps) {
       </Card>
     </motion.div>
   );
-}
+});
+
+CredentialCard.displayName = "CredentialCard";
