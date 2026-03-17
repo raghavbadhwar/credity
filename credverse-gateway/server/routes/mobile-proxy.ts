@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Router, type Request } from 'express';
 
 type ProxyTarget = 'wallet' | 'issuer' | 'recruiter';
