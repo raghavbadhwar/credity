@@ -198,7 +198,8 @@ export default function IdentityVerification() {
         onSuccess: (data) => {
             setLivenessSession(data);
             setCurrentChallenge(data.currentChallenge);
-            startCamera();
+            // Wait for the next tick for the video element to be rendered
+            setPendingCameraStart(true);
         }
     });
 

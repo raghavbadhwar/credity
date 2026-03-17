@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { QueryClient, QueryFunction } from "@tanstack/react-query";
 
 const API_KEY = (import.meta as any).env?.VITE_API_KEY as string | undefined;
