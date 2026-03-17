@@ -178,7 +178,7 @@ router.post("/digilocker/import-all", async (req, res) => {
 
         // PERFORMANCE: Process document imports concurrently instead of sequentially
         // This resolves an N+1 API call bottleneck during bulk imports
-        const importPromises = documents.map(async (doc: any) => {
+        const importPromises = documents.map(async (doc) => {
             const { document } = await digilockerService.pullDocument(userId, doc.uri);
             await walletService.storeCredential(userId, {
                 type: ['VerifiableCredential', doc.doctype, 'DigiLockerDocument'],
@@ -269,7 +269,7 @@ router.post("/digilocker/connect", async (req, res) => {
 
             // PERFORMANCE: Use Promise.all to fetch and store documents concurrently
             // This prevents sequential awaits for network requests during demo connection
-            const importPromises = documents.slice(0, 3).map(async (doc: any) => {
+            const importPromises = documents.slice(0, 3).map(async (doc) => {
                 const { document } = await digilockerService.pullDocument(userId, doc.uri);
 
                 await walletService.storeCredential(userId, {
