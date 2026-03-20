@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import * as crypto from 'crypto';
 
 /**
@@ -223,7 +224,6 @@ export class SelectiveDisclosureService {
      * Hash the disclosed data for integrity verification
      */
     private hashDisclosure(data: any): string {
-        const crypto = require('crypto');
         const canonical = JSON.stringify(data, Object.keys(data).sort());
         return crypto.createHash('sha256').update(canonical).digest('hex');
     }
