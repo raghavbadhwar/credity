@@ -204,19 +204,27 @@ export function listReputationEvents(userId: number, category?: ReputationCatego
 
 export function calculateReputationScore(userId: number): ReputationScoreSnapshot {
     const events = listReputationEvents(userId);
-    const breakdown: ReputationCategoryBreakdown[] = CATEGORY_LIST.map((category) => {
-        const categoryEvents = events.filter((event) => event.category === category);
-        let weightedNumerator = 0;
-        let weightedDenominator = 0;
 
-        for (const event of categoryEvents) {
-            const decay = decayMultiplier(event.occurred_at);
-            if (decay <= 0) continue;
-            weightedNumerator += event.score * decay;
-            weightedDenominator += decay;
+    // PERFORMANCE: Replace O(N * C) filtering with a single O(N) pass to calculate weighted sums.
+    // This reduces redundant iteration over the entire events array for each category.
+    const accumulators = new Map<ReputationCategory, { num: number; den: number; count: number }>(
+        CATEGORY_LIST.map(cat => [cat, { num: 0, den: 0, count: 0 }])
+    );
+
+    for (const event of events) {
+        const acc = accumulators.get(event.category);
+        if (!acc) continue;
+        acc.count++;
+        const decay = decayMultiplier(event.occurred_at);
+        if (decay > 0) {
+            acc.num += event.score * decay;
+            acc.den += decay;
         }
+    }
 
-        const score = weightedDenominator > 0 ? Math.round(weightedNumerator / weightedDenominator) : 0;
+    const breakdown: ReputationCategoryBreakdown[] = CATEGORY_LIST.map((category) => {
+        const acc = accumulators.get(category)!;
+        const score = acc.den > 0 ? Math.round(acc.num / acc.den) : 0;
         const weight = CATEGORY_WEIGHTS[category];
         const weightedScore = Math.round((score * weight) / 100);
 
@@ -225,7 +233,7 @@ export function calculateReputationScore(userId: number): ReputationScoreSnapsho
             weight,
             score,
             weighted_score: weightedScore,
-            event_count: categoryEvents.length,
+            event_count: acc.count,
         };
     });
 
