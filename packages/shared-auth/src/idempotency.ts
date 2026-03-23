@@ -10,9 +10,15 @@ type StoredResponse = {
 const DEFAULT_TTL_MS = 24 * 60 * 60 * 1000;
 const DEFAULT_MAX_ENTRIES = 5000;
 const cache = new Map<string, StoredResponse>();
+let lastPruneTime = 0;
 
 function pruneExpired(ttlMs: number): void {
     const now = Date.now();
+    // ⚡ Bolt: Throttle O(N) cache pruning to at most once per minute
+    // Prevents synchronous performance bottleneck on every request
+    if (now - lastPruneTime < 60000) return;
+
+    lastPruneTime = now;
     for (const [key, value] of cache.entries()) {
         if (now - value.createdAt > ttlMs) {
             cache.delete(key);

@@ -1,0 +1,3 @@
+## 2024-03-24 - Unnecessary O(N) Cache Pruning on Every Request
+**Learning:** `packages/shared-auth/src/idempotency.ts` runs an O(N) cache iteration (`pruneExpired`) on *every single incoming request* that passes through the idempotency middleware. This means that if the cache has 5,000 entries, every single POST/PUT/PATCH/DELETE request iterates 5,000 times before even processing the request.
+**Action:** Throttle cache pruning so it doesn't run on every request. A simple `lastPruneTime` check ensures it runs at most once per minute, significantly reducing synchronous overhead on the critical path.
