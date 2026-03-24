@@ -1,3 +1,5 @@
+import * as crypto from 'crypto';
+
 /**
  * Selective Disclosure Service for CredVerse Wallet
  * Implements field-level disclosure for credentials
@@ -126,8 +128,9 @@ export class SelectiveDisclosureService {
         // Create disclosure digest (hash of what's being disclosed)
         const disclosureDigest = this.hashDisclosure(disclosedData);
 
+        // SECURITY: Use crypto.randomBytes instead of Math.random() for secure ID generation
         const token: DisclosureToken = {
-            id: `disclosure-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+            id: `disclosure-${Date.now()}-${crypto.randomBytes(4).toString('hex')}`,
             credentialId,
             disclosedData,
             hiddenFields,
@@ -160,8 +163,9 @@ export class SelectiveDisclosureService {
             userAgent?: string;
         }
     ): ConsentLog {
+        // SECURITY: Use crypto.randomBytes instead of Math.random() for secure ID generation
         const log: ConsentLog = {
-            id: `consent-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+            id: `consent-${Date.now()}-${crypto.randomBytes(4).toString('hex')}`,
             credentialId,
             disclosedFields,
             requesterDID: metadata.requesterDID,
