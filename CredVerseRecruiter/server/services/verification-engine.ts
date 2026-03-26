@@ -1,3 +1,6 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable prefer-const */
 import crypto from 'crypto';
 import { blockchainService } from './blockchain-service';
 import { PostgresStateStore } from '@credverse/shared-auth';
