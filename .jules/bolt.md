@@ -1,0 +1,3 @@
+## 2025-03-26 - Concurrent Execution of Bulk Verification
+**Learning:** In `CredVerseRecruiter/server/services/verification-engine.ts`, the `bulkVerify` function processed credential verifications sequentially using a `for...of` loop with `await this.verifyCredential(cred)`. Because verifications are independent and potentially I/O bound (involving signature checking and DB calls), executing them sequentially caused an O(n) delay bottleneck (N+1 anti-pattern).
+**Action:** Use `Promise.all()` with `Array.prototype.map()` to run independent verifications concurrently. This parallelizes the network and compute load, significantly reducing total verification time for large bulk jobs, while maintaining the same correctness.

@@ -303,10 +303,12 @@ export class VerificationEngine {
         let failed = 0;
         let suspicious = 0;
 
-        for (const cred of credentials) {
-            const result = await this.verifyCredential(cred);
-            results.push(result);
+        // ⚡ Bolt: Use Promise.all to run credential verifications concurrently instead of sequentially (N+1 bottleneck)
+        const verificationPromises = credentials.map(cred => this.verifyCredential(cred));
+        const allResults = await Promise.all(verificationPromises);
 
+        for (const result of allResults) {
+            results.push(result);
             if (result.status === 'verified') verified++;
             else if (result.status === 'failed') failed++;
             else if (result.status === 'suspicious') suspicious++;
