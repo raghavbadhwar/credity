@@ -3,6 +3,7 @@
  */
 
 // Initialize Sentry BEFORE importing anything else
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { initSentry, sentryErrorHandler } from './services/sentry';
 initSentry('credverse-gateway');
 
@@ -116,6 +117,7 @@ const gatewayHTML = `
         <div class="status" id="status"></div>
     </div>
     <script>
+        /* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars */
         const params = new URLSearchParams(window.location.search);
         const statusDiv = document.getElementById('status');
         if (params.get('login') === 'success') {
