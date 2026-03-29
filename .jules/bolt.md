@@ -1,0 +1,3 @@
+## 2024-03-29 - [Optimization that didn't work: useMemo without memoized children]
+**Learning:** Wrapping an inline array or object in `useMemo` to preserve referential equality is a completely useless micro-optimization if the child components receiving that value are not themselves memoized (e.g., using `React.memo()`). The child will re-render anyway when the parent renders, making the `useMemo` overhead pointless and providing zero measurable performance impact.
+**Action:** Never apply `useMemo` or `useCallback` purely for referential equality unless it is explicitly passed to a child component that is wrapped in `React.memo()` or used as a dependency in a `useEffect` hook. Always verify the child is actually memoized before attempting this optimization.
