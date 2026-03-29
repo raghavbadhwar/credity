@@ -105,7 +105,7 @@ export default function Dashboard() {
     refetchInterval: 30000,
   });
 
-  const credentials: WalletCredential[] = credentialsData?.credentials || [];
+  const credentials: WalletCredential[] = useMemo(() => credentialsData?.credentials || [], [credentialsData?.credentials]);
   const stats: WalletStats = walletData?.stats || {};
   const notifications: Notification[] = notifData?.notifications || [];
   const unreadCount = notifData?.unreadCount || 0;
