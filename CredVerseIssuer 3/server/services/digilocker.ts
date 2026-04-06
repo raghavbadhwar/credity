@@ -1,3 +1,4 @@
+import crypto from "crypto";
 /**
  * DigiLocker Integration Service
  * 
@@ -108,7 +109,7 @@ class DigiLockerService {
 
             return {
                 success: true,
-                transactionId: `DL-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+                transactionId: `DL-${Date.now()}-${crypto.randomBytes(4).toString('hex')}`,
                 digiLockerUri: `digilocker://view/${document.docRef}`,
             };
         }
