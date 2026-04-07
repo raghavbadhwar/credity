@@ -1,0 +1,6 @@
+## 2024-04-07 - [Reduce useQuery Polling Frequency]
+**Learning:** [Aggressive default polling intervals in useQuery (e.g., 5000ms, 10000ms) on non-realtime dashboard components cause unnecessary re-renders and over-fetching.]
+**Action:** [Extend refetch intervals to 30000ms - 60000ms to improve client performance and reduce backend load.]
+## 2024-04-07 - [Reduce useQuery Polling Frequency - Realtime exception]
+**Learning:** [While aggressive default polling intervals in useQuery (e.g., 5000ms, 10000ms) on non-realtime dashboard components cause unnecessary re-renders and should be optimized, doing so on components explicitly marked for 'real-time' user experiences degrades intended functionality.]
+**Action:** [Extend refetch intervals to 30000ms - 60000ms to improve client performance ONLY if they are not meant for real-time experiences.]
