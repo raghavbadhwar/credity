@@ -102,7 +102,7 @@ export default function Dashboard() {
       const res = await fetch('/api/wallet/notifications?userId=1');
       return res.json();
     },
-    refetchInterval: 30000,
+    refetchInterval: 60000, // ⚡ Bolt: Reduced polling interval to improve performance
   });
 
   const credentials: WalletCredential[] = credentialsData?.credentials || [];

@@ -60,7 +60,7 @@ export default function BusinessDashboard() {
             const res = await fetch('/api/v1/claims?limit=100');
             return res.json();
         },
-        refetchInterval: 30000, // Refresh every 30 seconds
+        refetchInterval: 60000, // ⚡ Bolt: Reduced polling interval to improve performance
     });
 
     const claims: ClaimSummary[] = claimsData?.claims || [];

@@ -98,7 +98,7 @@ export default function SettingsPage() {
   // Get wallet status
   const { data: walletStatus } = useQuery<WalletStatusData>({
     queryKey: ['/api/wallet/status'],
-    refetchInterval: 30000,
+    refetchInterval: 60000, // ⚡ Bolt: Reduced polling interval to improve performance
   });
 
   // Get notifications count
