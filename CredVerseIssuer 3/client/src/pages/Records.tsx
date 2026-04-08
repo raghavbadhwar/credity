@@ -1,3 +1,4 @@
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Layout } from "@/components/layout/Layout";
 import {
   Table,
@@ -161,6 +162,7 @@ export default function Records() {
   };
 
   return (
+    <TooltipProvider>
     <Layout>
       <div className="space-y-8">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -186,9 +188,16 @@ export default function Records() {
               onChange={(e) => setSearch(e.target.value)}
             />
           </div>
-          <Button variant="outline" size="icon">
-            <Filter className="h-4 w-4" />
-          </Button>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button variant="outline" size="icon" aria-label="Filter records">
+                <Filter className="h-4 w-4" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Filter records</p>
+            </TooltipContent>
+          </Tooltip>
         </div>
 
         <div className="border rounded-md bg-card shadow-sm">
@@ -252,9 +261,16 @@ export default function Records() {
                     <TableCell className="text-right">
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon" className="h-8 w-8">
-                            <MoreHorizontal className="h-4 w-4" />
-                          </Button>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button variant="ghost" size="icon" className="h-8 w-8" aria-label="More actions">
+                                <MoreHorizontal className="h-4 w-4" />
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p>More actions</p>
+                            </TooltipContent>
+                          </Tooltip>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
                           <DropdownMenuItem onClick={() => handleViewDetails(cred)}>View Details</DropdownMenuItem>
@@ -282,6 +298,7 @@ export default function Records() {
         </div>
       </div>
     </Layout>
+    </TooltipProvider>
   );
 }
 
