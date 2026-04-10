@@ -55,7 +55,7 @@ export default function Dashboard() {
         title: 'Report exported',
         description: 'Dashboard report has been downloaded.'
       });
-    } catch (_error) {
+    } catch {
       toast({
         title: 'Export failed',
         description: 'Could not generate the report.',
