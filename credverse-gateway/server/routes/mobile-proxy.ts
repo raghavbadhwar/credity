@@ -214,7 +214,7 @@ router.all('/:target/*', async (req, res) => {
         }
 
         return res.status(upstreamResponse.status).send(responseBuffer);
-    } catch (error: any) {
+    } catch (error: unknown) {
         const isAbort = error?.name === 'AbortError';
         const statusCode = isAbort ? 504 : 502;
         return res.status(statusCode).json({
