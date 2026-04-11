@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import { ZodError } from "zod";
 
-export function errorHandler(err: any, req: Request, res: Response, next: NextFunction) {
+export function errorHandler(err: any, req: Request, res: Response, _next: NextFunction) {
     const status = err.status || err.statusCode || 500;
     const message = err.message || "Internal Server Error";
 

@@ -7,7 +7,7 @@ import prettier from 'eslint-config-prettier';
 import { defineConfig, globalIgnores } from 'eslint/config';
 
 export default defineConfig([
-  globalIgnores(['dist', 'node_modules', 'migrations', 'drizzle']),
+  globalIgnores(['dist', 'node_modules', 'migrations', 'drizzle', 'contracts']),
   {
     files: ['server/**/*.ts', 'shared/**/*.ts'],
     extends: [js.configs.recommended, tseslint.configs.recommended],
@@ -24,6 +24,9 @@ export default defineConfig([
       reactHooks.configs.flat.recommended,
       reactRefresh.configs.vite,
     ],
+    rules: {
+      "react-refresh/only-export-components": "off",
+    },
     languageOptions: {
       ecmaVersion: 2020,
       globals: globals.browser,
