@@ -28,7 +28,7 @@ export function initSentry(appName?: string): void {
         tracesSampleRate: process.env.NODE_ENV === 'production' ? 0.1 : 1.0,
 
         // Error filtering
-        beforeSend(event) {
+        beforeSend(event, hint) {
             // Don't send in development unless explicitly enabled
             if (process.env.NODE_ENV === 'development' && !process.env.SENTRY_DEV_ENABLED) {
                 return null;
