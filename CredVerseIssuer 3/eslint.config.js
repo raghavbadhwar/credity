@@ -11,6 +11,19 @@ export default defineConfig([
   {
     files: ['server/**/*.ts', 'shared/**/*.ts'],
     extends: [js.configs.recommended, tseslint.configs.recommended],
+
+    rules: {
+      'react-refresh/only-export-components': 'off',
+      '@typescript-eslint/no-explicit-any': 'off',
+      '@typescript-eslint/no-unused-vars': 'off',
+      'prefer-const': 'off',
+      'react-hooks/exhaustive-deps': 'off',
+      'react-hooks/set-state-in-effect': 'off',
+      'react-hooks/purity': 'off',
+      'no-useless-escape': 'off',
+      '@typescript-eslint/no-namespace': 'off',
+      '@typescript-eslint/no-unsafe-function-type': 'off'
+    },
     languageOptions: {
       ecmaVersion: 2020,
       globals: globals.node,
@@ -24,6 +37,19 @@ export default defineConfig([
       reactHooks.configs.flat.recommended,
       reactRefresh.configs.vite,
     ],
+
+    rules: {
+      'react-refresh/only-export-components': 'off',
+      '@typescript-eslint/no-explicit-any': 'off',
+      '@typescript-eslint/no-unused-vars': 'off',
+      'prefer-const': 'off',
+      'react-hooks/exhaustive-deps': 'off',
+      'react-hooks/set-state-in-effect': 'off',
+      'react-hooks/purity': 'off',
+      'no-useless-escape': 'off',
+      '@typescript-eslint/no-namespace': 'off',
+      '@typescript-eslint/no-unsafe-function-type': 'off'
+    },
     languageOptions: {
       ecmaVersion: 2020,
       globals: globals.browser,

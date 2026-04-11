@@ -1,3 +1,4 @@
+import * as crypto from 'crypto';
 /**
  * Selective Disclosure Service for CredVerse Wallet
  * Implements field-level disclosure for credentials
@@ -219,7 +220,7 @@ export class SelectiveDisclosureService {
      * Hash the disclosed data for integrity verification
      */
     private hashDisclosure(data: any): string {
-        const crypto = require('crypto');
+
         const canonical = JSON.stringify(data, Object.keys(data).sort());
         return crypto.createHash('sha256').update(canonical).digest('hex');
     }
