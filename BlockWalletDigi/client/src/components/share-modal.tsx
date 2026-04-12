@@ -52,7 +52,7 @@ export function ShareModal({ credential, open, onOpenChange }: ShareModalProps) 
   const handleShareClick = async () => {
     try {
       // PROMPT BIOMETRIC AUTH
-      const verification = await verifyBiometrics('1');
+      const verification = await verifyBiometrics();
       if (!verification.success) {
         toast({ title: 'Authentication Failed', description: 'Biometric verification required to share credentials', variant: 'destructive' });
         return;

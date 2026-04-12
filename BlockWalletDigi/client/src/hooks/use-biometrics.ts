@@ -129,11 +129,13 @@ export function useBiometrics() {
             const data = await response.json();
             return { success: data.success, credentialId };
 
-        } catch (error: any) {
+        } catch (error: unknown) {
             console.error('Biometric enrollment error:', error);
 
+            const err = error as Error;
+
             // User cancelled or device doesn't support
-            if (error.name === 'NotAllowedError') {
+            if (err.name === 'NotAllowedError') {
                 return {
                     success: false,
                     error: 'Biometric authentication was cancelled or denied'
@@ -142,7 +144,7 @@ export function useBiometrics() {
 
             return {
                 success: false,
-                error: error.message || 'Biometric enrollment failed'
+                error: err.message || 'Biometric enrollment failed'
             };
         } finally {
             setIsEnrolling(false);
@@ -150,7 +152,7 @@ export function useBiometrics() {
     }, [checkAvailability]);
 
     // Verify using biometrics
-    const verifyBiometrics = useCallback(async (userId: string): Promise<BiometricResult> => {
+    const verifyBiometrics = useCallback(async (): Promise<BiometricResult> => {
         setIsVerifying(true);
 
         try {
@@ -183,11 +185,11 @@ export function useBiometrics() {
                 credentialId: arrayBufferToBase64(assertion.rawId)
             };
 
-        } catch (error: any) {
+        } catch (error: unknown) {
             console.error('Biometric verification error:', error);
             return {
                 success: false,
-                error: error.message || 'Verification failed'
+                error: (error as Error).message || 'Verification failed'
             };
         } finally {
             setIsVerifying(false);
