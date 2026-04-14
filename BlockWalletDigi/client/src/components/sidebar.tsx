@@ -15,7 +15,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { useTheme } from "@/hooks/use-theme";
+import { useTheme } from "@/components/theme-provider";
 
 export function Sidebar() {
   const [location] = useLocation();
@@ -51,7 +51,7 @@ export function Sidebar() {
             <span>CredVerse</span>
           </div>
 
-          <Button aria-label="Toggle theme"
+          <Button
             variant="ghost"
             size="icon"
             className="h-8 w-8 text-muted-foreground hover:text-foreground"
