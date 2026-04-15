@@ -158,7 +158,7 @@ router.post('/auth/refresh', (req, res) => {
                 expiresIn: 900,
             },
         });
-    } catch (error) {
+    } catch (_error) {
         res.status(500).json({ error: 'Token refresh failed' });
     }
 });
@@ -181,7 +181,7 @@ router.post('/auth/logout', authMiddleware, (req, res) => {
         }
 
         res.json({ success: true });
-    } catch (error) {
+    } catch (_error) {
         res.status(500).json({ error: 'Logout failed' });
     }
 });
@@ -201,7 +201,7 @@ router.get('/auth/me', authMiddleware, async (req, res) => {
             username: user.username,
             role: 'recruiter',
         });
-    } catch (error) {
+    } catch (_error) {
         res.status(500).json({ error: 'Failed to get profile' });
     }
 });
@@ -233,7 +233,7 @@ router.post('/auth/verify-token', (req, res) => {
             },
             app: 'recruiter',
         });
-    } catch (error) {
+    } catch (_error) {
         res.status(500).json({ valid: false, error: 'Token verification failed' });
     }
 });

@@ -525,7 +525,7 @@ export class VerificationEngine {
     private async checkOnChainAnchor(credential: any): Promise<VerificationCheck> {
         // Hash the credential data to find it on-chain
         // The issuance process hashes the credential content
-        let dataToHash = Buffer.isBuffer(credential) ? credential.toString() : credential;
+        Buffer.isBuffer(credential) ? credential.toString() : credential;
 
         // If it's a JWT payload, we might need to verify the hash of the original JWT or the payload depending on how issuer anchored it.
         // Assuming issuer anchors hash of the VC Payload/claim

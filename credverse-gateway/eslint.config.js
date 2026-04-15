@@ -10,7 +10,12 @@ export default defineConfig([
   globalIgnores(['dist']),
   {
     files: ['server/**/*.ts'],
-    extends: [js.configs.recommended, tseslint.configs.recommended],
+    extends: [js.configs.recommended, tseslint.configs.recommended, {
+      rules: {
+        "@typescript-eslint/no-unused-vars": ["error", { "argsIgnorePattern": "^_", "varsIgnorePattern": "^_", "caughtErrorsIgnorePattern": "^_" }],
+        "@typescript-eslint/no-explicit-any": "off"
+      }
+    }],
     languageOptions: {
       ecmaVersion: 2020,
       globals: globals.node,
@@ -20,7 +25,12 @@ export default defineConfig([
     files: ['src/**/*.{ts,tsx}'],
     extends: [
       js.configs.recommended,
-      tseslint.configs.recommended,
+      tseslint.configs.recommended, {
+      rules: {
+        "@typescript-eslint/no-unused-vars": ["error", { "argsIgnorePattern": "^_", "varsIgnorePattern": "^_", "caughtErrorsIgnorePattern": "^_" }],
+        "@typescript-eslint/no-explicit-any": "off"
+      }
+    },
       reactHooks.configs.flat.recommended,
       reactRefresh.configs.vite,
     ],

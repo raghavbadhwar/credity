@@ -267,7 +267,7 @@ export class BlockchainService {
                 revocationReason,
                 revokedAt: revokedAt > BigInt(0) ? new Date(Number(revokedAt) * 1000) : null,
             };
-        } catch (error) {
+        } catch (_error) {
             return { exists: false };
         }
     }
@@ -286,7 +286,7 @@ export class BlockchainService {
                 anchored: Number(anchored),
                 revoked: Number(revoked),
             };
-        } catch (error) {
+        } catch (_error) {
             return { anchored: 0, revoked: 0 };
         }
     }
