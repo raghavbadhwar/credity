@@ -54,6 +54,7 @@ export function Sidebar() {
           <Button
             variant="ghost"
             size="icon"
+            aria-label="Toggle theme"
             className="h-8 w-8 text-muted-foreground hover:text-foreground"
             onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
           >
