@@ -170,7 +170,7 @@ export default function IdentityVerification() {
     const [currentChallenge, setCurrentChallenge] = useState<Challenge | null>(null);
     const [challengeTimer, setChallengeTimer] = useState(5);
     const [documentPreview, setDocumentPreview] = useState<string | null>(null);
-    const [livenessProgress, setLivenessProgress] = useState(0);
+    const [_livenessProgress, setLivenessProgress] = useState(0);
     const [biometricAvailable, setBiometricAvailable] = useState<{ available: boolean; platformAuthenticator: boolean } | null>(null);
     const [challengeCompleted, setChallengeCompleted] = useState<Record<string, boolean>>({});
     const [pendingCameraStart, setPendingCameraStart] = useState(false);
@@ -186,7 +186,7 @@ export default function IdentityVerification() {
     });
 
     // Start liveness session mutation
-    const startLivenessMutation = useMutation({
+    const _startLivenessMutation = useMutation({
         mutationFn: async () => {
             const res = await fetch('/api/identity/liveness/start', {
                 method: 'POST',
@@ -261,7 +261,7 @@ export default function IdentityVerification() {
     }, [checkAvailability]);
 
     // Scan document mutation
-    const scanDocumentMutation = useMutation({
+    const _scanDocumentMutation = useMutation({
         mutationFn: async (imageData: string) => {
             const res = await fetch('/api/identity/document/scan', {
                 method: 'POST',
@@ -384,7 +384,7 @@ export default function IdentityVerification() {
         }
     };
 
-    const cancelLiveness = () => {
+    const _cancelLiveness = () => {
         stopDetection();
         stopCamera();
         setLivenessSession(null);

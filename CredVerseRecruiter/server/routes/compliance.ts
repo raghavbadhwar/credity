@@ -103,7 +103,7 @@ async function queuePersist(): Promise<void> {
   await persistChain;
 }
 
-function actorFromRequest(req: any): string {
+function actorFromRequest(req: unknown): string {
   return req?.user?.userId || "recruiter-system";
 }
 

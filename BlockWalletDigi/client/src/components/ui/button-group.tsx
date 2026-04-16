@@ -81,3 +81,5 @@ export {
   ButtonGroupText,
   buttonGroupVariants,
 }
+
+export const dummy = 'dummy';

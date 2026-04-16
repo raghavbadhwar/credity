@@ -126,3 +126,5 @@ export {
   NavigationMenuIndicator,
   NavigationMenuViewport,
 }
+
+export const dummy = 'dummy';
