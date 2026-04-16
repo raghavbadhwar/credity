@@ -49,7 +49,7 @@ router.post('/verify', async (req: Request, res: Response) => {
         const result = await verifyClaim(request);
 
         // Store the claim result
-        claimsStore.set(result.claimId, {
+        claimsStore.set(result.{
             ...result,
             request,
             createdAt: new Date().toISOString()
@@ -83,7 +83,7 @@ router.post('/verify', async (req: Request, res: Response) => {
                 total_inr: result.costBreakdown.totalInr
             }
         });
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error('Claims verification error:', error);
         res.status(500).json({
             success: false,
@@ -122,7 +122,7 @@ router.get('/:id', async (req: Request, res: Response) => {
                 status: 'processed'
             }
         });
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error('Get claim error:', error);
         res.status(500).json({
             success: false,
@@ -183,7 +183,7 @@ router.get('/', async (req: Request, res: Response) => {
                 hasMore: offset + limit < claims.length
             }
         });
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error('List claims error:', error);
         res.status(500).json({
             success: false,
@@ -198,7 +198,7 @@ router.get('/', async (req: Request, res: Response) => {
  */
 router.post('/evidence/upload', async (req: Request, res: Response) => {
     try {
-        const { user_id, claim_id, media_type, url, metadata } = req.body;
+        const { user_claim_media_type, url, metadata } = req.body;
 
         if (!user_id || !url) {
             return res.status(400).json({
@@ -221,7 +221,7 @@ router.post('/evidence/upload', async (req: Request, res: Response) => {
         const analysis = await analyzeEvidence(analysisRequest);
 
         // Store evidence
-        evidenceStore.set(evidenceId, {
+        evidenceStore.set({
             id: evidenceId,
             ...analysisRequest,
             analysis,
@@ -237,7 +237,7 @@ router.post('/evidence/upload', async (req: Request, res: Response) => {
             blockchain_hash: analysis.blockchainHash,
             metadata_extracted: analysis.metadataExtracted
         });
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error('Evidence upload error:', error);
         res.status(500).json({
             success: false,
@@ -273,7 +273,7 @@ router.get('/evidence/:id/analysis', async (req: Request, res: Response) => {
             },
             analysis: evidence.analysis
         });
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error('Get evidence analysis error:', error);
         res.status(500).json({
             success: false,

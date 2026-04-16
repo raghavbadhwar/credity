@@ -83,7 +83,7 @@ router.post('/auth/register', async (req, res) => {
                 expiresIn: 900, // 15 minutes
             },
         });
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error('[Auth] Register error:', error);
         res.status(500).json({ error: 'Registration failed' });
     }
@@ -151,7 +151,7 @@ router.post('/auth/login', async (req, res) => {
                 expiresIn: 900,
             },
         });
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error('[Auth] Login error:', error);
         res.status(500).json({ error: 'Login failed' });
     }
@@ -181,7 +181,7 @@ router.post('/auth/refresh', (req, res) => {
                 expiresIn: 900,
             },
         });
-    } catch (error) {
+    } catch (_error) {
         res.status(500).json({ error: 'Token refresh failed' });
     }
 });
@@ -204,7 +204,7 @@ router.post('/auth/logout', authMiddleware, (req, res) => {
         }
 
         res.json({ success: true });
-    } catch (error) {
+    } catch (_error) {
         res.status(500).json({ error: 'Logout failed' });
     }
 });
@@ -228,7 +228,7 @@ router.get('/auth/me', authMiddleware, async (req, res) => {
             avatarUrl: user.avatarUrl,
             bio: user.bio,
         });
-    } catch (error) {
+    } catch (_error) {
         res.status(500).json({ error: 'Failed to get profile' });
     }
 });
@@ -258,7 +258,7 @@ router.patch('/auth/me', authMiddleware, async (req, res) => {
                 avatarUrl: updated.avatarUrl,
             },
         });
-    } catch (error) {
+    } catch (_error) {
         res.status(500).json({ error: 'Failed to update profile' });
     }
 });
@@ -301,7 +301,7 @@ router.post('/auth/change-password', authMiddleware, async (req, res) => {
         await storage.updateUser(Number(req.user!.userId), { password: newHash } as any);
 
         res.json({ success: true, message: 'Password updated' });
-    } catch (error) {
+    } catch (_error) {
         res.status(500).json({ error: 'Failed to change password' });
     }
 });
@@ -333,7 +333,7 @@ router.post('/auth/verify-token', (req, res) => {
             },
             app: 'wallet',
         });
-    } catch (error) {
+    } catch (_error) {
         res.status(500).json({ valid: false, error: 'Token verification failed' });
     }
 });

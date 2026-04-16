@@ -336,7 +336,7 @@ export class DigiLockerService {
      * Pull a specific document from DigiLocker
      */
     async pullDocument(userId: number, documentUri: string): Promise<{
-        document: any;
+        document: unknown;
         rawData?: string;
     }> {
         const tokens = tokenStorage.get(userId);

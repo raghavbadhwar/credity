@@ -76,7 +76,7 @@ export async function scanDocument(request: DocumentScanRequest): Promise<Docume
         : request.documentType;
 
     // Extract fields based on document type
-    const extractedFields = await extractFields(request.imageData, documentType);
+    const extractedFields = await extractFields(request.documentType);
 
     // Parse extracted data
     const extractedData = parseExtractedData(extractedFields, documentType);
@@ -85,7 +85,7 @@ export async function scanDocument(request: DocumentScanRequest): Promise<Docume
     const faceData = extractFaceFromDocument(request.imageData);
 
     // Run authenticity checks
-    const authenticityChecks = runAuthenticityChecks(request.imageData, documentType);
+    const authenticityChecks = runAuthenticityChecks(request.documentType);
 
     // Calculate overall score
     const overallScore = calculateDocumentScore(extractedFields, authenticityChecks);
@@ -245,7 +245,7 @@ function parseExtractedData(fields: ExtractedField[], documentType: string): Doc
 function normalizeDateFormat(dateStr: string): string {
     // Convert various formats to YYYY-MM-DD
     const formats = [
-        /(\d{2})\/(\d{2})\/(\d{4})/,  // DD/MM/YYYY
+        /(\d{2})/(\d{2})/(\d{4})/,  // DD/MM/YYYY
         /(\d{2})-(\d{2})-(\d{4})/,    // DD-MM-YYYY
         /(\d{2})\s+(\w+)\s+(\d{4})/,  // DD MMM YYYY
     ];

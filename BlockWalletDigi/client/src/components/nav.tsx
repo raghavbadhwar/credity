@@ -1,5 +1,5 @@
 import { Link, useLocation } from "wouter";
-import { Wallet, User, Settings, LogOut } from "lucide-react";
+import { Home, Shield, History, PlusCircle, Share2, Eye, UserX, AlertTriangle, ShieldCheck, HelpCircle, Activity } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export function Nav() {

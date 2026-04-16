@@ -56,7 +56,7 @@ export class QRService {
      */
     generateQRPayload(
         credentialId: string,
-        credentialData: any,
+        credentialData: unknown,
         options: QRGenerationOptions
     ): QRPayload {
         const credentialHash = sha256(JSON.stringify(credentialData));
@@ -85,7 +85,7 @@ export class QRService {
      */
     createShareLink(
         credentialId: string,
-        credentialData: any,
+        credentialData: unknown,
         options: QRGenerationOptions
     ): ShareLink {
         const { token, expiry } = generateAccessToken(

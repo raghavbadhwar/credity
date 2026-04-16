@@ -31,7 +31,7 @@ router.patch("/user", async (req, res) => {
 
         const updatedUser = await storage.updateUser(userId, parseResult.data);
         res.json(updatedUser);
-    } catch (error) {
+    } catch (_error) {
         res.status(500).json({ message: "Internal Server Error" });
     }
 });

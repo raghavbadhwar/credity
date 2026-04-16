@@ -37,7 +37,7 @@ export const aiService = {
             const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
             // Remove data:image/jpeg;base64, prefix if present
-            const base64Data = imageBase64.replace(/^data:image\/\w+;base64,/, "");
+            const base64Data = imageBase64.replace(/^data:image/\w+;base64,/, "");
 
             const prompt = `
                 Analyze this image for identity verification liveness check.
@@ -82,7 +82,7 @@ export const aiService = {
                 spoofingDetected: analysis.spoofingDetected,
                 faceDetected: analysis.faceDetected
             };
-        } catch (error) {
+        } catch (_error) {
             console.error("AI Analysis failed:", error);
             // Fallback for demo stability
             return {
@@ -100,7 +100,7 @@ export const aiService = {
      */
     analyzeDocument: async (imageBase64: string, documentType: string): Promise<{
         isValid: boolean;
-        extractedData: any;
+        extractedData: unknown;
         fraudScore: number;
         feedback: string;
     }> => {
@@ -116,7 +116,7 @@ export const aiService = {
             }
 
             const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-            const base64Data = imageBase64.replace(/^data:image\/\w+;base64,/, "");
+            const base64Data = imageBase64.replace(/^data:image/\w+;base64,/, "");
 
             const prompt = `
                 Analyze this ${documentType} document.
@@ -149,7 +149,7 @@ export const aiService = {
 
             return JSON.parse(jsonMatch[0]);
 
-        } catch (error) {
+        } catch (_error) {
             console.error("Document AI Analysis failed:", error);
             return {
                 isValid: false,

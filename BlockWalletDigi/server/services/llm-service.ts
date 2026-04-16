@@ -51,7 +51,7 @@ export async function analyzeDeception(text: string): Promise<LLMAnalysisRespons
                 type: 'deception',
                 text
             });
-        } catch (error) {
+        } catch (_error) {
             console.error(`LLM provider ${provider} failed, falling back to local:`, error);
         }
     }
@@ -77,7 +77,7 @@ export async function checkConsistency(
                 text: description,
                 context: { evidence: evidence.map(e => e.description || e.type) }
             });
-        } catch (error) {
+        } catch (_error) {
             console.error(`LLM provider ${provider} failed, falling back to local:`, error);
         }
     }
@@ -104,7 +104,7 @@ export async function detectFraudPatterns(
                 text,
                 context: { claimType, claimAmount }
             });
-        } catch (error) {
+        } catch (_error) {
             console.error(`LLM provider ${provider} failed, falling back to local:`, error);
         }
     }
@@ -125,7 +125,7 @@ async function callLLMProvider(
     // Build prompt based on analysis type
     const prompt = buildPrompt(request);
 
-    let response: any;
+    let response: unknown;
     let cost = 0;
 
     switch (provider) {
@@ -295,7 +295,7 @@ async function callOpenAI(prompt: string): Promise<any> {
 /**
  * Parse JSON from LLM response (handles markdown code blocks)
  */
-function parseJsonResponse(text: string): any {
+function parseJsonResponse(text: string): unknown {
     // Remove markdown code blocks if present
     const cleaned = text.replace(/```json?\n?/g, '').replace(/```/g, '').trim();
     try {
@@ -306,15 +306,15 @@ function parseJsonResponse(text: string): any {
 }
 
 // Helper functions to parse LLM responses
-function parseConfidence(response: any): number {
+function parseConfidence(response: unknown): number {
     return typeof response.confidence === 'number' ? response.confidence : 0.7;
 }
 
-function parseFraudIndicators(response: any): string[] {
+function parseFraudIndicators(response: unknown): string[] {
     return response.fraudIndicators || response.issues || response.matchedPatterns || [];
 }
 
-function parseRecommendation(response: any): string {
+function parseRecommendation(response: unknown): string {
     return response.recommendation || 'review';
 }
 
@@ -338,7 +338,7 @@ function localDeceptionAnalysis(text: string, startTime: number): LLMAnalysisRes
     }
 
     // Check for evasive language
-    const evasivePatterns = ['can\'t remember', 'don\'t recall', 'not sure', 'maybe', 'probably'];
+    const evasivePatterns = ['can't remember', 'don't recall', 'not sure', 'maybe', 'probably'];
     for (const pattern of evasivePatterns) {
         if (lowerText.includes(pattern)) {
             fraudIndicators.push(`Vague language: "${pattern}"`);
@@ -359,7 +359,7 @@ function localDeceptionAnalysis(text: string, startTime: number): LLMAnalysisRes
     }
 
     // Detailed descriptions with specifics are more trustworthy
-    if (text.length > 200 && /\d{1,2}[:\-\/]\d{1,2}/i.test(text)) {
+    if (text.length > 200 && /\d{1,2}[:\-/]\d{1,2}/i.test(text)) {
         confidence += 0.1;
     }
 
@@ -461,7 +461,7 @@ function localPatternAnalysis(
         { phrase: 'lost receipt', weight: 0.15 },
         { phrase: 'no documentation', weight: 0.15 },
         { phrase: 'cash payment', weight: 0.1 },
-        { phrase: 'friend\'s account', weight: 0.2 },
+        { phrase: 'friend's account', weight: 0.2 },
         { phrase: 'third party', weight: 0.15 }
     ];
 

@@ -57,7 +57,7 @@ export async function analyzeEvidence(request: EvidenceUploadRequest): Promise<E
     const metadataExtracted = extractMetadata(request);
 
     // Analyze for manipulation
-    const manipulationAnalysis = detectManipulation(request, metadataExtracted);
+    const manipulationAnalysis = detectManipulation(metadataExtracted);
 
     // Check for AI generation (placeholder - would use ML model)
     const aiDetection = await detectDeepfakeFromUrl(request.url);

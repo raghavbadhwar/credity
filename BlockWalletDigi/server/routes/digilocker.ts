@@ -21,7 +21,7 @@ router.get("/digilocker/auth", async (req, res) => {
             state,
             isDemoMode: digilockerService.isDemoMode(),
         });
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error('[DigiLocker] Auth URL error:', error);
         if (String(error?.message || '').includes('not configured')) {
             return res.status(503).json({ error: 'DigiLocker is not configured for this environment' });
@@ -54,7 +54,7 @@ router.get("/digilocker/callback", async (req, res) => {
 
         // Redirect to frontend with success
         res.redirect(`/connect-digilocker?connected=true&digilocker_id=${tokens.digilocker_id || ''}`);
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error('[DigiLocker] Callback error:', error);
         res.redirect(`/connect-digilocker?error=${encodeURIComponent(error.message)}`);
     }
@@ -79,7 +79,7 @@ router.get("/digilocker/status", async (req, res) => {
         } else {
             res.json({ connected: false });
         }
-    } catch (error: any) {
+    } catch (error: unknown) {
         res.json({ connected: false, error: error.message });
     }
 });
@@ -98,7 +98,7 @@ router.get("/digilocker/documents", async (req, res) => {
         const documents = await digilockerService.listDocuments(userId);
 
         res.json({ documents });
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error('[DigiLocker] List documents error:', error);
         res.status(500).json({ error: error.message });
     }
@@ -110,7 +110,7 @@ router.get("/digilocker/documents", async (req, res) => {
 router.post("/digilocker/import", async (req, res) => {
     try {
         const userId = parseInt(req.body.userId) || 1;
-        const { documentUri, documentType, documentName, issuer } = req.body;
+        const { documentUri, documentName, issuer } = req.body;
 
         if (!digilockerService.isConnected(userId)) {
             return res.status(401).json({ error: 'Not connected to DigiLocker' });
@@ -131,7 +131,7 @@ router.post("/digilocker/import", async (req, res) => {
 
         // Store in wallet as verified credential
         const credential = await walletService.storeCredential(userId, {
-            type: ['VerifiableCredential', documentType, 'DigiLockerDocument'],
+            type: ['VerifiableCredential', 'DigiLockerDocument'],
             issuer: issuer || 'DigiLocker',
             issuanceDate: new Date(),
             data: {
@@ -155,7 +155,7 @@ router.post("/digilocker/import", async (req, res) => {
             credential,
             message: `${documentName} imported successfully`,
         });
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error('[DigiLocker] Import error:', error);
         res.status(500).json({ error: error.message });
     }
@@ -196,7 +196,7 @@ router.post("/digilocker/import-all", async (req, res) => {
                 });
 
                 imported.push(doc.name);
-            } catch (e) {
+            } catch (_e) {
                 failed.push(doc.name);
             }
         }
@@ -213,7 +213,7 @@ router.post("/digilocker/import-all", async (req, res) => {
             failed,
             total: documents.length,
         });
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error('[DigiLocker] Import all error:', error);
         res.status(500).json({ error: error.message });
     }
@@ -235,7 +235,7 @@ router.post("/digilocker/disconnect", async (req, res) => {
         });
 
         res.json({ success: true });
-    } catch (error: any) {
+    } catch (error: unknown) {
         res.status(500).json({ error: error.message });
     }
 });
@@ -299,7 +299,7 @@ router.post("/digilocker/connect", async (req, res) => {
                 state,
             });
         }
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error('[DigiLocker] Connect error:', error);
         if (String(error?.message || '').includes('not configured')) {
             return res.status(503).json({ error: 'DigiLocker is not configured for this environment' });

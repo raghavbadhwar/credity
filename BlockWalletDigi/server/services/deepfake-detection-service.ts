@@ -45,7 +45,7 @@ export async function detectDeepfakeFromUrl(url: string): Promise<DeepfakeDetect
             confidence: score,
             provider: data.provider || 'remote_api',
         };
-    } catch (error: any) {
+    } catch (error: unknown) {
         return {
             verdict: 'unknown',
             confidence: null,

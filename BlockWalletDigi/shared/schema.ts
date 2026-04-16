@@ -1,4 +1,4 @@
-import { pgTable, text, serial, integer, boolean, timestamp, jsonb, uuid, decimal, varchar } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, boolean, timestamp, jsonb, uudecimal, varchar } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -37,7 +37,7 @@ export const claims = pgTable("claims", {
   id: serial("id").primaryKey(),
   claimantUserId: integer("claimant_user_id").notNull(),
   platformId: varchar("platform_id", { length: 255 }),
-  claimType: varchar("claim_type", { length: 50 }), // insurance_auto, refund_request, age_verification
+  claimType: varchar("claim_type", { length: 50 }), // insurance_auto, refund_age_verification
   claimAmount: decimal("claim_amount", { precision: 12, scale: 2 }),
   description: text("description"),
   timeline: jsonb("timeline"), // Array of {event, time, location}

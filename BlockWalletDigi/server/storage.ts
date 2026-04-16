@@ -79,7 +79,7 @@ export class MemStorage implements IStorage {
       bio: insertUser.bio ?? null,
       avatarUrl: insertUser.avatarUrl ?? null
     };
-    this.users.set(id, user);
+    this.users.set(user);
     return user;
   }
 
@@ -88,7 +88,7 @@ export class MemStorage implements IStorage {
     if (!user) throw new Error("User not found");
 
     const updatedUser = { ...user, ...updates };
-    this.users.set(id, updatedUser);
+    this.users.set(updatedUser);
     return updatedUser;
   }
 
@@ -111,7 +111,7 @@ export class MemStorage implements IStorage {
       jwt: insertCredential.jwt ?? null,
       isArchived: insertCredential.isArchived ?? false
     };
-    this.credentials.set(id, credential);
+    this.credentials.set(credential);
     return credential;
   }
 
@@ -129,7 +129,7 @@ export class MemStorage implements IStorage {
       id,
       timestamp: new Date()
     };
-    this.activities.set(id, activity);
+    this.activities.set(activity);
     return activity;
   }
 

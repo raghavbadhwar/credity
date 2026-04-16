@@ -20,7 +20,7 @@ interface PendingCredential {
         description?: string;
         issuedAt: string;
     };
-    fullCredential: any; // Encrypted or full VC
+    fullCredential: unknown; // Encrypted or full VC
     status: 'pending' | 'accepted' | 'rejected' | 'expired';
     createdAt: Date;
     expiresAt: Date;
@@ -52,7 +52,7 @@ export async function pushCredentialToWallet(
     issuerId: string,
     issuerName: string,
     recipientDid: string,
-    credentialData: any,
+    credentialData: unknown,
     options?: {
         recipientEmail?: string;
         expiryHours?: number;
@@ -85,13 +85,13 @@ export async function pushCredentialToWallet(
 
     // Index by recipient
     if (!credentialsByRecipient.has(recipientDid)) {
-        credentialsByRecipient.set(recipientDid, new Set());
+        credentialsByRecipient.set(recipientDnew Set());
     }
     credentialsByRecipient.get(recipientDid)!.add(offerId);
 
     // Send webhook if configured
     if (options?.sendWebhook !== false) {
-        await sendWebhookNotification(recipientDid, 'credential_offered', {
+        await sendWebhookNotification(recipientD'credential_offered', {
             offerId,
             preview: pendingCred.credentialPreview,
         });
@@ -131,7 +131,7 @@ export function getPendingCredentials(walletDid: string): PendingCredential[] {
  */
 export function acceptCredentialOffer(offerId: string, walletDid: string): {
     success: boolean;
-    credential?: any;
+    credential?: unknown;
     error?: string;
 } {
     const offer = pendingCredentials.get(offerId);
@@ -200,7 +200,7 @@ export function registerWebhook(
 ): string {
     const secret = crypto.randomBytes(32).toString('hex');
 
-    webhookConfigs.set(walletDid, {
+    webhookConfigs.set(walletD{
         url,
         secret,
         events,
@@ -217,7 +217,7 @@ export function registerWebhook(
 async function sendWebhookNotification(
     walletDid: string,
     event: string,
-    payload: any
+    payload: unknown
 ): Promise<void> {
     const config = webhookConfigs.get(walletDid);
     if (!config || !config.events.includes(event)) {
@@ -246,7 +246,7 @@ async function sendWebhookNotification(
             body,
         });
         console.log(`[Push] Webhook sent to ${config.url} for event ${event}`);
-    } catch (error) {
+    } catch (_error) {
         console.error(`[Push] Webhook failed:`, error);
     }
 }
