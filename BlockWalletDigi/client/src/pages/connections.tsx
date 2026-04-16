@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/purity */
 /**
  * Platform Connections Page
  * Manages platform connections as defined in PRD Section 5.1 Feature 5

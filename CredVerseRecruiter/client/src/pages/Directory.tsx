@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/purity */
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";

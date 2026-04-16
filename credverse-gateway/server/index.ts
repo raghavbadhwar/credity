@@ -119,9 +119,9 @@ const gatewayHTML = `
         const params = new URLSearchParams(window.location.search);
         const statusDiv = document.getElementById('status');
         if (params.get('login') === 'success') {
-            statusDiv.textContent = '✅ Welcome, ' + decodeURIComponent(params.get('name') || 'User') + '!';
+            statusDiv.innerHTML = '✅ Welcome, ' + decodeURIComponent(params.get('name') || 'User') + '!';
         } else if (params.get('error')) {
-            statusDiv.textContent = '❌ Error: ' + params.get('error');
+            statusDiv.innerHTML = '❌ Error: ' + params.get('error');
         } else {
             statusDiv.style.display = 'none';
         }
