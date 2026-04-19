@@ -7,3 +7,6 @@
 ## 2026-02-22 - Decorative Overlays
 **Learning:** Decorative elements (like blurred backgrounds) positioned absolutely over interactive elements can intercept clicks, making the UI unresponsive. This is a critical usability failure.
 **Action:** Always add `pointer-events-none` to decorative overlays that sit on top of other content.
+## 2024-04-19 - Added aria-labels to icon-only buttons
+**Learning:** Common missing accessibility feature across Shadcn-like `<Button size="icon">` components used for secondary actions (copy, back, theme toggle). Without `aria-label`, screen readers only announce "button" for these controls.
+**Action:** Always verify if a button that visually relies entirely on an icon (like Lucide React icons) provides screen reader context via an `aria-label` or visually hidden text span.
