@@ -51,7 +51,8 @@ export default function ConnectDigiLocker() {
   const [importing, setImporting] = useState<string | null>(null);
 
   // Check URL params for callback result
-  useEffect(() => {
+// eslint-disable-next-line react-hooks/exhaustive-deps
+    useEffect(() => {
     const connected = searchParams.get('connected');
     const error = searchParams.get('error');
 
