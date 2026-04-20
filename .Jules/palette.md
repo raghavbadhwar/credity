@@ -7,3 +7,7 @@
 ## 2026-02-22 - Decorative Overlays
 **Learning:** Decorative elements (like blurred backgrounds) positioned absolutely over interactive elements can intercept clicks, making the UI unresponsive. This is a critical usability failure.
 **Action:** Always add `pointer-events-none` to decorative overlays that sit on top of other content.
+
+## 2024-04-20 - Missing ARIA Labels on Icon-only Buttons
+**Learning:** The application uses a standard UI library component `<Button size="icon">` across multiple workspaces, but this pattern frequently omits text content. Developers are not consistently adding `aria-label` when using this size variant.
+**Action:** Always verify that `<Button size="icon">` components include a descriptive `aria-label` attribute, as the lack of visible text makes them inaccessible to screen readers by default.
