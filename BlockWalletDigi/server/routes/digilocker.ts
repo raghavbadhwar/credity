@@ -176,10 +176,7 @@ router.post("/digilocker/import-all", async (req, res) => {
         const imported: string[] = [];
         const failed: string[] = [];
 
-        // ⚡ Bolt Optimization: Parallelized independent document pull and store operations
-        // Impact: Reduces batch import time from O(n) to O(1) network latency overhead
-        // Performance improvement: Processing documents concurrently rather than sequentially
-        await Promise.all(documents.map(async (doc) => {
+        for (const doc of documents) {
             try {
                 const { document } = await digilockerService.pullDocument(userId, doc.uri);
 
@@ -202,7 +199,7 @@ router.post("/digilocker/import-all", async (req, res) => {
             } catch (e) {
                 failed.push(doc.name);
             }
-        }));
+        }
 
         await storage.createActivity({
             userId,
@@ -264,10 +261,7 @@ router.post("/digilocker/connect", async (req, res) => {
             // Import demo documents
             const documents = await digilockerService.listDocuments(userId);
 
-            // ⚡ Bolt Optimization: Parallelized independent document pull and store operations
-            // Impact: Reduces import time from O(n) to O(1) network latency overhead
-            // Performance improvement: Processing documents concurrently rather than sequentially
-            await Promise.all(documents.slice(0, 3).map(async (doc) => { // Import first 3
+            for (const doc of documents.slice(0, 3)) { // Import first 3
                 const { document } = await digilockerService.pullDocument(userId, doc.uri);
 
                 await walletService.storeCredential(userId, {
@@ -282,7 +276,7 @@ router.post("/digilocker/connect", async (req, res) => {
                     },
                     category: doc.doctype.includes('CLASS') ? 'academic' : 'government',
                 });
-            }));
+            }
 
             await storage.createActivity({
                 userId,
