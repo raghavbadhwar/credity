@@ -1,0 +1,3 @@
+## 2026-04-23 - Optimize Array Iterations in Analytics Endpoint
+**Learning:** Computing multiple statistics on a large array by chaining multiple `.filter()` and `.reduce()` calls results in an O(k*n) runtime cost where k is the number of array traversals. In Node.js environments handling large datasets, this approach leads to unnecessary CPU overhead and memory allocation for intermediate arrays.
+**Action:** Replace multiple separate array traversals with a single `reduce` or `for` loop that aggregates all required metrics simultaneously. This reduces time complexity from O(k*n) to O(n) and minimizes garbage collection pressure.
