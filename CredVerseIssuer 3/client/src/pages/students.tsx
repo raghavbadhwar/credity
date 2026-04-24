@@ -375,6 +375,7 @@ export default function Students() {
         setIsIssueOpen(true);
     };
 
+    // ⚡ Bolt: Memoize filtered list to prevent O(n) recalculations on unrelated renders
     const filteredStudents = useMemo(() => {
         return students.filter(student =>
             student.name.toLowerCase().includes(search.toLowerCase()) ||

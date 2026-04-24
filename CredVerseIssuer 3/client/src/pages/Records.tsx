@@ -49,6 +49,7 @@ export default function Records() {
     }
   });
 
+  // ⚡ Bolt: Memoize filtered list to prevent O(n) recalculations on unrelated renders
   const filteredRecords = useMemo(() => {
     return credentials.filter((cred) =>
       (cred.recipient?.name || '').toLowerCase().includes(search.toLowerCase()) ||
