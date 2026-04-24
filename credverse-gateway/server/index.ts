@@ -118,10 +118,11 @@ const gatewayHTML = `
     <script>
         const params = new URLSearchParams(window.location.search);
         const statusDiv = document.getElementById('status');
+        // Security Fix: Use textContent instead of innerHTML to prevent DOM-based XSS
         if (params.get('login') === 'success') {
-            statusDiv.innerHTML = '✅ Welcome, ' + decodeURIComponent(params.get('name') || 'User') + '!';
+            statusDiv.textContent = '✅ Welcome, ' + decodeURIComponent(params.get('name') || 'User') + '!';
         } else if (params.get('error')) {
-            statusDiv.innerHTML = '❌ Error: ' + params.get('error');
+            statusDiv.textContent = '❌ Error: ' + params.get('error');
         } else {
             statusDiv.style.display = 'none';
         }
