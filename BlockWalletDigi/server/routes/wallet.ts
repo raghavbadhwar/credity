@@ -61,7 +61,10 @@ router.post('/wallet/init', async (req, res) => {
  */
 router.get('/wallet/status', async (req, res) => {
     try {
-        const userId = parseInt(req.query.userId as string) || 1;
+        const userId = parseInt(req.query.userId as string);
+        if (isNaN(userId)) {
+            return res.status(400).json({ error: 'userId is required and must be valid' });
+        }
         const wallet = await walletService.getOrCreateWallet(userId);
         const stats = await walletService.getWalletStats(userId);
 
@@ -144,7 +147,10 @@ router.get('/did/resolve/:did', async (req, res) => {
  */
 router.post('/wallet/backup', async (req, res) => {
     try {
-        const userId = parseInt(req.body.userId) || 1;
+        const userId = parseInt(req.body.userId as string);
+        if (isNaN(userId)) {
+            return res.status(400).json({ error: 'userId is required and must be valid' });
+        }
         const { backupData, backupKey } = await walletService.createBackup(userId);
 
         await storage.createActivity({

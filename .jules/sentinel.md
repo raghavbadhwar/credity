@@ -1,0 +1,4 @@
+## 2025-04-21 - Systemic IDOR Pattern via Fallback User ID
+**Vulnerability:** Found widespread Insecure Direct Object Reference (IDOR) vulnerabilities across `BlockWalletDigi` API routes, where endpoints default to `userId = 1` if parsing the request parameter fails or evaluates to falsy (e.g., `parseInt(req.query.userId) || 1`).
+**Learning:** This fallback mechanism meant that unauthenticated or malformed requests would automatically bypass authorization checks and operate on the data of user ID 1 (likely an admin or first user), leading to a systemic authorization bypass.
+**Prevention:** Remove fallback logic and ensure endpoints strictly validate the presence and validity of required parameters. Authentication middleware must be used to derive the user ID securely from the token rather than trusting client-provided input.
