@@ -1,4 +1,4 @@
-import { Router } from 'express';
+import { Router, Request, Response } from 'express';
 import crypto from 'crypto';
 import { walletService } from '../services/wallet-service';
 import { authMiddleware } from '@credverse/shared-auth';
@@ -8,12 +8,16 @@ import { hashPassword } from '../services/auth-service';
 
 const router = Router();
 
+interface AuthRequest extends Request {
+    user?: { userId: number; [key: string]: unknown };
+}
+
 // ============== Wallet Core & Status ==============
 
 /**
  * Initialize wallet for user (creates DID automatically)
  */
-router.post('/wallet/init', authMiddleware, async (req: any, res) => {
+router.post('/wallet/init', authMiddleware, async (req: AuthRequest, res: Response) => {
     try {
         const userId = req.user?.userId;
         if (!userId) return res.status(400).json({ error: 'userId required' });
@@ -60,7 +64,7 @@ router.post('/wallet/init', authMiddleware, async (req: any, res) => {
 /**
  * Get wallet status
  */
-router.get('/wallet/status', authMiddleware, async (req: any, res) => {
+router.get('/wallet/status', authMiddleware, async (req: AuthRequest, res: Response) => {
     try {
         const userId = req.user?.userId;
         if (!userId) return res.status(401).json({ error: 'Unauthorized' });
@@ -144,7 +148,7 @@ router.get('/did/resolve/:did', async (req, res) => {
 /**
  * Create wallet backup
  */
-router.post('/wallet/backup', authMiddleware, async (req: any, res) => {
+router.post('/wallet/backup', authMiddleware, async (req: AuthRequest, res: Response) => {
     try {
         const userId = req.user?.userId;
         if (!userId) return res.status(401).json({ error: 'Unauthorized' });
