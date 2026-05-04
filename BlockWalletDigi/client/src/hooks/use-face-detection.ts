@@ -83,6 +83,7 @@ export function useFaceDetection() {
         let diffPixels = 0;
         const threshold = 30;
         const minMotionPercent = 0.02; // 2% of pixels must change
+        const requiredDiffPixels = (currentFrame.data.length / 4) * minMotionPercent;
 
         for (let i = 0; i < currentFrame.data.length; i += 4) {
             const rDiff = Math.abs(currentFrame.data[i] - previousFrame.data[i]);
@@ -91,13 +92,16 @@ export function useFaceDetection() {
 
             if (rDiff > threshold || gDiff > threshold || bDiff > threshold) {
                 diffPixels++;
+                // ⚡ Bolt: Early return for O(n) array iteration to prevent UI stutter
+                if (diffPixels > requiredDiffPixels) {
+                    setPreviousFrame(currentFrame);
+                    return true;
+                }
             }
         }
 
-        const motionPercent = diffPixels / (currentFrame.data.length / 4);
         setPreviousFrame(currentFrame);
-
-        return motionPercent > minMotionPercent;
+        return false;
     }, [previousFrame]);
 
     // Capture frame and detect face/motion
@@ -129,8 +133,12 @@ export function useFaceDetection() {
             startY: Math.floor(canvas.height * 0.1),
             endY: Math.floor(canvas.height * 0.7)
         };
+        const regionPixels = (centerRegion.endX - centerRegion.startX) *
+            (centerRegion.endY - centerRegion.startY);
+        const requiredSkinPixels = regionPixels * 0.15;
+        let detected = false;
 
-        for (let y = centerRegion.startY; y < centerRegion.endY; y++) {
+        skinLoop: for (let y = centerRegion.startY; y < centerRegion.endY; y++) {
             for (let x = centerRegion.startX; x < centerRegion.endX; x++) {
                 const i = (y * canvas.width + x) * 4;
                 const r = imageData.data[i];
@@ -143,16 +151,14 @@ export function useFaceDetection() {
                     Math.abs(r - g) > 15 &&
                     r - b > 15) {
                     skinPixels++;
+                    // ⚡ Bolt: Break early out of O(n) loop once threshold is met
+                    if (skinPixels > requiredSkinPixels) {
+                        detected = true;
+                        break skinLoop;
+                    }
                 }
             }
         }
-
-        const regionPixels = (centerRegion.endX - centerRegion.startX) *
-            (centerRegion.endY - centerRegion.startY);
-        const skinPercent = skinPixels / regionPixels;
-
-        // Face detected if sufficient skin-tone pixels in center
-        const detected = skinPercent > 0.15;
         const motion = detectMotion(imageData);
 
         setFaceDetected(detected);
