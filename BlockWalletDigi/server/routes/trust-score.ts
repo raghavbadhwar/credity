@@ -22,7 +22,7 @@ router.use(authMiddleware);
  */
 router.get('/', async (req: Request, res: Response) => {
     try {
-        const userId = parseInt((req as any).user?.userId as string, 10);
+        const userId = parseInt((req as Request & { user?: { userId: string | number } }).user?.userId as string, 10);
 
         // Build user trust data from various sources
         // In production, this would aggregate from database
@@ -72,7 +72,7 @@ router.get('/', async (req: Request, res: Response) => {
  */
 router.get('/breakdown', async (req: Request, res: Response) => {
     try {
-        const userId = parseInt((req as any).user?.userId as string, 10);
+        const userId = parseInt((req as Request & { user?: { userId: string | number } }).user?.userId as string, 10);
         const userData = await getUserTrustData(userId);
         const breakdown = calculateTrustScore(userData);
 
@@ -105,7 +105,7 @@ router.get('/breakdown', async (req: Request, res: Response) => {
  */
 router.get('/suggestions', async (req: Request, res: Response) => {
     try {
-        const userId = parseInt((req as any).user?.userId as string, 10);
+        const userId = parseInt((req as Request & { user?: { userId: string | number } }).user?.userId as string, 10);
         const userData = await getUserTrustData(userId);
         const breakdown = calculateTrustScore(userData);
         const suggestions = generateImprovementSuggestions(userData, breakdown);
@@ -134,7 +134,7 @@ router.get('/suggestions', async (req: Request, res: Response) => {
  */
 router.get('/history', async (req: Request, res: Response) => {
     try {
-        const userId = parseInt((req as any).user?.userId as string, 10);
+        const userId = parseInt((req as Request & { user?: { userId: string | number } }).user?.userId as string, 10);
         const days = parseInt(req.query.days as string) || 30;
         const history = getScoreHistory(userId);
 
