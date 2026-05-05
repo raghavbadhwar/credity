@@ -139,8 +139,8 @@ export function useFaceDetection() {
         const requiredSkinPixels = regionPixels * 0.15;
         let detected = false;
 
-        skinLoop: for (let y = centerRegion.startY; y < centerRegion.endY; y++) {
-            for (let x = centerRegion.startX; x < centerRegion.endX; x++) {
+        for (let y = centerRegion.startY; y < centerRegion.endY && !detected; y++) {
+            for (let x = centerRegion.startX; x < centerRegion.endX && !detected; x++) {
                 const i = (y * canvas.width + x) * 4;
                 const r = imageData.data[i];
                 const g = imageData.data[i + 1];
@@ -155,7 +155,6 @@ export function useFaceDetection() {
                     // ⚡ Bolt: Break out of O(n) loop as soon as skin pixel threshold is met
                     if (skinPixels > requiredSkinPixels) {
                         detected = true;
-                        break skinLoop;
                     }
                 }
             }
