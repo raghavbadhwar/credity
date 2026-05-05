@@ -4,6 +4,7 @@
  */
 
 import { Router, Request, Response } from 'express';
+import { authMiddleware } from '@credverse/shared-auth';
 import {
     calculateTrustScore,
     generateImprovementSuggestions,
@@ -18,9 +19,10 @@ const router = Router();
  * GET /api/trust-score
  * Get the current trust score with full breakdown
  */
-router.get('/', async (req: Request, res: Response) => {
+router.get('/', authMiddleware, async (req: any, res: Response) => {
     try {
-        const userId = parseInt(req.query.userId as string) || 1;
+        const userId = Number(req.user?.userId);
+        if (!userId) return res.status(401).json({ success: false, error: 'Unauthorized' });
 
         // Build user trust data from various sources
         // In production, this would aggregate from database
@@ -68,9 +70,10 @@ router.get('/', async (req: Request, res: Response) => {
  * GET /api/trust-score/breakdown
  * Get detailed breakdown of trust score components
  */
-router.get('/breakdown', async (req: Request, res: Response) => {
+router.get('/breakdown', authMiddleware, async (req: any, res: Response) => {
     try {
-        const userId = parseInt(req.query.userId as string) || 1;
+        const userId = Number(req.user?.userId);
+        if (!userId) return res.status(401).json({ success: false, error: 'Unauthorized' });
         const userData = await getUserTrustData(userId);
         const breakdown = calculateTrustScore(userData);
 
@@ -101,9 +104,10 @@ router.get('/breakdown', async (req: Request, res: Response) => {
  * GET /api/trust-score/suggestions
  * Get all improvement suggestions
  */
-router.get('/suggestions', async (req: Request, res: Response) => {
+router.get('/suggestions', authMiddleware, async (req: any, res: Response) => {
     try {
-        const userId = parseInt(req.query.userId as string) || 1;
+        const userId = Number(req.user?.userId);
+        if (!userId) return res.status(401).json({ success: false, error: 'Unauthorized' });
         const userData = await getUserTrustData(userId);
         const breakdown = calculateTrustScore(userData);
         const suggestions = generateImprovementSuggestions(userData, breakdown);
@@ -130,9 +134,10 @@ router.get('/suggestions', async (req: Request, res: Response) => {
  * GET /api/trust-score/history
  * Get historical trust score data
  */
-router.get('/history', async (req: Request, res: Response) => {
+router.get('/history', authMiddleware, async (req: any, res: Response) => {
     try {
-        const userId = parseInt(req.query.userId as string) || 1;
+        const userId = Number(req.user?.userId);
+        if (!userId) return res.status(401).json({ success: false, error: 'Unauthorized' });
         const days = parseInt(req.query.days as string) || 30;
         const history = getScoreHistory(userId);
 
