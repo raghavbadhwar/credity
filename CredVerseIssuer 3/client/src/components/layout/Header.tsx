@@ -129,6 +129,7 @@ export function Header() {
           <ThemeToggle />
 
           <Button
+            aria-label="Help"
             variant="ghost"
             size="icon"
             className="text-muted-foreground hover:text-foreground"
@@ -137,6 +138,7 @@ export function Header() {
             <HelpCircle className="h-5 w-5" />
           </Button>
           <Button
+            aria-label="Notifications"
             variant="ghost"
             size="icon"
             className="text-muted-foreground hover:text-foreground relative"
@@ -151,7 +153,7 @@ export function Header() {
           {/* User Menu */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="relative h-9 w-9 rounded-full">
+              <Button aria-label="User menu" variant="ghost" className="relative h-9 w-9 rounded-full">
                 <Avatar className="h-9 w-9 border border-border">
                   <AvatarImage src="https://github.com/shadcn.png" alt="@admin" />
                   <AvatarFallback>AD</AvatarFallback>
@@ -218,7 +220,7 @@ export function Header() {
                 <code className="flex-1 text-sm font-mono truncate">
                   {address}
                 </code>
-                <Button size="icon" variant="ghost" onClick={handleCopyAddress}>
+                <Button aria-label="Copy address" size="icon" variant="ghost" onClick={handleCopyAddress}>
                   {copied ? <Check className="h-4 w-4 text-green-600" /> : <Copy className="h-4 w-4" />}
                 </Button>
               </div>
