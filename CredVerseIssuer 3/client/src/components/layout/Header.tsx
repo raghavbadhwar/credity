@@ -1,6 +1,20 @@
-import { Bell, Search, HelpCircle, Smartphone, Wallet, Copy, ExternalLink, LogOut, User, CreditCard, Settings, Check, AlertCircle } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import {
+  Bell,
+  Search,
+  HelpCircle,
+  Smartphone,
+  Wallet,
+  Copy,
+  ExternalLink,
+  LogOut,
+  User,
+  CreditCard,
+  Settings,
+  Check,
+  AlertCircle,
+} from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -8,21 +22,21 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+} from '@/components/ui/dropdown-menu';
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { ThemeToggle } from "@/components/layout/ThemeToggle";
-import { Link, useLocation } from "wouter";
-import { useState } from "react";
-import { useWallet } from "@/hooks/use-wallet";
-import { useToast } from "@/hooks/use-toast";
-import { Badge } from "@/components/ui/badge";
+} from '@/components/ui/dialog';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { ThemeToggle } from '@/components/layout/ThemeToggle';
+import { Link, useLocation } from 'wouter';
+import { useState } from 'react';
+import { useWallet } from '@/hooks/use-wallet';
+import { useToast } from '@/hooks/use-toast';
+import { Badge } from '@/components/ui/badge';
 
 export function Header() {
   const [, navigate] = useLocation();
@@ -37,7 +51,7 @@ export function Header() {
     formatAddress,
     getChainName,
     isMetaMaskInstalled,
-    error
+    error,
   } = useWallet();
 
   const [showWalletDetails, setShowWalletDetails] = useState(false);
@@ -50,9 +64,9 @@ export function Header() {
       await connect();
       if (!isMetaMaskInstalled) {
         toast({
-          title: "MetaMask Required",
-          description: "Please install MetaMask to connect your wallet",
-          variant: "destructive",
+          title: 'MetaMask Required',
+          description: 'Please install MetaMask to connect your wallet',
+          variant: 'destructive',
         });
       }
     }
@@ -63,14 +77,14 @@ export function Header() {
       navigator.clipboard.writeText(address);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
-      toast({ title: "Address copied", description: "Wallet address copied to clipboard" });
+      toast({ title: 'Address copied', description: 'Wallet address copied to clipboard' });
     }
   };
 
   const handleDisconnect = () => {
     disconnect();
     setShowWalletDetails(false);
-    toast({ title: "Disconnected", description: "Wallet disconnected successfully" });
+    toast({ title: 'Disconnected', description: 'Wallet disconnected successfully' });
   };
 
   const handleViewOnExplorer = () => {
@@ -100,7 +114,7 @@ export function Header() {
         <div className="flex items-center gap-4">
           {/* Wallet Connect Button */}
           <Button
-            variant={isConnected ? "outline" : "default"}
+            variant={isConnected ? 'outline' : 'default'}
             size="sm"
             className={`gap-2 hidden md:flex ${isConnected ? 'border-green-500/50 text-green-600' : 'bg-blue-600 hover:bg-blue-700 text-white'}`}
             onClick={handleConnect}
@@ -114,7 +128,7 @@ export function Header() {
             ) : (
               <>
                 <Wallet className="h-4 w-4" />
-                {isConnected && address ? formatAddress(address) : "Connect Wallet"}
+                {isConnected && address ? formatAddress(address) : 'Connect Wallet'}
               </>
             )}
           </Button>
@@ -162,9 +176,7 @@ export function Header() {
               <DropdownMenuLabel className="font-normal">
                 <div className="flex flex-col space-y-1">
                   <p className="text-sm font-medium leading-none">Admin User</p>
-                  <p className="text-xs leading-none text-muted-foreground">
-                    admin@university.edu
-                  </p>
+                  <p className="text-xs leading-none text-muted-foreground">admin@university.edu</p>
                 </div>
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
@@ -181,10 +193,16 @@ export function Header() {
                 Settings
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem className="text-red-600" onClick={() => {
-                toast({ title: "Logged out", description: "You have been logged out successfully." });
-                navigate('/');
-              }}>
+              <DropdownMenuItem
+                className="text-red-600"
+                onClick={() => {
+                  toast({
+                    title: 'Logged out',
+                    description: 'You have been logged out successfully.',
+                  });
+                  navigate('/');
+                }}
+              >
                 <LogOut className="mr-2 h-4 w-4" />
                 Log out
               </DropdownMenuItem>
@@ -198,9 +216,7 @@ export function Header() {
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle>Wallet Connected</DialogTitle>
-            <DialogDescription>
-              Your wallet is connected to CredVerse
-            </DialogDescription>
+            <DialogDescription>Your wallet is connected to CredVerse</DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
             {/* Chain Badge */}
@@ -215,11 +231,18 @@ export function Header() {
             <div className="space-y-2">
               <span className="text-sm text-muted-foreground">Address</span>
               <div className="flex items-center gap-2 p-3 bg-muted rounded-lg">
-                <code className="flex-1 text-sm font-mono truncate">
-                  {address}
-                </code>
-                <Button size="icon" variant="ghost" onClick={handleCopyAddress}>
-                  {copied ? <Check className="h-4 w-4 text-green-600" /> : <Copy className="h-4 w-4" />}
+                <code className="flex-1 text-sm font-mono truncate">{address}</code>
+                <Button
+                  size="icon"
+                  variant="ghost"
+                  onClick={handleCopyAddress}
+                  aria-label="Copy wallet address"
+                >
+                  {copied ? (
+                    <Check className="h-4 w-4 text-green-600" />
+                  ) : (
+                    <Copy className="h-4 w-4" />
+                  )}
                 </Button>
               </div>
             </div>
