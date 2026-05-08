@@ -83,6 +83,8 @@ export function useFaceDetection() {
         let diffPixels = 0;
         const threshold = 30;
         const minMotionPercent = 0.02; // 2% of pixels must change
+        const totalPixels = currentFrame.data.length / 4;
+        const targetPixels = totalPixels * minMotionPercent;
 
         for (let i = 0; i < currentFrame.data.length; i += 4) {
             const rDiff = Math.abs(currentFrame.data[i] - previousFrame.data[i]);
@@ -91,13 +93,16 @@ export function useFaceDetection() {
 
             if (rDiff > threshold || gDiff > threshold || bDiff > threshold) {
                 diffPixels++;
+                // ⚡ Bolt: Early return to avoid processing the whole frame once threshold is met
+                if (diffPixels > targetPixels) {
+                    setPreviousFrame(currentFrame);
+                    return true;
+                }
             }
         }
 
-        const motionPercent = diffPixels / (currentFrame.data.length / 4);
         setPreviousFrame(currentFrame);
-
-        return motionPercent > minMotionPercent;
+        return false;
     }, [previousFrame]);
 
     // Capture frame and detect face/motion
