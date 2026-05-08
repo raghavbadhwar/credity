@@ -1,0 +1,4 @@
+## 2024-05-08 - DOM XSS via innerHTML in gateway fallback HTML
+**Vulnerability:** The gateway's fallback HTML script blindly rendered untrusted URL query parameters (`name`, `error`) directly into the DOM using `statusDiv.innerHTML = ...`. This created a direct path for DOM-based Cross-Site Scripting (XSS).
+**Learning:** Even internal, temporary, or "fallback" development pages (like the Vite-unavailable fallback in Express backends) are vulnerable to XSS if they accept user input via URL parameters. Never trust `innerHTML` when handling client-supplied data, regardless of the page's intended audience or simplicity.
+**Prevention:** Always use safe DOM APIs like `.textContent` or `.innerText` when inserting dynamic, untrusted data into HTML templates to guarantee the data is rendered purely as text, not evaluated as markup.
