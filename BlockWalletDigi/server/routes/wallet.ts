@@ -63,6 +63,8 @@ router.post('/wallet/init', authMiddleware, async (req, res) => {
 router.get('/wallet/status', authMiddleware, async (req, res) => {
     try {
         const userId = Number(req.user?.userId);
+        if (!userId) return res.status(401).json({ error: 'Unauthorized' });
+
         const wallet = await walletService.getOrCreateWallet(userId);
         const stats = await walletService.getWalletStats(userId);
 
@@ -146,6 +148,8 @@ router.get('/did/resolve/:did', async (req, res) => {
 router.post('/wallet/backup', authMiddleware, async (req, res) => {
     try {
         const userId = Number(req.user?.userId);
+        if (!userId) return res.status(401).json({ error: 'Unauthorized' });
+
         const { backupData, backupKey } = await walletService.createBackup(userId);
 
         await storage.createActivity({
