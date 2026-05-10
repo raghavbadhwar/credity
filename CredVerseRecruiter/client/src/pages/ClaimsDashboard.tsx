@@ -55,7 +55,7 @@ export default function ClaimsDashboard() {
     const [selectedPeriod, setSelectedPeriod] = useState<'today' | 'week' | 'month'>('today');
 
     // Fetch claims list and stats from Wallet API
-    const { data: claimsData, isLoading, refetch } = useQuery({
+    const { data: claimsData, isLoading, isRefetching, refetch } = useQuery({
         queryKey: ['claims-dashboard', selectedPeriod],
         queryFn: async () => {
             // Call the Wallet's Claims API
@@ -124,8 +124,14 @@ export default function ClaimsDashboard() {
                                 </button>
                             ))}
                         </div>
-                        <Button variant="outline" size="sm" onClick={() => refetch()} className="border-white/20 text-white">
-                            <RefreshCw className="w-4 h-4 mr-1" />
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => refetch()}
+                            disabled={isRefetching}
+                            className="border-white/20 text-white"
+                        >
+                            <RefreshCw className={`w-4 h-4 mr-1 ${isRefetching ? 'animate-spin' : ''}`} />
                             Refresh
                         </Button>
                         <Button variant="outline" size="sm" className="border-white/20 text-white">
