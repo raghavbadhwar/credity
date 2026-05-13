@@ -1,4 +1,5 @@
 import { Router } from "express";
+import { authMiddleware } from '@credverse/shared-auth';
 import { storage } from "../storage";
 import { digilockerService } from "../services/digilocker-service";
 import { walletService } from "../services/wallet-service";
@@ -10,9 +11,9 @@ const allowDemoRoutes =
 /**
  * Get authorization URL for DigiLocker OAuth flow
  */
-router.get("/digilocker/auth", async (req, res) => {
+router.get("/digilocker/auth", authMiddleware, async (req, res) => {
     try {
-        const userId = parseInt(req.query.userId as string) || 1;
+        const userId = Number((req as any).user?.userId);
 
         const { url, state } = digilockerService.getAuthorizationUrl(userId);
 
@@ -63,9 +64,9 @@ router.get("/digilocker/callback", async (req, res) => {
 /**
  * Check connection status
  */
-router.get("/digilocker/status", async (req, res) => {
+router.get("/digilocker/status", authMiddleware, async (req, res) => {
     try {
-        const userId = parseInt(req.query.userId as string) || 1;
+        const userId = Number((req as any).user?.userId);
 
         const isConnected = digilockerService.isConnected(userId);
 
@@ -87,9 +88,9 @@ router.get("/digilocker/status", async (req, res) => {
 /**
  * List available documents from DigiLocker
  */
-router.get("/digilocker/documents", async (req, res) => {
+router.get("/digilocker/documents", authMiddleware, async (req, res) => {
     try {
-        const userId = parseInt(req.query.userId as string) || 1;
+        const userId = Number((req as any).user?.userId);
 
         if (!digilockerService.isConnected(userId)) {
             return res.status(401).json({ error: 'Not connected to DigiLocker' });
@@ -107,9 +108,9 @@ router.get("/digilocker/documents", async (req, res) => {
 /**
  * Import a specific document from DigiLocker to wallet
  */
-router.post("/digilocker/import", async (req, res) => {
+router.post("/digilocker/import", authMiddleware, async (req, res) => {
     try {
-        const userId = parseInt(req.body.userId) || 1;
+        const userId = Number((req as any).user?.userId);
         const { documentUri, documentType, documentName, issuer } = req.body;
 
         if (!digilockerService.isConnected(userId)) {
@@ -164,9 +165,9 @@ router.post("/digilocker/import", async (req, res) => {
 /**
  * Import all available documents from DigiLocker
  */
-router.post("/digilocker/import-all", async (req, res) => {
+router.post("/digilocker/import-all", authMiddleware, async (req, res) => {
     try {
-        const userId = parseInt(req.body.userId) || 1;
+        const userId = Number((req as any).user?.userId);
 
         if (!digilockerService.isConnected(userId)) {
             return res.status(401).json({ error: 'Not connected to DigiLocker' });
@@ -222,9 +223,9 @@ router.post("/digilocker/import-all", async (req, res) => {
 /**
  * Disconnect from DigiLocker
  */
-router.post("/digilocker/disconnect", async (req, res) => {
+router.post("/digilocker/disconnect", authMiddleware, async (req, res) => {
     try {
-        const userId = parseInt(req.body.userId) || 1;
+        const userId = Number((req as any).user?.userId);
 
         digilockerService.disconnect(userId);
 
@@ -243,9 +244,9 @@ router.post("/digilocker/disconnect", async (req, res) => {
 /**
  * Demo mode: Quick connect without OAuth (for testing)
  */
-router.post("/digilocker/connect", async (req, res) => {
+router.post("/digilocker/connect", authMiddleware, async (req, res) => {
     try {
-        const userId = parseInt(req.body.userId) || 1;
+        const userId = Number((req as any).user?.userId);
 
         // Simulate OAuth flow for demo
         const { url, state } = digilockerService.getAuthorizationUrl(userId);

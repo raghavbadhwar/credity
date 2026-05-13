@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import { authMiddleware } from '@credverse/shared-auth';
 import { walletService } from '../services/wallet-service';
 import { storage } from '../storage';
 
@@ -9,9 +10,9 @@ const router = Router();
 /**
  * List all credentials
  */
-router.get('/wallet/credentials', async (req, res) => {
+router.get('/wallet/credentials', authMiddleware, async (req, res) => {
     try {
-        const userId = parseInt(req.query.userId as string) || 1;
+        const userId = Number((req as any).user?.userId);
         const category = req.query.category as string;
 
         let credentials;
@@ -31,9 +32,9 @@ router.get('/wallet/credentials', async (req, res) => {
 /**
  * Get single credential details
  */
-router.get('/wallet/credentials/:id', async (req, res) => {
+router.get('/wallet/credentials/:id', authMiddleware, async (req, res) => {
     try {
-        const userId = parseInt(req.query.userId as string) || 1;
+        const userId = Number((req as any).user?.userId);
         const { id } = req.params;
 
         const credentials = await walletService.getCredentials(userId);

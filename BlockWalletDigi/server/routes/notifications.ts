@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import { authMiddleware } from '@credverse/shared-auth';
 import { walletService } from '../services/wallet-service';
 import { storage } from '../storage';
 import {
@@ -17,9 +18,9 @@ const router = Router();
 /**
  * Get pending credential offers for wallet
  */
-router.get('/inbox', async (req, res) => {
+router.get('/inbox', authMiddleware, async (req, res) => {
     try {
-        const userId = parseInt(req.query.userId as string) || 1;
+        const userId = Number((req as any).user?.userId);
 
         // Get user's DID
         const wallet = await walletService.getOrCreateWallet(userId, '');
@@ -47,10 +48,10 @@ router.get('/inbox', async (req, res) => {
 /**
  * Accept a credential offer
  */
-router.post('/inbox/:offerId/accept', async (req, res) => {
+router.post('/inbox/:offerId/accept', authMiddleware, async (req, res) => {
     try {
         const { offerId } = req.params;
-        const userId = parseInt(req.body.userId) || 1;
+        const userId = Number((req as any).user?.userId);
 
         // Get user's DID
         const wallet = await walletService.getOrCreateWallet(userId, '');
@@ -90,10 +91,10 @@ router.post('/inbox/:offerId/accept', async (req, res) => {
 /**
  * Reject a credential offer
  */
-router.post('/inbox/:offerId/reject', async (req, res) => {
+router.post('/inbox/:offerId/reject', authMiddleware, async (req, res) => {
     try {
         const { offerId } = req.params;
-        const userId = parseInt(req.body.userId) || 1;
+        const userId = Number((req as any).user?.userId);
 
         const wallet = await walletService.getOrCreateWallet(userId, '');
         if (!wallet?.did) {
@@ -111,10 +112,10 @@ router.post('/inbox/:offerId/reject', async (req, res) => {
 /**
  * Get details of a specific offer
  */
-router.get('/inbox/:offerId', async (req, res) => {
+router.get('/inbox/:offerId', authMiddleware, async (req, res) => {
     try {
         const { offerId } = req.params;
-        const userId = parseInt(req.query.userId as string) || 1;
+        const userId = Number((req as any).user?.userId);
 
         const wallet = await walletService.getOrCreateWallet(userId, '');
         const offer = getCredentialOffer(offerId);
@@ -206,9 +207,9 @@ router.post('/push', async (req, res) => {
 /**
  * Get notifications
  */
-router.get('/wallet/notifications', async (req, res) => {
+router.get('/wallet/notifications', authMiddleware, async (req, res) => {
     try {
-        const userId = parseInt(req.query.userId as string) || 1;
+        const userId = Number((req as any).user?.userId);
         const notifications = await walletService.getNotifications(userId);
 
         res.json({
@@ -224,10 +225,10 @@ router.get('/wallet/notifications', async (req, res) => {
 /**
  * Mark notification as read
  */
-router.post('/wallet/notifications/:id/read', async (req, res) => {
+router.post('/wallet/notifications/:id/read', authMiddleware, async (req, res) => {
     try {
         const { id } = req.params;
-        const userId = parseInt(req.body.userId) || 1;
+        const userId = Number((req as any).user?.userId);
 
         await walletService.markNotificationRead(userId, id);
 
@@ -241,9 +242,9 @@ router.post('/wallet/notifications/:id/read', async (req, res) => {
 /**
  * Get activity feed
  */
-router.get('/activity', async (req, res) => {
+router.get('/activity', authMiddleware, async (req, res) => {
     try {
-        const userId = parseInt(req.query.userId as string) || 1;
+        const userId = Number((req as any).user?.userId);
         const activities = await storage.listActivities(userId);
         res.json(activities);
     } catch (error) {
