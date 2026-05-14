@@ -4,6 +4,7 @@
  */
 
 import { Router, Request, Response } from 'express';
+import { authMiddleware } from '@credverse/shared-auth';
 
 const router = Router();
 
@@ -100,9 +101,9 @@ initDemoData();
  * GET /api/connections
  * List all platform connections
  */
-router.get('/', async (req: Request, res: Response) => {
+router.get('/', authMiddleware, async (req: any, res: Response) => {
     try {
-        const userId = parseInt(req.query.userId as string) || 1;
+        const userId = Number(req.user!.userId);
 
         const userConnections = Array.from(connections.values())
             .filter(c => c.userId === userId && c.status !== 'revoked')
@@ -132,9 +133,9 @@ router.get('/', async (req: Request, res: Response) => {
  * GET /api/connections/requests
  * List pending connection requests
  */
-router.get('/requests', async (req: Request, res: Response) => {
+router.get('/requests', authMiddleware, async (req: any, res: Response) => {
     try {
-        const userId = parseInt(req.query.userId as string) || 1;
+        const userId = Number(req.user!.userId);
 
         const userRequests = Array.from(pendingRequests.values())
             .filter(r => r.userId === userId && r.status === 'pending')
