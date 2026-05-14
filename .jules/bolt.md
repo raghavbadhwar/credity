@@ -1,0 +1,3 @@
+## 2024-05-14 - Sequential await in large batch processing
+**Learning:** The bulk verification process `bulkVerify` in `CredVerseRecruiter/server/services/verification-engine.ts` used a sequential `for...of` loop with `await` to verify large batches of credentials. Because these verifications involve asynchronous network or cryptographic operations, executing them sequentially caused N+1 latency, drastically slowing down large batch requests.
+**Action:** Replace sequential `for...of` loops iterating over independent asynchronous operations with `Promise.all` to allow concurrent execution and improve throughput.
