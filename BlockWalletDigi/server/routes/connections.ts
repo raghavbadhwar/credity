@@ -101,9 +101,9 @@ initDemoData();
  * GET /api/connections
  * List all platform connections
  */
-router.get('/', authMiddleware, async (req: any, res: Response) => {
+router.get('/', authMiddleware, async (req: Request, res: Response) => {
     try {
-        const userId = Number(req.user!.userId);
+        const userId = Number((req as any).user!.userId);
 
         const userConnections = Array.from(connections.values())
             .filter(c => c.userId === userId && c.status !== 'revoked')
@@ -133,9 +133,9 @@ router.get('/', authMiddleware, async (req: any, res: Response) => {
  * GET /api/connections/requests
  * List pending connection requests
  */
-router.get('/requests', authMiddleware, async (req: any, res: Response) => {
+router.get('/requests', authMiddleware, async (req: Request, res: Response) => {
     try {
-        const userId = Number(req.user!.userId);
+        const userId = Number((req as any).user!.userId);
 
         const userRequests = Array.from(pendingRequests.values())
             .filter(r => r.userId === userId && r.status === 'pending')
