@@ -118,7 +118,7 @@ export default function ReceiveCredential() {
                       value={url}
                       onChange={(e) => setUrl(e.target.value)}
                     />
-                    <Button onClick={handleProcess}>
+                    <Button onClick={handleProcess} aria-label="Process credential URL">
                       <ArrowRight className="w-4 h-4" />
                     </Button>
                   </div>
