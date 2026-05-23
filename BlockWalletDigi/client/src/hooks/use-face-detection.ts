@@ -83,6 +83,8 @@ export function useFaceDetection() {
         let diffPixels = 0;
         const threshold = 30;
         const minMotionPercent = 0.02; // 2% of pixels must change
+        const totalPixels = currentFrame.data.length / 4;
+        const requiredDiffPixels = totalPixels * minMotionPercent;
 
         for (let i = 0; i < currentFrame.data.length; i += 4) {
             const rDiff = Math.abs(currentFrame.data[i] - previousFrame.data[i]);
@@ -91,13 +93,15 @@ export function useFaceDetection() {
 
             if (rDiff > threshold || gDiff > threshold || bDiff > threshold) {
                 diffPixels++;
+                if (diffPixels > requiredDiffPixels) {
+                    setPreviousFrame(currentFrame);
+                    return true;
+                }
             }
         }
 
-        const motionPercent = diffPixels / (currentFrame.data.length / 4);
         setPreviousFrame(currentFrame);
-
-        return motionPercent > minMotionPercent;
+        return false;
     }, [previousFrame]);
 
     // Capture frame and detect face/motion
@@ -130,9 +134,14 @@ export function useFaceDetection() {
             endY: Math.floor(canvas.height * 0.7)
         };
 
-        for (let y = centerRegion.startY; y < centerRegion.endY; y++) {
-            for (let x = centerRegion.startX; x < centerRegion.endX; x++) {
-                const i = (y * canvas.width + x) * 4;
+        const regionPixels = (centerRegion.endX - centerRegion.startX) *
+            (centerRegion.endY - centerRegion.startY);
+        const requiredSkinPixels = regionPixels * 0.15;
+        let detected = false;
+
+        for (let y = centerRegion.startY; y < centerRegion.endY && !detected; y++) {
+            let i = (y * canvas.width + centerRegion.startX) * 4;
+            for (let x = centerRegion.startX; x < centerRegion.endX; x++, i += 4) {
                 const r = imageData.data[i];
                 const g = imageData.data[i + 1];
                 const b = imageData.data[i + 2];
@@ -140,19 +149,16 @@ export function useFaceDetection() {
                 // Simple skin color detection (works for various skin tones)
                 if (r > 60 && g > 40 && b > 20 &&
                     r > g && r > b &&
-                    Math.abs(r - g) > 15 &&
+                    r - g > 15 && // Math.abs(r - g) > 15 is same since r > g
                     r - b > 15) {
                     skinPixels++;
+                    if (skinPixels > requiredSkinPixels) {
+                        detected = true;
+                        break;
+                    }
                 }
             }
         }
-
-        const regionPixels = (centerRegion.endX - centerRegion.startX) *
-            (centerRegion.endY - centerRegion.startY);
-        const skinPercent = skinPixels / regionPixels;
-
-        // Face detected if sufficient skin-tone pixels in center
-        const detected = skinPercent > 0.15;
         const motion = detectMotion(imageData);
 
         setFaceDetected(detected);
