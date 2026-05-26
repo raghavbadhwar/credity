@@ -3,7 +3,7 @@ import crypto from 'crypto';
 import { walletService } from '../services/wallet-service';
 import { didService } from '../services/did-service';
 import { storage } from '../storage';
-import { hashPassword } from '../services/auth-service';
+import { hashPassword, authMiddleware } from '../services/auth-service';
 
 const router = Router();
 
@@ -59,9 +59,10 @@ router.post('/wallet/init', async (req, res) => {
 /**
  * Get wallet status
  */
-router.get('/wallet/status', async (req, res) => {
+router.get('/wallet/status', authMiddleware, async (req, res) => {
     try {
-        const userId = parseInt(req.query.userId as string) || 1;
+        const userId = req.user?.userId;
+        if (!userId) return res.status(401).json({ error: 'Unauthorized' });
         const wallet = await walletService.getOrCreateWallet(userId);
         const stats = await walletService.getWalletStats(userId);
 
@@ -142,9 +143,10 @@ router.get('/did/resolve/:did', async (req, res) => {
 /**
  * Create wallet backup
  */
-router.post('/wallet/backup', async (req, res) => {
+router.post('/wallet/backup', authMiddleware, async (req, res) => {
     try {
-        const userId = parseInt(req.body.userId) || 1;
+        const userId = req.user?.userId;
+        if (!userId) return res.status(401).json({ error: 'Unauthorized' });
         const { backupData, backupKey } = await walletService.createBackup(userId);
 
         await storage.createActivity({

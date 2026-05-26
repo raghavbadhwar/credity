@@ -1,0 +1,4 @@
+## 2024-05-26 - IDOR via Defaulting User IDs in Queries and Bodies
+**Vulnerability:** Several endpoints in `BlockWalletDigi` default the `userId` to 1 if `parseInt(req.query.userId)` or `parseInt(req.body.userId)` is falsy (e.g., unauthenticated requests). This results in an Insecure Direct Object Reference (IDOR) where any unauthenticated user assumes the identity of user 1.
+**Learning:** Hardcoding default user IDs as fallbacks for missing input enables systemic authorization bypasses, as the application assumes implicit trust instead of failing securely when authentication is missing.
+**Prevention:** Always secure user-specific endpoints with `authMiddleware` and extract the `userId` directly from the securely verified token payload (`req.user?.userId`) instead of trusting user input from queries or bodies.
