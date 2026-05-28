@@ -7,3 +7,6 @@
 ## 2026-02-22 - Decorative Overlays
 **Learning:** Decorative elements (like blurred backgrounds) positioned absolutely over interactive elements can intercept clicks, making the UI unresponsive. This is a critical usability failure.
 **Action:** Always add `pointer-events-none` to decorative overlays that sit on top of other content.
+## 2026-05-28 - Header Navigation Accessibility
+**Learning:** Icon-only navigation buttons in global headers (like theme toggles or notification bells) frequently lack accessible names because their context is considered "obvious" visually. Screen readers announce these as just "button", severely hindering navigation for visually impaired users.
+**Action:** Audit all global navigation regions (headers, sidebars) to ensure every icon-only interactive control has a descriptive `aria-label` or visually hidden text.
