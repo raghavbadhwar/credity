@@ -1,0 +1,4 @@
+## 2024-05-31 - [High] IDOR in Wallet API routes
+**Vulnerability:** Multiple critical routes (/wallet/init, /wallet/status, /did/create, /wallet/backup) directly used req.query.userId or req.body.userId, falling back to 1 or defaulting to an insecure state. This permitted any unauthenticated user to assume the identity of another user and potentially gain access or initialize their wallet.
+**Learning:** It is crucial to never trust the client to assert their own userId. Even if a route is intended to act on a specific user, the target userId must be extracted from the strongly verified JWT payload inside req.user.
+**Prevention:** Always apply authMiddleware to all internal and sensitive endpoints. Never use req.query.userId or req.body.userId when an authenticated user context is expected; instead, retrieve userId using Number(req.user!.userId).
