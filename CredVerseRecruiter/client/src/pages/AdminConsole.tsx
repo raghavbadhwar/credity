@@ -151,7 +151,7 @@ export default function AdminConsole() {
                   </div>
                   <div className="flex gap-2">
                     <Button variant="outline" size="sm">Roll Key</Button>
-                    <Button variant="ghost" size="sm" className="text-destructive hover:text-destructive hover:bg-destructive/10">
+                    <Button aria-label="Delete API Key" variant="ghost" size="sm" className="text-destructive hover:text-destructive hover:bg-destructive/10">
                       <Trash2 className="h-4 w-4" />
                     </Button>
                   </div>
