@@ -1,0 +1,4 @@
+## 2024-05-24 - Systemic IDOR Vulnerability in Routes
+**Vulnerability:** Endpoints use `parseInt(req.query.userId) || 1` or `parseInt(req.body.userId) || 1`, allowing unauthenticated users or users with invalid IDs to access user 1's data by default, bypassing authorization.
+**Learning:** Extracting `userId` directly from request parameters without verifying it against an authenticated token leads to Insecure Direct Object Reference (IDOR) vulnerabilities. The fallback `|| 1` creates a systemic risk where invalid data requests are automatically granted access to a specific account's data.
+**Prevention:** Always require authentication (`authMiddleware`) for non-public routes. Extract the user ID directly from the verified token payload (`req.user.userId`) rather than trusting client-provided input in the query or body.

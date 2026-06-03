@@ -3,7 +3,7 @@ import crypto from 'crypto';
 import { walletService } from '../services/wallet-service';
 import { didService } from '../services/did-service';
 import { storage } from '../storage';
-import { hashPassword } from '../services/auth-service';
+import { hashPassword, authMiddleware } from '../services/auth-service';
 
 const router = Router();
 
@@ -59,9 +59,9 @@ router.post('/wallet/init', async (req, res) => {
 /**
  * Get wallet status
  */
-router.get('/wallet/status', async (req, res) => {
+router.get('/wallet/status', authMiddleware, async (req, res) => {
     try {
-        const userId = parseInt(req.query.userId as string) || 1;
+        const userId = Number(req.user!.userId);
         const wallet = await walletService.getOrCreateWallet(userId);
         const stats = await walletService.getWalletStats(userId);
 
