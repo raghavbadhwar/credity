@@ -428,7 +428,9 @@ export class WalletService {
     ): Promise<{ valid: boolean; credential?: Partial<StoredCredential>; error?: string }> {
         await ensureHydrated();
         // Find share across all wallets
-        for (const [userId, wallet] of Array.from(wallets.entries())) {
+        // ⚡ Bolt Performance: Iterate directly over Map.entries() instead of creating an intermediate array.
+        // This prevents O(N) memory allocation and allows short-circuiting for O(1) best-case time complexity.
+        for (const [userId, wallet] of wallets.entries()) {
             const share = wallet.shares.find((s: ShareRecord) => s.id === shareId || s.token === shareId);
 
             if (share) {
