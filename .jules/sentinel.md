@@ -1,0 +1,4 @@
+## 2024-06-07 - IDOR via default user ID in BlockWalletDigi routes
+**Vulnerability:** Many sensitive routes in `BlockWalletDigi` handled user identity by parsing `req.query.userId` or `req.body.userId` with a fallback to `|| 1`. This allows unauthenticated users to completely bypass authorization and access or modify data for user 1 (or any user by simply providing a different ID).
+**Learning:** This widespread IDOR (Insecure Direct Object Reference) exists because the routes lacked authentication middleware and trusted unverified user input for identity rather than a securely verified token payload.
+**Prevention:** Always enforce authentication middleware (`authMiddleware`) on sensitive endpoints. Extract the `userId` strictly from the securely verified token payload (e.g., `req.user.userId`) rather than trusting client-provided parameters.
