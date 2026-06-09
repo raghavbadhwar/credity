@@ -1,0 +1,3 @@
+## 2024-06-09 - In-Memory Map Persistence GC Spikes
+**Learning:** The architecture relies on periodic persistence of large in-memory Maps (e.g., `wallets`, `verificationCache`, `jobResults`) across various microservices using `queuePersist()`. The pattern `Array.from(map.entries()).map(...)` creates a massive temporary array copy of the entire map before mapping, causing significant O(n) memory allocation and garbage collection spikes during frequent persistence cycles.
+**Action:** Always use direct `for...of` iteration over `map.entries()` or `map.values()` when serializing in-memory state stores to avoid intermediate array allocations and reduce GC pressure.

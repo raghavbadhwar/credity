@@ -261,11 +261,16 @@ async function queuePersist(): Promise<void> {
     if (!stateStore) return;
     persistChain = persistChain
         .then(async () => {
+            // ⚡ Bolt Performance Optimization:
+            // Replaced Array.from(map.entries()).map() with direct for...of iteration
+            // This avoids creating an intermediate array of all map entries, reducing O(n) memory allocation
+            // and garbage collection pressure during frequent state persistence.
+            const serializedWallets: Array<[number, PersistedWalletState]> = [];
+            for (const [userId, wallet] of wallets.entries()) {
+                serializedWallets.push([userId, serializeWalletState(wallet)]);
+            }
             const payload: WalletServiceState = {
-                wallets: Array.from(wallets.entries()).map(([userId, wallet]) => [
-                    userId,
-                    serializeWalletState(wallet),
-                ]),
+                wallets: serializedWallets,
                 certInIncidents: Array.from(certInIncidents.entries()),
             };
             await stateStore.save(payload);
@@ -684,10 +689,17 @@ export class WalletService {
     async listCertInIncidents(): Promise<Array<CertInIncidentRecord & { seconds_to_report_due: number }>> {
         await ensureHydrated();
         const now = Date.now();
-        return Array.from(certInIncidents.values()).map((incident) => ({
-            ...incident,
-            seconds_to_report_due: Math.max(0, Math.floor((new Date(incident.report_due_at).getTime() - now) / 1000)),
-        }));
+        // ⚡ Bolt Performance Optimization:
+        // Replaced Array.from(map.values()).map() with direct for...of iteration
+        // Avoids O(n) intermediate array allocation and improves map operation performance
+        const incidents: Array<CertInIncidentRecord & { seconds_to_report_due: number }> = [];
+        for (const incident of certInIncidents.values()) {
+            incidents.push({
+                ...incident,
+                seconds_to_report_due: Math.max(0, Math.floor((new Date(incident.report_due_at).getTime() - now) / 1000)),
+            });
+        }
+        return incidents;
     }
 
     /**
