@@ -265,7 +265,7 @@ async function queuePersist(): Promise<void> {
             // Replaced Array.from(map.entries()).map() with direct for...of iteration
             // This avoids creating an intermediate array of all map entries, reducing O(n) memory allocation
             // and garbage collection pressure during frequent state persistence.
-            const serializedWallets: Array<[number, PersistedWalletState]> = [];
+            const serializedWallets: WalletServiceState['wallets'] = [];
             for (const [userId, wallet] of wallets.entries()) {
                 serializedWallets.push([userId, serializeWalletState(wallet)]);
             }
