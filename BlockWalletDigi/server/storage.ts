@@ -63,9 +63,13 @@ export class MemStorage implements IStorage {
   }
 
   async getUserByUsername(username: string): Promise<User | undefined> {
-    return Array.from(this.users.values()).find(
-      (user) => user.username === username,
-    );
+    // ⚡ Bolt: Using for...of avoids O(n) array allocation from Array.from()
+    for (const user of this.users.values()) {
+      if (user.username === username) {
+        return user;
+      }
+    }
+    return undefined;
   }
 
   async createUser(insertUser: InsertUser): Promise<User> {
@@ -98,9 +102,14 @@ export class MemStorage implements IStorage {
   }
 
   async listCredentials(userId: number): Promise<Credential[]> {
-    return Array.from(this.credentials.values()).filter(
-      (c) => c.userId === userId && !c.isArchived
-    );
+    // ⚡ Bolt: Using for...of avoids O(n) array allocation from Array.from()
+    const result: Credential[] = [];
+    for (const c of this.credentials.values()) {
+      if (c.userId === userId && !c.isArchived) {
+        result.push(c);
+      }
+    }
+    return result;
   }
 
   async createCredential(insertCredential: InsertCredential): Promise<Credential> {
@@ -117,9 +126,14 @@ export class MemStorage implements IStorage {
 
   // Activities
   async listActivities(userId: number): Promise<Activity[]> {
-    return Array.from(this.activities.values())
-      .filter((a) => a.userId === userId)
-      .sort((a, b) => (b.timestamp?.getTime() ?? 0) - (a.timestamp?.getTime() ?? 0));
+    // ⚡ Bolt: Using for...of avoids O(n) array allocation from Array.from()
+    const result: Activity[] = [];
+    for (const a of this.activities.values()) {
+      if (a.userId === userId) {
+        result.push(a);
+      }
+    }
+    return result.sort((a, b) => (b.timestamp?.getTime() ?? 0) - (a.timestamp?.getTime() ?? 0));
   }
 
   async createActivity(insertActivity: InsertActivity): Promise<Activity> {
