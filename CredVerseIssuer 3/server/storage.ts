@@ -251,9 +251,13 @@ export class MemStorage implements IStorage {
   }
 
   async getUserByUsername(username: string): Promise<User | undefined> {
-    return Array.from(this.users.values()).find(
-      (user) => user.username === username,
-    );
+    // ⚡ Bolt: Replace Array.from with direct map iteration to avoid O(n) memory allocation
+    for (const user of this.users.values()) {
+      if (user.username === username) {
+        return user;
+      }
+    }
+    return undefined;
   }
 
   async createUser(insertUser: InsertUser): Promise<User> {
@@ -277,9 +281,13 @@ export class MemStorage implements IStorage {
 
   // API Key
   async getApiKey(keyHash: string): Promise<ApiKey | undefined> {
-    return Array.from(this.apiKeys.values()).find(
-      (key) => key.keyHash === keyHash
-    );
+    // ⚡ Bolt: Replace Array.from with direct map iteration to avoid O(n) memory allocation
+    for (const key of this.apiKeys.values()) {
+      if (key.keyHash === keyHash) {
+        return key;
+      }
+    }
+    return undefined;
   }
 
   async createApiKey(insertApiKey: InsertApiKey): Promise<ApiKey> {
@@ -301,7 +309,13 @@ export class MemStorage implements IStorage {
   }
 
   async getIssuerByDid(did: string): Promise<Issuer | undefined> {
-    return Array.from(this.issuers.values()).find(i => i.did === did);
+    // ⚡ Bolt: Replace Array.from with direct map iteration to avoid O(n) memory allocation
+    for (const i of this.issuers.values()) {
+      if (i.did === did) {
+        return i;
+      }
+    }
+    return undefined;
   }
 
   async createIssuer(insertIssuer: InsertIssuer): Promise<Issuer> {
