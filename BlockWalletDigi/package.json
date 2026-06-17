@@ -18,7 +18,7 @@
     "test:watch": "vitest"
   },
   "dependencies": {
-    "@credverse/shared-auth": "link:../packages/shared-auth",
+    "@credverse/shared-auth": "file:../packages/shared-auth",
     "@google/generative-ai": "^0.24.1",
     "@hookform/resolvers": "^3.10.0",
     "@jridgewell/trace-mapping": "^0.3.25",
