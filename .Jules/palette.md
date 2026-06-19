@@ -7,3 +7,6 @@
 ## 2026-02-22 - Decorative Overlays
 **Learning:** Decorative elements (like blurred backgrounds) positioned absolutely over interactive elements can intercept clicks, making the UI unresponsive. This is a critical usability failure.
 **Action:** Always add `pointer-events-none` to decorative overlays that sit on top of other content.
+## 2025-05-18 - Missing ARIA Labels on Icon-only Buttons
+**Learning:** Found multiple icon-only buttons missing `aria-label` attributes. This breaks accessibility for screen reader users, who won't know the button's action. This happens most often with functional buttons (like copy, share, close).
+**Action:** Always verify `aria-label` is present on any `<Button>` that only contains an icon. Added `aria-label` to the Copy button in `share-modal.tsx`.
