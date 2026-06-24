@@ -251,6 +251,7 @@ export class MemStorage implements IStorage {
   }
 
   async getUserByUsername(username: string): Promise<User | undefined> {
+    // Using for...of over values() to avoid O(n) array allocation and allow early return
     for (const user of this.users.values()) {
       if (user.username === username) return user;
     }
