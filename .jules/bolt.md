@@ -1,0 +1,3 @@
+## 2023-10-27 - Replace Array.from with direct map iteration
+**Learning:** In Node.js/TypeScript, using `Array.from(map.values())` or `Array.from(map.entries())` just to iterate over a Map is a common anti-pattern that creates unnecessary O(n) array memory allocations. This can lead to increased garbage collection overhead and potential performance bottlenecks when working with large data sets.
+**Action:** Always prefer direct iteration using `for...of` over Map iterators (e.g., `for (const entry of map.values())`) instead of converting them to arrays first unless array-specific methods (like `slice`, `filter`, `map`) are required immediately in a functional chain.
