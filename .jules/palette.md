@@ -1,0 +1,3 @@
+## 2024-05-24 - Accessibility for Custom Accordions
+**Learning:** Custom UI components built with basic HTML elements (like a `button` controlling a `div` for an accordion/disclosure widget) often miss crucial accessibility context. Screen readers rely on `aria-expanded` to know if content is hidden/visible, and `aria-controls` to know *which* content is being toggled. Without these, blind users just hear "Score Breakdown button" with no indication of its state or function.
+**Action:** Always add `aria-expanded={isOpen}` and `aria-controls="content-id"` to the trigger button, and add `id="content-id"` to the collapsible container when building custom disclosures instead of using built-in design system accordions.
