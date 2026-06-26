@@ -189,8 +189,8 @@ function generateBackupCodes(): string[] {
     for (let i = 0; i < 10; i++) {
         let code = '';
         for (let j = 0; j < 8; j++) {
-// SECURE: Use cryptographically secure random number generation
-code += chars.charAt(crypto.randomInt(0, chars.length));
+            // SECURE: Use cryptographically secure random number generation
+            code += chars.charAt(crypto.randomInt(0, chars.length));
         }
         // Format as XXXX-XXXX
         codes.push(`${code.slice(0, 4)}-${code.slice(4)}`);
