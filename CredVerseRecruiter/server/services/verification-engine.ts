@@ -303,8 +303,10 @@ export class VerificationEngine {
         let failed = 0;
         let suspicious = 0;
 
-        for (const cred of credentials) {
-            const result = await this.verifyCredential(cred);
+        // Using Promise.all to run verification concurrently instead of sequentially to prevent O(N) network bottlenecks
+        const promiseResults = await Promise.all(credentials.map((cred) => this.verifyCredential(cred)));
+
+        for (const result of promiseResults) {
             results.push(result);
 
             if (result.status === 'verified') verified++;
