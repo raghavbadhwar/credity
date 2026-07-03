@@ -428,7 +428,8 @@ export class WalletService {
     ): Promise<{ valid: boolean; credential?: Partial<StoredCredential>; error?: string }> {
         await ensureHydrated();
         // Find share across all wallets
-        for (const [userId, wallet] of Array.from(wallets.entries())) {
+        // Using for...of over entries() to avoid O(n) array allocation
+        for (const [userId, wallet] of wallets.entries()) {
             const share = wallet.shares.find((s: ShareRecord) => s.id === shareId || s.token === shareId);
 
             if (share) {
