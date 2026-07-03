@@ -7,3 +7,7 @@
 ## 2026-02-22 - Decorative Overlays
 **Learning:** Decorative elements (like blurred backgrounds) positioned absolutely over interactive elements can intercept clicks, making the UI unresponsive. This is a critical usability failure.
 **Action:** Always add `pointer-events-none` to decorative overlays that sit on top of other content.
+
+## 2024-07-03 - Missing ARIA Labels on Icon-Only Buttons
+**Learning:** Found multiple icon-only buttons across components (`sidebar.tsx`, `qr-scanner.tsx`, `share-modal.tsx`) that lack screen reader context, specifically missing `aria-label`s. This is a crucial accessibility pattern specific to the wallet application's UI components.
+**Action:** Always ensure any `size="icon"` button component has an associated `aria-label` or `title` describing its function to assistive technologies.
