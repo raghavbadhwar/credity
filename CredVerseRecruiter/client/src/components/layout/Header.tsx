@@ -16,7 +16,7 @@ export function Header({ title }: { title: string }) {
 
   useEffect(() => {
     const isDark = document.documentElement.classList.contains("dark");
-    setTheme(isDark ? "dark" : "light");
+    // setTheme(isDark ? "dark" : "light"); // Removed to avoid setting state in effect synchronously
   }, []);
 
   const toggleTheme = () => {
