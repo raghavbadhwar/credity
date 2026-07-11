@@ -303,10 +303,14 @@ export class VerificationEngine {
         let failed = 0;
         let suspicious = 0;
 
-        for (const cred of credentials) {
-            const result = await this.verifyCredential(cred);
+        // ⚡ Bolt Optimization: Use Promise.all for concurrent verification
+        // Impact: Reduces O(n) blocking network delay to O(1) concurrent latency,
+        // vastly improving performance for bulk verifications.
+        const promisedResults = await Promise.all(
+            credentials.map(cred => this.verifyCredential(cred))
+        );
+        for (const result of promisedResults) {
             results.push(result);
-
             if (result.status === 'verified') verified++;
             else if (result.status === 'failed') failed++;
             else if (result.status === 'suspicious') suspicious++;
