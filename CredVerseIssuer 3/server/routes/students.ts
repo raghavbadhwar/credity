@@ -20,7 +20,8 @@ router.get("/students", async (req, res) => {
 router.get("/students/:id", async (req, res) => {
     try {
         const student = await storage.getStudent(req.params.id);
-        if (!student) {
+        // Security: Prevent IDOR by verifying tenant ownership
+        if (!student || student.tenantId !== (req as any).tenantId) {
             return res.status(404).json({ message: "Student not found" });
         }
         res.json(student);
@@ -90,6 +91,11 @@ router.post("/students/import", async (req, res) => {
 // Update student
 router.put("/students/:id", async (req, res) => {
     try {
+        const student = await storage.getStudent(req.params.id);
+        // Security: Prevent IDOR by verifying tenant ownership
+        if (!student || student.tenantId !== (req as any).tenantId) {
+            return res.status(404).json({ message: "Student not found" });
+        }
         const updated = await storage.updateStudent(req.params.id, req.body);
         if (!updated) {
             return res.status(404).json({ message: "Student not found" });
@@ -103,6 +109,11 @@ router.put("/students/:id", async (req, res) => {
 // Delete student
 router.delete("/students/:id", async (req, res) => {
     try {
+        const student = await storage.getStudent(req.params.id);
+        // Security: Prevent IDOR by verifying tenant ownership
+        if (!student || student.tenantId !== (req as any).tenantId) {
+            return res.status(404).json({ message: "Student not found" });
+        }
         const deleted = await storage.deleteStudent(req.params.id);
         if (!deleted) {
             return res.status(404).json({ message: "Student not found" });
