@@ -100,10 +100,9 @@ router.put("/students/:id", async (req, res) => {
         if (student.tenantId !== (req as any).tenantId) {
             return res.status(403).json({ message: "Forbidden" });
         }
-        const updated = await storage.updateStudent(req.params.id, req.body);
-        if (!updated) {
-            return res.status(404).json({ message: "Student not found" });
-        }
+        const updateData = { ...req.body };
+        delete updateData.tenantId;
+        const updated = await storage.updateStudent(req.params.id, updateData);
         res.json(updated);
     } catch (error) {
         res.status(500).json({ message: "Failed to update student" });
@@ -120,10 +119,7 @@ router.delete("/students/:id", async (req, res) => {
         if (student.tenantId !== (req as any).tenantId) {
             return res.status(403).json({ message: "Forbidden" });
         }
-        const deleted = await storage.deleteStudent(req.params.id);
-        if (!deleted) {
-            return res.status(404).json({ message: "Student not found" });
-        }
+        await storage.deleteStudent(req.params.id);
         res.json({ message: "Student deleted successfully" });
     } catch (error) {
         res.status(500).json({ message: "Failed to delete student" });
