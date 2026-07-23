@@ -1,0 +1,4 @@
+## 2024-05-18 - Missing IDOR checks on DB records
+**Vulnerability:** In `CredVerseIssuer 3/server/routes/students.ts` and `team.ts`, routes matching a specific ID (GET/PUT/DELETE) fetched the resource from the database but returned/modified it without verifying that the resource's `tenantId` matched the `tenantId` of the authenticated requester. This allowed any valid tenant to read/update/delete records belonging to other tenants by providing their record ID (IDOR).
+**Learning:** Even though centralized tenant mapping tools set `req.tenantId` for authentication (via API key), database storage methods (`getStudent`, `getTeamMember`) do not implicitly filter by `tenantId`. Route handlers must explicitly verify this relationship.
+**Prevention:** Always verify that the fetched resource's `tenantId` matches `req.tenantId` before returning or mutating data. Alternatively, pass `tenantId` into storage fetching methods to filter at the query level.
