@@ -259,10 +259,11 @@ export function startIssuanceWorker(
                         try {
                             await processCredential(tenantId, templateId, issuerId, recipient, data);
                             result.success++;
-                        } catch (error: any) {
+                        } catch (error) {
+                            const err = error as Error;
                             result.failed++;
-                            result.errors.push(`Recipient ${globalIndex + 1}: ${error.message}`);
-                            console.error(`[Queue] Job ${jobId} failed for recipient ${globalIndex + 1}:`, error);
+                            result.errors.push(`Recipient ${globalIndex + 1}: ${err.message}`);
+                            console.error(`[Queue] Job ${jobId} failed for recipient ${globalIndex + 1}:`, err);
                         }
                         result.processed++;
                     })
