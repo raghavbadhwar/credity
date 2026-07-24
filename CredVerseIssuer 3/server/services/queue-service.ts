@@ -245,22 +245,30 @@ export function startIssuanceWorker(
             jobResults.set(jobId, result);
             void queuePersist();
 
-            // Process each credential
-            for (let i = 0; i < recipients.length; i++) {
-                const { recipient, data } = recipients[i];
+            // ⚡ Bolt Optimization: Process credentials in concurrent batches
+            // Impact: Significantly reduces overall job execution time by overlapping network/IO waits,
+            // while bounded concurrency (batchSize = 10) prevents memory and connection exhaustion.
+            const batchSize = 10;
+            for (let i = 0; i < recipients.length; i += batchSize) {
+                const batch = recipients.slice(i, i + batchSize);
 
-                try {
-                    await processCredential(tenantId, templateId, issuerId, recipient, data);
-                    result.success++;
-                } catch (error: any) {
-                    result.failed++;
-                    result.errors.push(`Recipient ${i + 1}: ${error.message}`);
-                    console.error(`[Queue] Job ${jobId} failed for recipient ${i + 1}:`, error);
-                }
+                await Promise.all(
+                    batch.map(async (item, index) => {
+                        const { recipient, data } = item;
+                        const globalIndex = i + index;
+                        try {
+                            await processCredential(tenantId, templateId, issuerId, recipient, data);
+                            result.success++;
+                        } catch (error: any) {
+                            result.failed++;
+                            result.errors.push(`Recipient ${globalIndex + 1}: ${error.message}`);
+                            console.error(`[Queue] Job ${jobId} failed for recipient ${globalIndex + 1}:`, error);
+                        }
+                        result.processed++;
+                    })
+                );
 
-                result.processed++;
-
-                // Update job progress
+                // Update job progress per batch rather than per item to reduce Redis overhead
                 await job.updateProgress(Math.round((result.processed / result.total) * 100));
             }
 
