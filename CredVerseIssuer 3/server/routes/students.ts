@@ -19,10 +19,18 @@ router.get("/students", async (req, res) => {
 // Get single student
 router.get("/students/:id", async (req, res) => {
     try {
+        const tenantId = (req as any).tenantId;
         const student = await storage.getStudent(req.params.id);
+
         if (!student) {
             return res.status(404).json({ message: "Student not found" });
         }
+
+        // Security: Prevent IDOR
+        if (student.tenantId !== tenantId) {
+            return res.status(403).json({ message: "Forbidden" });
+        }
+
         res.json(student);
     } catch (error) {
         res.status(500).json({ message: "Failed to fetch student" });
@@ -90,10 +98,24 @@ router.post("/students/import", async (req, res) => {
 // Update student
 router.put("/students/:id", async (req, res) => {
     try {
-        const updated = await storage.updateStudent(req.params.id, req.body);
-        if (!updated) {
+        const tenantId = (req as any).tenantId;
+        const student = await storage.getStudent(req.params.id);
+
+        if (!student) {
             return res.status(404).json({ message: "Student not found" });
         }
+
+        // Security: Prevent IDOR
+        if (student.tenantId !== tenantId) {
+            return res.status(403).json({ message: "Forbidden" });
+        }
+
+        // Security: Prevent Mass Assignment
+        const updateData = { ...req.body };
+        delete updateData.id;
+        delete updateData.tenantId;
+
+        const updated = await storage.updateStudent(req.params.id, updateData);
         res.json(updated);
     } catch (error) {
         res.status(500).json({ message: "Failed to update student" });
@@ -103,10 +125,19 @@ router.put("/students/:id", async (req, res) => {
 // Delete student
 router.delete("/students/:id", async (req, res) => {
     try {
-        const deleted = await storage.deleteStudent(req.params.id);
-        if (!deleted) {
+        const tenantId = (req as any).tenantId;
+        const student = await storage.getStudent(req.params.id);
+
+        if (!student) {
             return res.status(404).json({ message: "Student not found" });
         }
+
+        // Security: Prevent IDOR
+        if (student.tenantId !== tenantId) {
+            return res.status(403).json({ message: "Forbidden" });
+        }
+
+        await storage.deleteStudent(req.params.id);
         res.json({ message: "Student deleted successfully" });
     } catch (error) {
         res.status(500).json({ message: "Failed to delete student" });
