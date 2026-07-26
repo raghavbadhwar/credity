@@ -1,0 +1,4 @@
+## 2024-05-20 - Fix IDOR and Mass Assignment on Student Routes
+**Vulnerability:** Student GET/PUT/DELETE endpoints in `CredVerseIssuer 3` relied on route parameters without verifying that the requested student's `tenantId` matched the authenticated user's `tenantId`. Furthermore, PUT directly passed `req.body` to storage, allowing potential Mass Assignment of protected fields like `tenantId`.
+**Learning:** In a multi-tenant system using a central DB/storage, centralized middleware (like `apiKeyMiddleware`) sets the `req.tenantId`, but generic storage methods (like `getStudent`) fetch data independently of the tenant. Route handlers must explicitly enforce authorization checks bridging the two.
+**Prevention:** Always verify `resource.tenantId === req.tenantId` for all CRUD operations, and explicitly sanitize/omit protected fields like `tenantId` from `req.body` before updating.

@@ -23,6 +23,12 @@ router.get("/students/:id", async (req, res) => {
         if (!student) {
             return res.status(404).json({ message: "Student not found" });
         }
+
+        const tenantId = (req as any).tenantId;
+        if (student.tenantId !== tenantId) {
+            return res.status(403).json({ message: "Forbidden" });
+        }
+
         res.json(student);
     } catch (error) {
         res.status(500).json({ message: "Failed to fetch student" });
@@ -90,7 +96,21 @@ router.post("/students/import", async (req, res) => {
 // Update student
 router.put("/students/:id", async (req, res) => {
     try {
-        const updated = await storage.updateStudent(req.params.id, req.body);
+        const student = await storage.getStudent(req.params.id);
+        if (!student) {
+            return res.status(404).json({ message: "Student not found" });
+        }
+
+        const tenantId = (req as any).tenantId;
+        if (student.tenantId !== tenantId) {
+            return res.status(403).json({ message: "Forbidden" });
+        }
+
+        const updateData = { ...req.body };
+        delete updateData.tenantId;
+        delete updateData.id;
+
+        const updated = await storage.updateStudent(req.params.id, updateData);
         if (!updated) {
             return res.status(404).json({ message: "Student not found" });
         }
@@ -103,6 +123,16 @@ router.put("/students/:id", async (req, res) => {
 // Delete student
 router.delete("/students/:id", async (req, res) => {
     try {
+        const student = await storage.getStudent(req.params.id);
+        if (!student) {
+            return res.status(404).json({ message: "Student not found" });
+        }
+
+        const tenantId = (req as any).tenantId;
+        if (student.tenantId !== tenantId) {
+            return res.status(403).json({ message: "Forbidden" });
+        }
+
         const deleted = await storage.deleteStudent(req.params.id);
         if (!deleted) {
             return res.status(404).json({ message: "Student not found" });
