@@ -392,9 +392,9 @@ router.get("/reputation/score", apiKeyOrAuthMiddleware, async (req, res) => {
     .select()
     .from(reputationEvents)
     .where(eq(reputationEvents.subjectDid, subjectDid));
-  const breakdown = buildCategoryBreakdown(
-    events.map((event: any) => ({ category: event.category, score: event.score })),
-  );
+  // ⚡ Bolt Optimization: Pass events directly instead of mapping to avoid O(N) array allocation
+  // Impact: Reduces memory pressure and GC overhead for large event histories
+  const breakdown = buildCategoryBreakdown(events as any[]);
   const score = Math.max(
     0,
     Math.min(
@@ -447,9 +447,9 @@ router.get("/reputation/safedate", apiKeyOrAuthMiddleware, async (req, res) => {
       Math.min(
         1000,
         Math.round(
-          buildCategoryBreakdown(
-            events.map((event: any) => ({ category: event.category, score: event.score })),
-          ).reduce((sum, item) => sum + item.weighted_score, 0) * 10,
+          // ⚡ Bolt Optimization: Removed redundant array mapping
+          // Impact: Saves memory and CPU cycles during score computation
+          buildCategoryBreakdown(events as any[]).reduce((sum, item) => sum + item.weighted_score, 0) * 10,
         ),
       ),
     );
@@ -458,11 +458,9 @@ router.get("/reputation/safedate", apiKeyOrAuthMiddleware, async (req, res) => {
   const safeDate = calculateSafeDateScore(
     toUserId(subjectDid, preferredUserId),
     score1000,
-    events.map((event: any) => ({
-      signalType: event.signalType,
-      score: event.score,
-      category: event.category,
-    })),
+    // ⚡ Bolt Optimization: Pass events directly instead of mapping
+    // Impact: Prevents unnecessary object instantiation per event
+    events as any[],
   );
 
   return res.status(200).json({ success: true, safe_date: safeDate });
@@ -577,9 +575,9 @@ router.post("/reputation/scores/recompute", apiKeyOrAuthMiddleware, async (req, 
     .select()
     .from(reputationEvents)
     .where(eq(reputationEvents.subjectDid, subjectDid));
-  const breakdown = buildCategoryBreakdown(
-    events.map((event: any) => ({ category: event.category, score: event.score })),
-  );
+  // ⚡ Bolt Optimization: Pass events directly instead of mapping to avoid O(N) array allocation
+  // Impact: Reduces memory pressure and GC overhead for large event histories
+  const breakdown = buildCategoryBreakdown(events as any[]);
 
   const weightedScore = breakdown.reduce(
     (sum, item) => sum + item.weighted_score,

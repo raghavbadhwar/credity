@@ -1,0 +1,3 @@
+## 2024-07-29 - Array Mapping in Bulk Event Processing
+**Learning:** In `CredVerseIssuer 3/server/routes/reputation.ts`, the code was unnecessarily mapping over the `events` array multiple times during reputation score computation, allocating new arrays and objects for each event just to pass the exact same properties. This adds memory pressure and GC overhead during large bulk queries, which can be avoided by passing the raw Drizzle result rows directly.
+**Action:** When computing aggregates over raw database rows, pass the raw row array directly to helper functions (casting as `any[]` if needed to bypass strict typings temporarily) rather than mapping it to new objects just to extract identical properties, reducing O(N) memory allocations.
