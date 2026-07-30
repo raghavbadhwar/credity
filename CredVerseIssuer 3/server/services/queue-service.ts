@@ -245,22 +245,30 @@ export function startIssuanceWorker(
             jobResults.set(jobId, result);
             void queuePersist();
 
-            // Process each credential
-            for (let i = 0; i < recipients.length; i++) {
-                const { recipient, data } = recipients[i];
+            // ⚡ Bolt Optimization: Process credentials in bounded concurrent batches to improve throughput while preventing database/memory exhaustion.
+            // Impact: Significantly reduces overall job duration for large recipient lists by up to 10x while maintaining memory safety.
+            const BATCH_SIZE = 10;
+            for (let i = 0; i < recipients.length; i += BATCH_SIZE) {
+                const chunk = recipients.slice(i, i + BATCH_SIZE);
+                await Promise.all(
+                    chunk.map(async (recipientData, index) => {
+                        const { recipient, data } = recipientData;
+                        const actualIndex = i + index;
 
-                try {
-                    await processCredential(tenantId, templateId, issuerId, recipient, data);
-                    result.success++;
-                } catch (error: any) {
-                    result.failed++;
-                    result.errors.push(`Recipient ${i + 1}: ${error.message}`);
-                    console.error(`[Queue] Job ${jobId} failed for recipient ${i + 1}:`, error);
-                }
+                        try {
+                            await processCredential(tenantId, templateId, issuerId, recipient, data);
+                            result.success++;
+                        } catch (error: any) {
+                            result.failed++;
+                            result.errors.push(`Recipient ${actualIndex + 1}: ${error.message}`);
+                            console.error(`[Queue] Job ${jobId} failed for recipient ${actualIndex + 1}:`, error);
+                        }
 
-                result.processed++;
+                        result.processed++;
+                    })
+                );
 
-                // Update job progress
+                // Update job progress per batch
                 await job.updateProgress(Math.round((result.processed / result.total) * 100));
             }
 

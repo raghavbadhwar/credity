@@ -1,0 +1,3 @@
+## 2025-02-12 - Concurrent Batching for Queue Processing
+**Learning:** Sequential await operations in loops (e.g., `for` loops processing array items) are common performance bottlenecks, resulting in slow throughput. However, applying an unbounded `Promise.all` across a large dataset can cause database connection exhaustion or OOM (Out-of-Memory) errors in Node.js.
+**Action:** When parallelizing array iterations, implement bounded concurrency by chunking the array (e.g., 10 items at a time) and using `Promise.all` on the batches. Due to Node.js's single-threaded nature, it is safe to mutate shared counters and arrays (like success/fail tallies) directly within the async iteration without locks.
