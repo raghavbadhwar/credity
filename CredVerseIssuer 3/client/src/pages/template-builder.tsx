@@ -56,7 +56,7 @@ interface TemplateField {
     y: number;
     width: number;
     height: number;
-    properties: Record<string, any>;
+    properties: Record<string, unknown>;
 }
 
 // Draggable field component for the palette
@@ -291,7 +291,7 @@ export default function TemplateBuilder() {
     };
 
     // Update field property
-    const updateFieldProperty = (key: string, value: any) => {
+    const updateFieldProperty = (key: string, value: unknown) => {
         if (!selectedFieldId) return;
         setFields(fields.map(f =>
             f.id === selectedFieldId
@@ -307,7 +307,7 @@ export default function TemplateBuilder() {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'x-api-key': (import.meta as any).env?.VITE_API_KEY || '',
+                    'x-api-key': (import.meta as unknown as { env: Record<string, string> }).env?.VITE_API_KEY || '',
                 },
                 body: JSON.stringify({
                     name: templateName,
