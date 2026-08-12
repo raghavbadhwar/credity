@@ -1,0 +1,11 @@
+# Reviewed false positives: the same eight-character local placeholder in tests,
+# local deployment examples, in-memory defaults, and documentation.
+BlockWalletDigi/tests/storage-persistence.test.ts:generic-api-key:11
+CredVerseIssuer 3/contracts/scripts/deploy.js:generic-api-key:33
+CredVerseIssuer 3/scripts/deploy-local.mjs:generic-api-key:22
+CredVerseIssuer 3/scripts/deploy-local.mjs:generic-api-key:46
+CredVerseIssuer 3/scripts/deploy-sepolia.mjs:generic-api-key:65
+CredVerseIssuer 3/server/storage.ts:generic-api-key:205
+CredVerseIssuer 3/tests/storage-persistence.test.ts:generic-api-key:19
+CredVerseRecruiter/server/services/verification-engine.ts:generic-api-key:156
+information__critical /PRD.md:generic-api-key:1779

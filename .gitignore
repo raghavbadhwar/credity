@@ -9,3 +9,8 @@ coverage
 tmp
 .gemini
 cr_backup/
+.git_backup/
+*.log
+register_output.json
+register_recruiter.json
+result.txt
