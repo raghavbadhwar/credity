@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { ActivityIndicator, Alert, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import {
   exportIssuerAuditLog,
@@ -24,27 +25,10 @@ interface Props {
 }
 
 export function IssuerDashboardScreen({ onSwitchRole, onLogout }: Props) {
-  const [loading, setLoading] = useState(true);
-  const [profile, setProfile] = useState<any>(null);
-  const [credentials, setCredentials] = useState<any[]>([]);
-  const [tenantId, setTenantId] = useState('550e8400-e29b-41d4-a716-446655440000');
-  const [templateId, setTemplateId] = useState('template-1');
-  const [issuerId, setIssuerId] = useState('issuer-1');
-  const [recipientEmail, setRecipientEmail] = useState('student@example.com');
-  const [lastIssueMode, setLastIssueMode] = useState<'oid4vci' | 'legacy' | null>(null);
-  const [lastIssueCredentialId, setLastIssueCredentialId] = useState<string | null>(null);
-  const [queueStats, setQueueStats] = useState<any>(null);
-  const [deadLetterEntries, setDeadLetterEntries] = useState<any[]>([]);
-  const [complianceConsents, setComplianceConsents] = useState<any[]>([]);
-  const [dataRequests, setDataRequests] = useState<any[]>([]);
-  const [certInIncidents, setCertInIncidents] = useState<any[]>([]);
-  const [auditIntegrity, setAuditIntegrity] = useState<string | null>(null);
-  const [lastReplayJob, setLastReplayJob] = useState<string | null>(null);
-
-  async function refresh() {
-    setLoading(true);
-    try {
-      const [nextProfile, nextCredentials, nextQueueStats, nextDeadLetter, nextConsents, nextDataRequests, nextIncidents] = await Promise.all([
+  const { data, isLoading: loading, refetch: refresh, isError, error } = useQuery({
+    queryKey: ['issuer-dashboard'],
+    queryFn: async () => {
+      const [profile, credentials, queueStats, deadLetter, consents, dataRequests, incidents] = await Promise.all([
         getRoleProfile('issuer'),
         getIssuerCredentials(),
         getIssuerQueueStats().catch(() => null),
@@ -53,19 +37,34 @@ export function IssuerDashboardScreen({ onSwitchRole, onLogout }: Props) {
         getIssuerDataRequests().catch(() => []),
         getIssuerCertInIncidents().catch(() => []),
       ]);
-      setProfile(nextProfile);
-      setCredentials(nextCredentials);
-      setQueueStats(nextQueueStats);
-      setDeadLetterEntries(Array.isArray(nextDeadLetter) ? nextDeadLetter : []);
-      setComplianceConsents(Array.isArray(nextConsents) ? nextConsents : []);
-      setDataRequests(Array.isArray(nextDataRequests) ? nextDataRequests : []);
-      setCertInIncidents(Array.isArray(nextIncidents) ? nextIncidents : []);
-    } catch (error: any) {
-      Alert.alert('Load failed', error?.message || 'Unable to load issuer data.');
-    } finally {
-      setLoading(false);
+      return {
+        profile,
+        credentials,
+        queueStats,
+        deadLetterEntries: Array.isArray(deadLetter) ? deadLetter : [],
+        complianceConsents: Array.isArray(consents) ? consents : [],
+        dataRequests: Array.isArray(dataRequests) ? dataRequests : [],
+        certInIncidents: Array.isArray(incidents) ? incidents : [],
+      };
     }
-  }
+  });
+
+  const profile = data?.profile;
+  const credentials = data?.credentials || [];
+  const queueStats = data?.queueStats;
+  const deadLetterEntries = data?.deadLetterEntries || [];
+  const complianceConsents = data?.complianceConsents || [];
+  const dataRequests = data?.dataRequests || [];
+  const certInIncidents = data?.certInIncidents || [];
+
+  const [tenantId, setTenantId] = useState('550e8400-e29b-41d4-a716-446655440000');
+  const [templateId, setTemplateId] = useState('template-1');
+  const [issuerId, setIssuerId] = useState('issuer-1');
+  const [recipientEmail, setRecipientEmail] = useState('student@example.com');
+  const [lastIssueMode, setLastIssueMode] = useState<'oid4vci' | 'legacy' | null>(null);
+  const [lastIssueCredentialId, setLastIssueCredentialId] = useState<string | null>(null);
+  const [auditIntegrity, setAuditIntegrity] = useState<string | null>(null);
+  const [lastReplayJob, setLastReplayJob] = useState<string | null>(null);
 
   async function onIssue() {
     const payload = {
@@ -194,8 +193,12 @@ export function IssuerDashboardScreen({ onSwitchRole, onLogout }: Props) {
   }
 
   useEffect(() => {
-    refresh();
-  }, []);
+    if (isError) {
+      Alert.alert('Load failed', (error as any)?.message || 'Unable to load issuer data.');
+    }
+  }, [isError, error]);
+
+  // Replaced useEffect with useQuery to cache data and prevent redundant renders and network calls
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
@@ -245,7 +248,7 @@ export function IssuerDashboardScreen({ onSwitchRole, onLogout }: Props) {
             <Text style={styles.meta}>{cred?.recipient?.name || cred?.recipient || 'Recipient'}</Text>
           </View>
         ))}
-        <Pressable style={styles.primaryButton} onPress={refresh}>
+        <Pressable style={styles.primaryButton} onPress={() => refresh()}>
           <Text style={styles.primaryButtonText}>Refresh</Text>
         </Pressable>
       </View>
