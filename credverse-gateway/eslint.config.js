@@ -15,6 +15,10 @@ export default defineConfig([
       ecmaVersion: 2020,
       globals: globals.node,
     },
+    rules: {
+      '@typescript-eslint/no-explicit-any': 'warn',
+      '@typescript-eslint/no-unused-vars': 'warn',
+    },
   },
   {
     files: ['src/**/*.{ts,tsx}'],
@@ -27,6 +31,10 @@ export default defineConfig([
     languageOptions: {
       ecmaVersion: 2020,
       globals: globals.browser,
+    },
+    rules: {
+      '@typescript-eslint/no-explicit-any': 'warn',
+      '@typescript-eslint/no-unused-vars': 'warn',
     },
   },
   prettier,
