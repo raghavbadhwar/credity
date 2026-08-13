@@ -347,6 +347,7 @@ export default function IdentityVerification() {
         };
 
         initCamera();
+// eslint-disable-next-line react-hooks/exhaustive-deps
     }, [pendingCameraStart, livenessSession]);
 
     const completeLiveness = async (frameData?: string | null) => {

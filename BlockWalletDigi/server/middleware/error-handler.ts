@@ -1,7 +1,9 @@
 import { Request, Response, NextFunction } from "express";
 import { ZodError } from "zod";
 
-export function errorHandler(err: any, req: Request, res: Response, next: NextFunction) {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export function errorHandler(err: any, req: Request, res: Response, _next: NextFunction) {
     const status = err.status || err.statusCode || 500;
     const message = err.message || "Internal Server Error";
 

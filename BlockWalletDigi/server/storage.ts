@@ -48,6 +48,11 @@ export class MemStorage implements IStorage {
   private currentCredentialId: number;
   private currentActivityId: number;
 
+  // Secondary indices for O(1) lookups
+  private usersByUsername: Map<string, number>;
+  private credentialsByUserId: Map<number, number[]>;
+  private activitiesByUserId: Map<number, number[]>;
+
   constructor() {
     this.users = new Map();
     this.credentials = new Map();
@@ -55,6 +60,10 @@ export class MemStorage implements IStorage {
     this.currentUserId = 1;
     this.currentCredentialId = 1;
     this.currentActivityId = 1;
+
+    this.usersByUsername = new Map();
+    this.credentialsByUserId = new Map();
+    this.activitiesByUserId = new Map();
   }
 
   // User
@@ -63,9 +72,9 @@ export class MemStorage implements IStorage {
   }
 
   async getUserByUsername(username: string): Promise<User | undefined> {
-    return Array.from(this.users.values()).find(
-      (user) => user.username === username,
-    );
+    const id = this.usersByUsername.get(username);
+    if (id === undefined) return undefined;
+    return this.users.get(id);
   }
 
   async createUser(insertUser: InsertUser): Promise<User> {
@@ -80,12 +89,18 @@ export class MemStorage implements IStorage {
       avatarUrl: insertUser.avatarUrl ?? null
     };
     this.users.set(id, user);
+    this.usersByUsername.set(user.username, id);
     return user;
   }
 
   async updateUser(id: number, updates: Partial<InsertUser>): Promise<User> {
     const user = await this.getUser(id);
     if (!user) throw new Error("User not found");
+
+    if (updates.username && updates.username !== user.username) {
+      this.usersByUsername.delete(user.username);
+      this.usersByUsername.set(updates.username, id);
+    }
 
     const updatedUser = { ...user, ...updates };
     this.users.set(id, updatedUser);
@@ -98,9 +113,12 @@ export class MemStorage implements IStorage {
   }
 
   async listCredentials(userId: number): Promise<Credential[]> {
-    return Array.from(this.credentials.values()).filter(
-      (c) => c.userId === userId && !c.isArchived
-    );
+    const ids = this.credentialsByUserId.get(userId);
+    if (!ids) return [];
+
+    return ids
+      .map(id => this.credentials.get(id))
+      .filter((c): c is Credential => c !== undefined && !c.isArchived);
   }
 
   async createCredential(insertCredential: InsertCredential): Promise<Credential> {
@@ -112,13 +130,22 @@ export class MemStorage implements IStorage {
       isArchived: insertCredential.isArchived ?? false
     };
     this.credentials.set(id, credential);
+
+    const userCreds = this.credentialsByUserId.get(credential.userId) || [];
+    userCreds.push(id);
+    this.credentialsByUserId.set(credential.userId, userCreds);
+
     return credential;
   }
 
   // Activities
   async listActivities(userId: number): Promise<Activity[]> {
-    return Array.from(this.activities.values())
-      .filter((a) => a.userId === userId)
+    const ids = this.activitiesByUserId.get(userId);
+    if (!ids) return [];
+
+    return ids
+      .map(id => this.activities.get(id))
+      .filter((a): a is Activity => a !== undefined)
       .sort((a, b) => (b.timestamp?.getTime() ?? 0) - (a.timestamp?.getTime() ?? 0));
   }
 
@@ -130,6 +157,11 @@ export class MemStorage implements IStorage {
       timestamp: new Date()
     };
     this.activities.set(id, activity);
+
+    const userActs = this.activitiesByUserId.get(activity.userId) || [];
+    userActs.push(id);
+    this.activitiesByUserId.set(activity.userId, userActs);
+
     return activity;
   }
 
@@ -148,15 +180,38 @@ export class MemStorage implements IStorage {
     this.users = new Map((state.users || []).map(([key, value]) => [key, value]));
     this.credentials = new Map((state.credentials || []).map(([key, value]) => [key, {
       ...value,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       issuanceDate: parseDate((value as any).issuanceDate),
     }]));
     this.activities = new Map((state.activities || []).map(([key, value]) => [key, {
       ...value,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       timestamp: parseDate((value as any).timestamp),
     }]));
     this.currentUserId = state.currentUserId || 1;
     this.currentCredentialId = state.currentCredentialId || 1;
     this.currentActivityId = state.currentActivityId || 1;
+
+    // Rebuild indices
+    this.usersByUsername = new Map();
+    this.credentialsByUserId = new Map();
+    this.activitiesByUserId = new Map();
+
+    for (const [id, user] of this.users) {
+      this.usersByUsername.set(user.username, id);
+    }
+
+    for (const [id, cred] of this.credentials) {
+      const list = this.credentialsByUserId.get(cred.userId) || [];
+      list.push(id);
+      this.credentialsByUserId.set(cred.userId, list);
+    }
+
+    for (const [id, act] of this.activities) {
+      const list = this.activitiesByUserId.get(act.userId) || [];
+      list.push(id);
+      this.activitiesByUserId.set(act.userId, list);
+    }
   }
 }
 
