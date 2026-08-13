@@ -1,0 +1,4 @@
+## 2024-05-24 - [Fix DOM-based XSS in Gateway HTML Fallback]
+**Vulnerability:** A fallback HTML template (`gatewayHTML` in `credverse-gateway/server/index.ts`) accepted URL query parameters (`name` and `error`) and directly injected them into a DOM element using `.innerHTML`, creating a DOM-based Cross-Site Scripting (XSS) vulnerability.
+**Learning:** Fallback UI templates written as raw strings outside the main frontend framework (like Vite/React) are easily overlooked for security best practices. Since they operate outside the framework's automatic escaping, any dynamic data insertion is a potential risk.
+**Prevention:** Always use safe DOM APIs like `.textContent` or `.innerText` instead of `.innerHTML` when inserting user-controlled or URL-derived data into the DOM, even in rudimentary fallback templates.

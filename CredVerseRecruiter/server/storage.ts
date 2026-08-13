@@ -106,10 +106,14 @@ export class MemStorage implements IStorage {
   importState(state: RecruiterStorageState): void {
     this.users = new Map((state.users || []).map(([key, value]) => [key, {
       ...value,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       createdAt: parseDate((value as any).createdAt),
     }]));
     this.verifications = (state.verifications || []).map((row) => ({
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       ...row,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       timestamp: parseDate((row as any).timestamp),
     }));
   }

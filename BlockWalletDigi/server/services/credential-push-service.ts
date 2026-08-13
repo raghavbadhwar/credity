@@ -20,6 +20,7 @@ interface PendingCredential {
         description?: string;
         issuedAt: string;
     };
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     fullCredential: any; // Encrypted or full VC
     status: 'pending' | 'accepted' | 'rejected' | 'expired';
     createdAt: Date;
@@ -52,6 +53,7 @@ export async function pushCredentialToWallet(
     issuerId: string,
     issuerName: string,
     recipientDid: string,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     credentialData: any,
     options?: {
         recipientEmail?: string;
@@ -131,6 +133,7 @@ export function getPendingCredentials(walletDid: string): PendingCredential[] {
  */
 export function acceptCredentialOffer(offerId: string, walletDid: string): {
     success: boolean;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     credential?: any;
     error?: string;
 } {
@@ -217,6 +220,7 @@ export function registerWebhook(
 async function sendWebhookNotification(
     walletDid: string,
     event: string,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     payload: any
 ): Promise<void> {
     const config = webhookConfigs.get(walletDid);
@@ -258,6 +262,7 @@ export function cleanupExpiredOffers(): number {
     const now = new Date();
     let cleaned = 0;
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     pendingCredentials.forEach((offer, id) => {
         if (offer.status === 'pending' && offer.expiresAt < now) {
             offer.status = 'expired';

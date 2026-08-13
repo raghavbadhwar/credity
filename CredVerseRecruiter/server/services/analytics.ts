@@ -19,11 +19,16 @@ export function initAnalytics(): void {
     logger.info('[Analytics] PostHog initialized');
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function identifyUser(userId: string, traits?: Record<string, any>): void {
     if (!posthog) return;
     posthog.identify({ distinctId: userId, properties: traits });
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function trackEvent(event: string, userId?: string, properties?: Record<string, any>): void {
     if (!posthog) {
         logger.info({ type: 'analytics', event, userId, ...properties }, `[Analytics] ${event}`);

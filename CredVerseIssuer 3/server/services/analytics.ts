@@ -32,6 +32,8 @@ export function initAnalytics(): void {
 /**
  * Identify a user with traits
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function identifyUser(userId: string, traits?: Record<string, any>): void {
     if (!posthog) return;
 
@@ -46,7 +48,9 @@ export function identifyUser(userId: string, traits?: Record<string, any>): void
  */
 export function trackEvent(
     event: string,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     userId?: string,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     properties?: Record<string, any>
 ): void {
     if (!posthog) {

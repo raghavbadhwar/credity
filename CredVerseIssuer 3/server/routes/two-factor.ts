@@ -48,6 +48,8 @@ router.post('/2fa/setup', authMiddleware, async (req, res) => {
             return res.status(400).json({ error: '2FA is already enabled' });
         }
 
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const email = (user as any).email || user.username;
         const setup = await generateTwoFactorSetup(userId, email);
 

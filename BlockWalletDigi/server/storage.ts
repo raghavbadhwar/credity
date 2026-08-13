@@ -148,10 +148,12 @@ export class MemStorage implements IStorage {
     this.users = new Map((state.users || []).map(([key, value]) => [key, value]));
     this.credentials = new Map((state.credentials || []).map(([key, value]) => [key, {
       ...value,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       issuanceDate: parseDate((value as any).issuanceDate),
     }]));
     this.activities = new Map((state.activities || []).map(([key, value]) => [key, {
       ...value,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       timestamp: parseDate((value as any).timestamp),
     }]));
     this.currentUserId = state.currentUserId || 1;

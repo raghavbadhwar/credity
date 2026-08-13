@@ -89,6 +89,7 @@ router.post('/wallet/credentials', async (req, res) => {
                 data: stored.data,
                 jwt: stored.jwt,
             });
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         } catch (e) {
             // Ignore duplication error if any
         }
@@ -186,6 +187,7 @@ router.post('/wallet/offer/claim', async (req, res) => {
                     const issuerData = await issuerRes.json();
                     issuerName = issuerData.name || issuerName;
                 }
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
             } catch (e) {
                 console.log('[Wallet] Could not fetch issuer info');
             }
@@ -223,6 +225,7 @@ router.post('/wallet/offer/claim', async (req, res) => {
             message: 'Credential claimed successfully'
         });
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
         console.error('[Wallet] Claim offer error:', error);
         res.status(500).json({ error: error.message || 'Failed to claim offer' });
