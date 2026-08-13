@@ -116,7 +116,7 @@ NavigationMenuIndicator.displayName =
   NavigationMenuPrimitive.Indicator.displayName
 
 export {
-  navigationMenuTriggerStyle,
+  navigationMenuTriggerStyle, // eslint-disable-next-line react-refresh/only-export-components
   NavigationMenu,
   NavigationMenuList,
   NavigationMenuItem,

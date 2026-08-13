@@ -171,7 +171,8 @@ export function additionalSecurityHeaders(_req: Request, res: Response, next: Ne
     res.setHeader('Surrogate-Control', 'no-store');
 
     // Permissions Policy (formerly Feature-Policy)
-    res.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
+    // Allow camera access for self (same origin) to enable face detection features
+    res.setHeader('Permissions-Policy', 'camera=(self), microphone=(), geolocation=()');
 
     next();
 }
@@ -181,7 +182,7 @@ export function additionalSecurityHeaders(_req: Request, res: Response, next: Ne
 // =============================================================================
 
 const SUSPICIOUS_PATTERNS = [
-    /(\%27)|(\')|(\\-\\-)|(\\%23)|(#)/i,     // SQL injection
+    /(%27)|(')|(\\-\\-)|(\\%23)|(#)/i,     // SQL injection
     /<script\b[^>]*>([\s\S]*?)<\/script>/gi, // XSS script tags
     /javascript:/gi,                         // JavaScript protocol
     /on\w+\s*=/gi,                          // Event handlers
