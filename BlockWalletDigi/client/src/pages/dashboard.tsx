@@ -11,20 +11,15 @@ import {
   FileText,
   ShieldCheck,
   CheckCircle2,
-  MoreHorizontal,
   Filter,
   X,
   Loader2,
   Bell,
-  RefreshCw,
-  Camera
+  RefreshCw
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { ShareModal } from "@/components/share-modal";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { DashboardSkeleton, CredentialCardSkeleton, StatsCardSkeleton } from "@/components/ui/skeletons";
-import { ScanQRButton } from "@/components/qr-scanner";
-import { ErrorBoundary } from "@/components/error-boundary";
 import { TrustScoreCard } from "@/components/trust-score-card";
 import { CredentialListItem } from "@/components/credential-list-item";
 import { getCategoryColor } from "@/lib/utils";

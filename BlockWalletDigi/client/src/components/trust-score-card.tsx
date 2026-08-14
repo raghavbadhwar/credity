@@ -67,7 +67,7 @@ export function TrustScoreCard() {
         );
     }
 
-    const { score, levelLabel, breakdown, suggestions, history } = data;
+    const { score, levelLabel, breakdown, suggestions = [], history = [] } = data;
 
     // Calculate trend from history
     const trend = history.length >= 2
