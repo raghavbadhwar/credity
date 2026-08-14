@@ -1,0 +1,6 @@
+## Sentinel's Journal - Critical Learnings
+
+## 2025-02-27 - DOM-based XSS via query parameters in inline fallback HTML
+**Vulnerability:** A fallback HTML snippet in `credverse-gateway/server/index.ts` parsed the `name` and `error` query parameters and inserted them directly into the DOM using `statusDiv.innerHTML`. This created a DOM-based Cross-Site Scripting (XSS) vulnerability if malicious input was provided.
+**Learning:** Even fallback logic meant for development or edge cases (like `gatewayHTML` when Vite is unavailable) must apply strict security best practices. Since this code was an inline string sent as a response to the client rather than a standard React component or an Express middleware, standard template escaping tools were bypassed.
+**Prevention:** Always use `textContent` instead of `innerHTML` when inserting user-controlled data into the DOM, especially data derived directly from the URL. Review inline HTML scripts generated server-side for any DOM manipulation vulnerabilities.
