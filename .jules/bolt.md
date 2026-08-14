@@ -1,0 +1,3 @@
+## 2024-12-19 - [Wallet Service Thread Safety]
+**Learning:** `walletService.storeCredential` safely handles concurrent writes because `queuePersist` serializes database writes using a promise chain (`persistChain`), effectively handling database concurrency safely.
+**Action:** It is safe and effective to use `Promise.all` or `Promise.allSettled` to parallelize upstream I/O like document fetching when storing multiple credentials in the wallet.

@@ -176,30 +176,38 @@ router.post("/digilocker/import-all", async (req, res) => {
         const imported: string[] = [];
         const failed: string[] = [];
 
-        for (const doc of documents) {
-            try {
-                const { document } = await digilockerService.pullDocument(userId, doc.uri);
+        // ⚡ Bolt: Use Promise.allSettled for concurrent bulk imports
+        // 💡 What: Replaced sequential `for...of` loop with `Promise.allSettled`.
+        // 🎯 Why: I/O (pulling documents and storing credentials) took O(N) time sequentially. `walletService.storeCredential` safely handles concurrent requests using a `persistChain` promise queue.
+        // 📊 Impact: O(1) concurrent network time, vastly improving performance on bulk imports.
+        const importPromises = documents.map(async (doc) => {
+            const { document } = await digilockerService.pullDocument(userId, doc.uri);
 
-                await walletService.storeCredential(userId, {
-                    type: ['VerifiableCredential', doc.doctype, 'DigiLockerDocument'],
-                    issuer: doc.issuer,
-                    issuanceDate: new Date(doc.date),
-                    data: {
-                        name: doc.name,
-                        description: doc.description,
-                        source: 'DigiLocker',
-                        uri: doc.uri,
-                        issuerid: doc.issuerid,
-                        ...document,
-                    },
-                    category: doc.doctype.includes('CLASS') ? 'academic' : 'government',
-                });
+            await walletService.storeCredential(userId, {
+                type: ['VerifiableCredential', doc.doctype, 'DigiLockerDocument'],
+                issuer: doc.issuer,
+                issuanceDate: new Date(doc.date),
+                data: {
+                    name: doc.name,
+                    description: doc.description,
+                    source: 'DigiLocker',
+                    uri: doc.uri,
+                    issuerid: doc.issuerid,
+                    ...document,
+                },
+                category: doc.doctype.includes('CLASS') ? 'academic' : 'government',
+            });
+            return doc.name;
+        });
 
-                imported.push(doc.name);
-            } catch (e) {
-                failed.push(doc.name);
+        const results = await Promise.allSettled(importPromises);
+        results.forEach((result, index) => {
+            if (result.status === 'fulfilled') {
+                imported.push(result.value);
+            } else {
+                failed.push(documents[index].name);
             }
-        }
+        });
 
         await storage.createActivity({
             userId,
@@ -261,22 +269,29 @@ router.post("/digilocker/connect", async (req, res) => {
             // Import demo documents
             const documents = await digilockerService.listDocuments(userId);
 
-            for (const doc of documents.slice(0, 3)) { // Import first 3
-                const { document } = await digilockerService.pullDocument(userId, doc.uri);
+            // ⚡ Bolt: Use Promise.all for concurrent demo document imports
+            // 💡 What: Replaced sequential loop with Promise.all.
+            // 🎯 Why: Demo connection pulls multiple default documents. Fetching them concurrently reduces wait time.
+            // 📊 Impact: Significantly faster demo connection flow.
+            const demoDocs = documents.slice(0, 3);
+            await Promise.all(
+                demoDocs.map(async (doc) => {
+                    const { document } = await digilockerService.pullDocument(userId, doc.uri);
 
-                await walletService.storeCredential(userId, {
-                    type: ['VerifiableCredential', doc.doctype, 'DigiLockerDocument'],
-                    issuer: doc.issuer,
-                    issuanceDate: new Date(doc.date),
-                    data: {
-                        name: doc.name,
-                        source: 'DigiLocker',
-                        uri: doc.uri,
-                        ...document,
-                    },
-                    category: doc.doctype.includes('CLASS') ? 'academic' : 'government',
-                });
-            }
+                    return walletService.storeCredential(userId, {
+                        type: ['VerifiableCredential', doc.doctype, 'DigiLockerDocument'],
+                        issuer: doc.issuer,
+                        issuanceDate: new Date(doc.date),
+                        data: {
+                            name: doc.name,
+                            source: 'DigiLocker',
+                            uri: doc.uri,
+                            ...document,
+                        },
+                        category: doc.doctype.includes('CLASS') ? 'academic' : 'government',
+                    });
+                })
+            );
 
             await storage.createActivity({
                 userId,
