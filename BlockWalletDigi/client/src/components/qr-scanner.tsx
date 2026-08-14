@@ -27,12 +27,23 @@ export function QRScanner({ onScan, onClose, title = "Scan QR Code", description
     const streamRef = useRef<MediaStream | null>(null);
     const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
-    useEffect(() => {
-        startCamera();
-        return () => {
-            stopCamera();
-        };
-    }, [facingMode]);
+    const stopCamera = () => {
+        if (intervalRef.current) {
+            clearInterval(intervalRef.current);
+            intervalRef.current = null;
+        }
+
+        if (streamRef.current) {
+            streamRef.current.getTracks().forEach(track => track.stop());
+            streamRef.current = null;
+        }
+
+        if (videoRef.current) {
+            videoRef.current.srcObject = null;
+        }
+
+        setScanning(false);
+    };
 
     const startCamera = async () => {
         try {
@@ -66,21 +77,13 @@ export function QRScanner({ onScan, onClose, title = "Scan QR Code", description
         }
     };
 
-    const stopCamera = () => {
-        if (intervalRef.current) {
-            clearInterval(intervalRef.current);
-            intervalRef.current = null;
-        }
-
-        if (streamRef.current) {
-            streamRef.current.getTracks().forEach(track => track.stop());
-            streamRef.current = null;
-        }
-
-        if (videoRef.current) {
-            videoRef.current.srcObject = null;
-        }
-    };
+    useEffect(() => {
+        startCamera();
+        return () => {
+            stopCamera();
+        };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [facingMode]);
 
     const startScanning = () => {
         // Simple QR detection using canvas
