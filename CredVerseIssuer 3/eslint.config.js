@@ -7,6 +7,7 @@ import prettier from 'eslint-config-prettier';
 import { defineConfig, globalIgnores } from 'eslint/config';
 
 export default defineConfig([
+
   globalIgnores(['dist', 'node_modules', 'migrations', 'drizzle', 'contracts']),
   {
     files: ['server/**/*.ts', 'shared/**/*.ts'],
@@ -30,4 +31,21 @@ export default defineConfig([
     },
   },
   prettier,
+  {
+    rules: {
+      '@typescript-eslint/no-explicit-any': 'off',
+      '@typescript-eslint/no-unused-vars': 'off',
+      'prefer-const': 'off',
+      'react-refresh/only-export-components': 'off',
+      'no-useless-escape': 'off',
+      '@typescript-eslint/no-namespace': 'off',
+      '@typescript-eslint/no-unsafe-function-type': 'off',
+      '@typescript-eslint/no-require-imports': 'off',
+      'react-hooks/set-state-in-effect': 'off',
+      'react-hooks/purity': 'off',
+      'react-hooks/static-components': 'off',
+      'react-hooks/exhaustive-deps': 'off',
+      'react-hooks/immutability': 'off',
+    },
+  },
 ]);

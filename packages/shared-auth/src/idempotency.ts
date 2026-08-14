@@ -11,8 +11,17 @@ const DEFAULT_TTL_MS = 24 * 60 * 60 * 1000;
 const DEFAULT_MAX_ENTRIES = 5000;
 const cache = new Map<string, StoredResponse>();
 
+let lastPruneTime = 0;
+// Prune at most once per minute to avoid O(N) overhead on every request
+const PRUNE_INTERVAL_MS = 60 * 1000;
+
 function pruneExpired(ttlMs: number): void {
     const now = Date.now();
+    if (now - lastPruneTime < PRUNE_INTERVAL_MS) {
+        return;
+    }
+    lastPruneTime = now;
+
     for (const [key, value] of cache.entries()) {
         if (now - value.createdAt > ttlMs) {
             cache.delete(key);
