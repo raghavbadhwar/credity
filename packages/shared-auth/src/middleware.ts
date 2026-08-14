@@ -81,6 +81,24 @@ export function requireRole(...roles: AuthUser['role'][]) {
  */
 const rateLimitMap = new Map<string, { count: number; resetAt: number }>();
 
+// Cleanup interval (every 5 minutes) to prevent memory leaks
+const CLEANUP_INTERVAL = 5 * 60 * 1000;
+
+if (typeof setInterval !== 'undefined') {
+    const cleanupInterval = setInterval(() => {
+        const now = Date.now();
+        for (const [key, record] of rateLimitMap.entries()) {
+            if (now > record.resetAt) {
+                rateLimitMap.delete(key);
+            }
+        }
+    }, CLEANUP_INTERVAL);
+
+    if (cleanupInterval.unref) {
+        cleanupInterval.unref();
+    }
+}
+
 export function checkRateLimit(key: string, maxRequests: number, windowMs: number): boolean {
     const now = Date.now();
     const record = rateLimitMap.get(key);
