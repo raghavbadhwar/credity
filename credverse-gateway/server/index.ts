@@ -3,12 +3,11 @@
  */
 
 // Initialize Sentry BEFORE importing anything else
-import { initSentry, sentryErrorHandler } from './services/sentry';
+import { initSentry } from './services/sentry';
 initSentry('credverse-gateway');
 
 import 'dotenv/config';
 import express from 'express';
-import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import { createServer } from 'http';
 import path from 'path';
@@ -59,7 +58,7 @@ app.use('/api', authRoutes);
 app.use('/api/mobile', mobileProxyRoutes);
 
 // Health check
-app.get('/api/health', (req, res) => {
+app.get('/api/health', (_req, res) => {
     res.json({ status: 'ok', app: 'credverse-gateway' });
 });
 
@@ -138,6 +137,7 @@ const gatewayHTML = `
             const { setupVite } = await import('./vite');
             await setupVite(httpServer, app);
             console.log('[Gateway] Vite dev server attached');
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         } catch (error) {
             console.log('[Gateway] Vite unavailable, using inline HTML fallback');
             app.get('/', (req, res) => {
