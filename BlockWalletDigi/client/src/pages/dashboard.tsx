@@ -11,20 +11,15 @@ import {
   FileText,
   ShieldCheck,
   CheckCircle2,
-  MoreHorizontal,
   Filter,
   X,
   Loader2,
   Bell,
-  RefreshCw,
-  Camera
+  RefreshCw
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { ShareModal } from "@/components/share-modal";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { DashboardSkeleton, CredentialCardSkeleton, StatsCardSkeleton } from "@/components/ui/skeletons";
-import { ScanQRButton } from "@/components/qr-scanner";
-import { ErrorBoundary } from "@/components/error-boundary";
 import { TrustScoreCard } from "@/components/trust-score-card";
 import { CredentialListItem } from "@/components/credential-list-item";
 import { getCategoryColor } from "@/lib/utils";
@@ -224,7 +219,12 @@ export default function Dashboard() {
                   <span className="text-sm font-medium capitalize">Filtering: {categoryFilter}</span>
                 </div>
                 <Link href="/">
-                  <Button variant="ghost" size="sm" className="h-6 w-6 p-0 rounded-full hover:bg-primary/20">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-6 w-6 p-0 rounded-full hover:bg-primary/20"
+                    aria-label="Clear filter"
+                  >
                     <X className="w-3 h-3" />
                   </Button>
                 </Link>
@@ -325,6 +325,7 @@ export default function Dashboard() {
 
       {/* Share Modal */}
       <ShareModal
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         credential={selectedCred as any}
         open={shareModalOpen}
         onOpenChange={setShareModalOpen}
