@@ -7,3 +7,6 @@
 ## 2026-02-22 - Decorative Overlays
 **Learning:** Decorative elements (like blurred backgrounds) positioned absolutely over interactive elements can intercept clicks, making the UI unresponsive. This is a critical usability failure.
 **Action:** Always add `pointer-events-none` to decorative overlays that sit on top of other content.
+## 2024-05-04 - Unlabelled Icon Buttons in Core Layout
+**Learning:** Found multiple instances of `<Button size="icon">` lacking `aria-label`s in the core `Header` layout component. This pattern of adding tooltips/icons without explicit screen reader accessible names seems common.
+**Action:** When using or reviewing the `Button` component with `size="icon"`, always explicitly provide an `aria-label` property to ensure the button's action is announced to screen readers.
