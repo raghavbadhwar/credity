@@ -68,6 +68,12 @@ interface ConnectionRequest {
 
 export default function PlatformConnections() {
     const queryClient = useQueryClient();
+    const [now, setNow] = useState(Date.now());
+
+    useEffect(() => {
+        const interval = setInterval(() => setNow(Date.now()), 60000); // Update every minute
+        return () => clearInterval(interval);
+    }, []);
     const [selectedConnection, setSelectedConnection] = useState<PlatformConnection | null>(null);
     const [showDisconnectDialog, setShowDisconnectDialog] = useState(false);
     const [showPermissionsDialog, setShowPermissionsDialog] = useState(false);
@@ -205,7 +211,7 @@ export default function PlatformConnections() {
                                                 </p>
                                                 <p className="text-xs text-amber-600 dark:text-amber-400 mt-1">
                                                     <Clock className="w-3 h-3 inline mr-1" />
-                                                    Expires in {Math.round((new Date(request.expiresAt).getTime() - Date.now()) / 3600000)}h
+                                                    Expires in {Math.round((new Date(request.expiresAt).getTime() - now) / 3600000)}h
                                                 </p>
                                             </div>
                                         </div>

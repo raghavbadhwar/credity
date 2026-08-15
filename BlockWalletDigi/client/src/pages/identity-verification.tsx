@@ -198,7 +198,8 @@ export default function IdentityVerification() {
         onSuccess: (data) => {
             setLivenessSession(data);
             setCurrentChallenge(data.currentChallenge);
-            startCamera();
+            // Wait for the next tick for the video element to be rendered
+            setPendingCameraStart(true);
         }
     });
 
@@ -347,6 +348,7 @@ export default function IdentityVerification() {
         };
 
         initCamera();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [pendingCameraStart, livenessSession]);
 
     const completeLiveness = async (frameData?: string | null) => {

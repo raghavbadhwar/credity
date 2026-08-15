@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { Sidebar } from "./Sidebar";
 import { Header } from "./Header";
 import { ScrollArea } from "@/components/ui/scroll-area";

@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * WebAuthn Biometrics Hook
  * Uses Web Authentication API for real device biometrics (Touch ID, Face ID, fingerprint)

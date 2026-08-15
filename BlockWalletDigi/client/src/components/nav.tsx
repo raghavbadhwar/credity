@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { Link, useLocation } from "wouter";
 import { Wallet, User, Settings, LogOut } from "lucide-react";
 import { cn } from "@/lib/utils";

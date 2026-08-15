@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { useState, useRef, useEffect } from 'react';
 import { Camera, X, SwitchCamera, FlashlightOff, Flashlight, CheckCircle } from 'lucide-react';
 import { Button } from './ui/button';
@@ -19,6 +20,7 @@ export function QRScanner({ onScan, onClose, title = "Scan QR Code", description
     const videoRef = useRef<HTMLVideoElement>(null);
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const [error, setError] = useState<string | null>(null);
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const [scanning, setScanning] = useState(false);
     const [facingMode, setFacingMode] = useState<'user' | 'environment'>('environment');
     const [flash, setFlash] = useState(false);

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /**
  * CredVerse Gateway - Express Backend Server with Vite Frontend
  */

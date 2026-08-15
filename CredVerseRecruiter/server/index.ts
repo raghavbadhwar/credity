@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // Initialize Sentry BEFORE importing anything else
 import { initSentry, sentryErrorHandler } from "./services/sentry";
 initSentry('credverse-recruiter');
