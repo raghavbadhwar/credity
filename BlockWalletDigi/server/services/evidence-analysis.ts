@@ -16,6 +16,7 @@ export interface EvidenceUploadRequest {
     claimId?: string;
     mediaType: 'image' | 'video' | 'document';
     url: string;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     metadata?: Record<string, any>;
 }
 
@@ -24,6 +25,7 @@ export interface EvidenceAnalysisResult {
     isAiGenerated: boolean;
     manipulationDetected: boolean;
     blockchainHash: string;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     metadataExtracted: Record<string, any>;
     analysisDetails: {
         exifPresent: boolean;
@@ -93,6 +95,7 @@ function generateBlockchainHash(url: string, userId: string): string {
  * Extract metadata from evidence
  * In production, would use exif-parser or sharp library
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function extractMetadata(request: EvidenceUploadRequest): Record<string, any> {
     // Simulated metadata extraction
     const now = new Date();
@@ -136,6 +139,7 @@ function getFormatFromUrl(url: string): string {
  */
 function detectManipulation(
     request: EvidenceUploadRequest,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     metadata: Record<string, any>
 ): { detected: boolean; software: string | null; indicators: string[] } {
     const indicators: string[] = [];
@@ -180,6 +184,7 @@ function detectManipulation(
  * Check if evidence is AI-generated
  * In production, would use trained ML model or API like Arya.ai
  */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 async function checkAiGenerated(request: EvidenceUploadRequest): Promise<boolean> {
     // Placeholder - would call deepfake detection API
     // For now, return false (assume not AI-generated)
@@ -197,6 +202,7 @@ async function checkAiGenerated(request: EvidenceUploadRequest): Promise<boolean
  * Calculate authenticity score based on analysis
  */
 function calculateAuthenticityScore(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     metadata: Record<string, any>,
     manipulationAnalysis: { detected: boolean; indicators: string[] },
     isAiGenerated: boolean
@@ -239,6 +245,7 @@ function calculateAuthenticityScore(
 /**
  * Get evidence by ID
  */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export async function getEvidenceById(evidenceId: string): Promise<EvidenceAnalysisResult | null> {
     // Would fetch from database
     return null;
@@ -247,6 +254,7 @@ export async function getEvidenceById(evidenceId: string): Promise<EvidenceAnaly
 /**
  * List evidence for a claim
  */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export async function listEvidenceForClaim(claimId: string): Promise<EvidenceAnalysisResult[]> {
     // Would fetch from database
     return [];

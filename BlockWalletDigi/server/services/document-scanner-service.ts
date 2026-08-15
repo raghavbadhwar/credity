@@ -123,6 +123,7 @@ export async function scanDocument(request: DocumentScanRequest): Promise<Docume
 /**
  * Detect document type from image
  */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function detectDocumentType(imageData: string): string {
     // In production, this would use ML model to detect document type
     // Based on layout, colors, patterns, etc.
@@ -197,6 +198,7 @@ async function extractFields(imageData: string, documentType: string): Promise<E
 /**
  * Parse extracted fields into structured data
  */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function parseExtractedData(fields: ExtractedField[], documentType: string): DocumentScanResult['extractedData'] {
     const data: DocumentScanResult['extractedData'] = {};
 
@@ -264,6 +266,7 @@ function normalizeDateFormat(dateStr: string): string {
 /**
  * Extract face from document photo
  */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function extractFaceFromDocument(imageData: string): { found: boolean; imageData?: string } {
     // In production, this would:
     // 1. Detect face region in document
