@@ -47,7 +47,8 @@ export default function VerificationLogs() {
             if (!response.ok) throw new Error('Failed to fetch logs');
             return response.json();
         },
-        refetchInterval: 5000, // Auto-refresh every 5 seconds for real-time feel
+        // ⚡ Bolt: Extended refetch interval to 30s to reduce backend load and prevent unnecessary re-renders
+        refetchInterval: 30000,
     });
 
     // Fetch stats
@@ -60,7 +61,8 @@ export default function VerificationLogs() {
             if (!response.ok) throw new Error('Failed to fetch stats');
             return response.json();
         },
-        refetchInterval: 5000,
+        // ⚡ Bolt: Extended refetch interval to 30s to reduce backend load and prevent unnecessary re-renders
+        refetchInterval: 30000,
     });
 
     // Export logs

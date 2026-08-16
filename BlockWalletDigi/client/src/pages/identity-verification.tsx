@@ -182,7 +182,8 @@ export default function IdentityVerification() {
             const res = await fetch('/api/identity/status?userId=1');
             return res.json();
         },
-        refetchInterval: 5000
+        // ⚡ Bolt: Extended refetch interval to 30s to reduce backend load and prevent unnecessary re-renders
+        refetchInterval: 30000
     });
 
     // Start liveness session mutation
