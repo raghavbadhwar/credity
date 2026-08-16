@@ -4,7 +4,7 @@
  * Implements PRD Section 5.1 Feature 3 UI requirements
  */
 
-import { useState } from "react";
+import { useState, memo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import {
@@ -47,7 +47,7 @@ interface TrustScoreData {
     history: Array<{ date: string; score: number }>;
 }
 
-export function TrustScoreCard() {
+export const TrustScoreCard = memo(function TrustScoreCard() {
     const [showBreakdown, setShowBreakdown] = useState(false);
 
     const { data, isLoading } = useQuery<{ success: boolean } & TrustScoreData>({
@@ -223,7 +223,7 @@ export function TrustScoreCard() {
             </div>
         </motion.div>
     );
-}
+});
 
 interface ScoreSectionProps {
     icon: React.ReactNode;

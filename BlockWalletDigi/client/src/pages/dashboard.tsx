@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Link, useSearch } from "wouter";
 import { Sidebar } from "@/components/sidebar";
 import { Button } from "@/components/ui/button";
@@ -105,19 +105,19 @@ export default function Dashboard() {
     refetchInterval: 30000,
   });
 
-  const credentials: WalletCredential[] = credentialsData?.credentials || [];
+  const credentials: WalletCredential[] = useMemo(() => credentialsData?.credentials || [], [credentialsData?.credentials]);
   const stats: WalletStats = walletData?.stats || {};
   const notifications: Notification[] = notifData?.notifications || [];
   const unreadCount = notifData?.unreadCount || 0;
   const userDID = walletData?.wallet?.did;
 
   // Quick Access Buttons
-  const quickActions = [
+  const quickActions = useMemo(() => [
     { icon: FileText, label: "My Credentials", href: "/profile" },
     { icon: QrCode, label: "Share via QR", action: () => { if (credentials[0]) { setSelectedCred(credentials[0]); setShareModalOpen(true); } } },
     { icon: Plus, label: "Add Credential", href: "/receive" },
     { icon: Settings, label: "Settings", href: "/settings" },
-  ];
+  ], [credentials]);
 
   const isLoading = walletLoading || credentialsLoading;
 
