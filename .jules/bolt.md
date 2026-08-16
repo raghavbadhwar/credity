@@ -1,0 +1,3 @@
+## 2024-05-24 - Map Iteration and Early Break Memory Leaks
+**Learning:** Map iteration order in V8 preserves insertion order. Updating an existing key's value does not update its iteration order. Therefore, trying to break early from a cleanup loop on a Map by checking if `now - value.createdAt > ttlMs` (assuming subsequent items are newer) is unsafe, as older items might be updated and re-inserted at the front of the iteration order, resulting in memory leaks for subsequent untouched keys. We need to throttle the O(N) cleanup over the entire Map rather than relying on early-break cache expiration.
+**Action:** Throttle O(N) cache cleanup operations using a `lastPruneTime` variable instead of attempting an early break in Map iteration loops.

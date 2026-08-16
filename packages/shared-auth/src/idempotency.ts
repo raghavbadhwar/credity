@@ -11,8 +11,17 @@ const DEFAULT_TTL_MS = 24 * 60 * 60 * 1000;
 const DEFAULT_MAX_ENTRIES = 5000;
 const cache = new Map<string, StoredResponse>();
 
+// SECURITY/PERFORMANCE: Throttle the O(N) cleanup over the Map to at most once per minute
+// Map iteration preserves insertion order. Updating an existing key's value does not update its iteration order.
+// Therefore, we cannot early-break this O(N) loop based on time. We must throttle the whole loop.
+// Impact: Reduces CPU blocking from O(N) sweeps on every request to at most once per 60 seconds.
+let lastPruneTime = 0;
+
 function pruneExpired(ttlMs: number): void {
     const now = Date.now();
+    if (now - lastPruneTime < 60000) return;
+    lastPruneTime = now;
+
     for (const [key, value] of cache.entries()) {
         if (now - value.createdAt > ttlMs) {
             cache.delete(key);
