@@ -1,0 +1,4 @@
+## 2024-07-30 - Fix Authentication Bypass in User Routes
+**Vulnerability:** Insecure Direct Object Reference (IDOR) / Authentication Bypass. The user routes (`/user`, `/activity`) were using a hardcoded `userId = 1` instead of extracting the authenticated user's ID from the session/token. This allowed any user (or unauthenticated users, since the middleware was missing) to view and modify user 1's data.
+**Learning:** Hardcoded development values (`userId = 1`) left in production routes completely bypass intended authentication and authorization mechanisms.
+**Prevention:** Ensure development placeholders are replaced with actual authentication mechanisms before merging. Implement strict middleware enforcement (`authMiddleware`) on all protected routes and derive user context strictly from the authenticated request object (`req.user`), not from hardcoded or easily manipulable sources.
