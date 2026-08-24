@@ -245,22 +245,26 @@ export function startIssuanceWorker(
             jobResults.set(jobId, result);
             void queuePersist();
 
-            // Process each credential
-            for (let i = 0; i < recipients.length; i++) {
-                const { recipient, data } = recipients[i];
+            // ⚡ Bolt Optimization: Process credentials in chunks concurrently instead of sequentially
+            // Impact: Reduces bulk issuance time by up to 10x (depending on CHUNK_SIZE) while bounding concurrency to prevent DB/memory exhaustion.
+            const CHUNK_SIZE = 10;
+            for (let i = 0; i < recipients.length; i += CHUNK_SIZE) {
+                const chunk = recipients.slice(i, i + CHUNK_SIZE);
 
-                try {
-                    await processCredential(tenantId, templateId, issuerId, recipient, data);
-                    result.success++;
-                } catch (error: any) {
-                    result.failed++;
-                    result.errors.push(`Recipient ${i + 1}: ${error.message}`);
-                    console.error(`[Queue] Job ${jobId} failed for recipient ${i + 1}:`, error);
-                }
+                await Promise.all(chunk.map(async ({ recipient, data }, index) => {
+                    const globalIndex = i + index;
+                    try {
+                        await processCredential(tenantId, templateId, issuerId, recipient, data);
+                        result.success++;
+                    } catch (error: any) {
+                        result.failed++;
+                        result.errors.push(`Recipient ${globalIndex + 1}: ${error.message}`);
+                        console.error(`[Queue] Job ${jobId} failed for recipient ${globalIndex + 1}:`, error);
+                    }
+                    result.processed++;
+                }));
 
-                result.processed++;
-
-                // Update job progress
+                // Update job progress after each chunk
                 await job.updateProgress(Math.round((result.processed / result.total) * 100));
             }
 
