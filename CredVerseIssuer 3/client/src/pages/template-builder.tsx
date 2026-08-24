@@ -12,9 +12,9 @@ import {
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
-import { useState, useCallback } from "react";
+import { useState } from "react";
 import { useLocation } from "wouter";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
     DndContext,
     DragEndEvent,
@@ -56,7 +56,7 @@ interface TemplateField {
     y: number;
     width: number;
     height: number;
-    properties: Record<string, any>;
+    properties: Record<string, unknown>;
 }
 
 // Draggable field component for the palette
@@ -133,7 +133,7 @@ function CanvasField({
                     <span className="text-xs font-medium">{field.label}</span>
                 </div>
                 {isSelected && (
-                    <button onClick={(e) => { e.stopPropagation(); onDelete(); }} className="text-red-500 hover:text-red-700">
+                    <button onClick={(e) => { e.stopPropagation(); onDelete(); }} className="text-red-500 hover:text-red-700" aria-label="Delete field" title="Delete field">
                         <Trash2 className="h-3 w-3" />
                     </button>
                 )}
@@ -291,7 +291,7 @@ export default function TemplateBuilder() {
     };
 
     // Update field property
-    const updateFieldProperty = (key: string, value: any) => {
+    const updateFieldProperty = (key: string, value: unknown) => {
         if (!selectedFieldId) return;
         setFields(fields.map(f =>
             f.id === selectedFieldId
@@ -307,7 +307,7 @@ export default function TemplateBuilder() {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'x-api-key': (import.meta as any).env?.VITE_API_KEY || '',
+                    'x-api-key': (import.meta as unknown as { env: Record<string, string> }).env?.VITE_API_KEY || '',
                 },
                 body: JSON.stringify({
                     name: templateName,
