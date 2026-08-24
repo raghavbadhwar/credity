@@ -1,0 +1,4 @@
+## 2025-05-14 - IDOR and Mass Assignment Pattern in Tenant Routes
+**Vulnerability:** API routes updating or retrieving objects (like students) lacked authorization checks ensuring the object's tenantId matches the requester's tenantId. Additionally, PUT payloads passed directly to storage permitted mass assignment of protected fields like tenantId.
+**Learning:** Centralized tenant mapping (apiKeyMiddleware) sets req.tenantId, but storage methods (getStudent) do not implicitly filter by tenantId. Relying on storage methods alone leaves endpoints vulnerable to IDOR.
+**Prevention:** Route handlers must explicitly verify `fetchedObject.tenantId === req.tenantId` before returning or mutating data. Protected fields like tenantId must be explicitly deleted from incoming payloads before passing them to storage methods.

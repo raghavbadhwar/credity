@@ -19,9 +19,14 @@ router.get("/students", async (req, res) => {
 // Get single student
 router.get("/students/:id", async (req, res) => {
     try {
+        const tenantId = (req as any).tenantId;
         const student = await storage.getStudent(req.params.id);
         if (!student) {
             return res.status(404).json({ message: "Student not found" });
+        }
+        // Security: Prevent IDOR by ensuring tenantId matches
+        if (student.tenantId !== tenantId) {
+            return res.status(403).json({ message: "Forbidden" });
         }
         res.json(student);
     } catch (error) {
@@ -90,9 +95,25 @@ router.post("/students/import", async (req, res) => {
 // Update student
 router.put("/students/:id", async (req, res) => {
     try {
-        const updated = await storage.updateStudent(req.params.id, req.body);
-        if (!updated) {
+        const tenantId = (req as any).tenantId;
+        const existingStudent = await storage.getStudent(req.params.id);
+
+        if (!existingStudent) {
             return res.status(404).json({ message: "Student not found" });
+        }
+
+        // Security: Prevent IDOR
+        if (existingStudent.tenantId !== tenantId) {
+            return res.status(403).json({ message: "Forbidden" });
+        }
+
+        // Security: Prevent Mass Assignment of tenantId
+        const updateData = { ...req.body };
+        delete updateData.tenantId;
+
+        const updated = await storage.updateStudent(req.params.id, updateData);
+        if (!updated) {
+            return res.status(404).json({ message: "Student not found" }); // Fallback
         }
         res.json(updated);
     } catch (error) {
@@ -103,6 +124,18 @@ router.put("/students/:id", async (req, res) => {
 // Delete student
 router.delete("/students/:id", async (req, res) => {
     try {
+        const tenantId = (req as any).tenantId;
+        const existingStudent = await storage.getStudent(req.params.id);
+
+        if (!existingStudent) {
+            return res.status(404).json({ message: "Student not found" });
+        }
+
+        // Security: Prevent IDOR
+        if (existingStudent.tenantId !== tenantId) {
+            return res.status(403).json({ message: "Forbidden" });
+        }
+
         const deleted = await storage.deleteStudent(req.params.id);
         if (!deleted) {
             return res.status(404).json({ message: "Student not found" });
