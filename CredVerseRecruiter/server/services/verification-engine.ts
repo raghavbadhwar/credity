@@ -303,13 +303,23 @@ export class VerificationEngine {
         let failed = 0;
         let suspicious = 0;
 
-        for (const cred of credentials) {
-            const result = await this.verifyCredential(cred);
-            results.push(result);
+        // ⚡ Bolt Optimization: Use chunked Promise.all for concurrent verification
+        // Impact: Reduces overall processing time for bulk operations by parallelizing API calls
+        // while preventing resource exhaustion through batching.
+        const BATCH_SIZE = 10;
 
-            if (result.status === 'verified') verified++;
-            else if (result.status === 'failed') failed++;
-            else if (result.status === 'suspicious') suspicious++;
+        for (let i = 0; i < credentials.length; i += BATCH_SIZE) {
+            const batch = credentials.slice(i, i + BATCH_SIZE);
+            const batchResults = await Promise.all(
+                batch.map(cred => this.verifyCredential(cred))
+            );
+
+            for (const result of batchResults) {
+                results.push(result);
+                if (result.status === 'verified') verified++;
+                else if (result.status === 'failed') failed++;
+                else if (result.status === 'suspicious') suspicious++;
+            }
         }
 
         const bulkResult: BulkVerificationResult = {
