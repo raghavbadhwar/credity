@@ -3,7 +3,7 @@
  * Manages platform connections as defined in PRD Section 5.1 Feature 5
  */
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "framer-motion";
 import { Sidebar } from "@/components/sidebar";
@@ -64,6 +64,28 @@ interface ConnectionRequest {
     status: string;
     createdAt: string;
     expiresAt: string;
+}
+
+// Extracted component to handle timer logic cleanly
+function ExpiryTimer({ expiresAt }: { expiresAt: string }) {
+    const [timeLeft, setTimeLeft] = useState(() => {
+        return Math.max(0, Math.round((new Date(expiresAt).getTime() - Date.now()) / 3600000));
+    });
+
+    useEffect(() => {
+        const timer = setInterval(() => {
+            const hours = Math.max(0, Math.round((new Date(expiresAt).getTime() - Date.now()) / 3600000));
+            setTimeLeft(hours);
+        }, 60000);
+        return () => clearInterval(timer);
+    }, [expiresAt]);
+
+    return (
+        <p className="text-xs text-amber-600 dark:text-amber-400 mt-1">
+            <Clock className="w-3 h-3 inline mr-1" />
+            Expires in {timeLeft}h
+        </p>
+    );
 }
 
 export default function PlatformConnections() {
@@ -203,10 +225,7 @@ export default function PlatformConnections() {
                                                 <p className="text-xs text-muted-foreground">
                                                     Wants access to: {request.requestedCredentials.join(', ')}
                                                 </p>
-                                                <p className="text-xs text-amber-600 dark:text-amber-400 mt-1">
-                                                    <Clock className="w-3 h-3 inline mr-1" />
-                                                    Expires in {Math.round((new Date(request.expiresAt).getTime() - Date.now()) / 3600000)}h
-                                                </p>
+                                                <ExpiryTimer expiresAt={request.expiresAt} />
                                             </div>
                                         </div>
 

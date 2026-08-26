@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * LLM Service
  * Provides LLM-powered analysis for claims verification

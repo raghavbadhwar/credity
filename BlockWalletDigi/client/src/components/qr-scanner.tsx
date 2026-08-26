@@ -19,7 +19,7 @@ export function QRScanner({ onScan, onClose, title = "Scan QR Code", description
     const videoRef = useRef<HTMLVideoElement>(null);
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const [error, setError] = useState<string | null>(null);
-    const [scanning, setScanning] = useState(false);
+    // Removed unused 'scanning' state
     const [facingMode, setFacingMode] = useState<'user' | 'environment'>('environment');
     const [flash, setFlash] = useState(false);
     const [scanned, setScanned] = useState(false);
@@ -37,7 +37,6 @@ export function QRScanner({ onScan, onClose, title = "Scan QR Code", description
     const startCamera = async () => {
         try {
             setError(null);
-            setScanning(true);
 
             // Stop previous stream
             stopCamera();
@@ -62,7 +61,6 @@ export function QRScanner({ onScan, onClose, title = "Scan QR Code", description
         } catch (err: any) {
             console.error('[QRScanner] Camera error:', err);
             setError('Unable to access camera. Please check permissions.');
-            setScanning(false);
         }
     };
 

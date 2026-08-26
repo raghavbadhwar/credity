@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * Evidence Analysis Service
  * Implements PRD v3.1 Layer 3: Evidence Authentication

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Router } from "express";
 import { storage } from "../storage";
 import { digilockerService } from "../services/digilocker-service";

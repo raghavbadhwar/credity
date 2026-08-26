@@ -12,13 +12,6 @@ interface FaceDetectionResult {
     boundingBox?: { x: number; y: number; width: number; height: number };
 }
 
-interface LivenessChallenge {
-    id: string;
-    type: 'blink' | 'turn_left' | 'turn_right' | 'smile' | 'nod';
-    instruction: string;
-    completed: boolean;
-}
-
 export function useFaceDetection() {
     const videoRef = useRef<HTMLVideoElement | null>(null);
     const canvasRef = useRef<HTMLCanvasElement | null>(null);

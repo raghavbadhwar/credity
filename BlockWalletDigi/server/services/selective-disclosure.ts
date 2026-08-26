@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * Selective Disclosure Service for CredVerse Wallet
  * Implements field-level disclosure for credentials

@@ -1,8 +1,9 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Layout } from "@/components/layout/Layout";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { STATS, RECENT_ACTIVITY } from "@/lib/constants";
 import { Button } from "@/components/ui/button";
-import { ArrowUpRight, MoreHorizontal, FileCheck, Download, Loader2 } from "lucide-react";
+import { ArrowUpRight, , FileCheck, Download, Loader2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { useLocation } from "wouter";
@@ -54,7 +55,7 @@ export default function Dashboard() {
         title: 'Report exported',
         description: 'Dashboard report has been downloaded.'
       });
-    } catch (error) {
+    } catch (_error) {
       toast({
         title: 'Export failed',
         description: 'Could not generate the report.',

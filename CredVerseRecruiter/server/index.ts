@@ -5,9 +5,7 @@ initSentry('credverse-recruiter');
 // Initialize PostHog Analytics
 import { initAnalytics } from "./services/analytics";
 initAnalytics();
-import express, { type Request, Response, NextFunction } from "express";
-import helmet from "helmet";
-import cors from "cors";
+import express from "express";
 import { errorHandler } from "./middleware/error-handler";
 import { setupSecurity } from "@credverse/shared-auth";
 import { initAuth } from "@credverse/shared-auth";

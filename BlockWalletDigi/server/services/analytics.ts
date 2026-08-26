@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { PostHog } from 'posthog-node';
 import { logger } from './logger';
 

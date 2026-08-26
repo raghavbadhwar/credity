@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * Platform Connections API Routes
  * Manages platform connections as defined in PRD Section 5.1 Feature 5

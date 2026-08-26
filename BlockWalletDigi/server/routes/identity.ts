@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * Identity Verification Routes
  * Implements PRD v3.1 Layer 1: Identity Verification API

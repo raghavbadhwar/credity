@@ -4,8 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import {
-    CreditCard, CheckCircle, AlertCircle, Download, Calendar,
-    Zap, Building, Users, FileCheck, ExternalLink
+    CreditCard, CheckCircle,  Download, Calendar,
+    Zap, Building, Users, FileCheck
 } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";

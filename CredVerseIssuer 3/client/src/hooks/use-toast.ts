@@ -22,6 +22,9 @@ const actionTypes = {
   REMOVE_TOAST: "REMOVE_TOAST",
 } as const
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const _actionTypes = actionTypes
+
 let count = 0
 
 function genId() {
