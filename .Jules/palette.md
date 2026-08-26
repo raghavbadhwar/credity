@@ -7,3 +7,6 @@
 ## 2026-02-22 - Decorative Overlays
 **Learning:** Decorative elements (like blurred backgrounds) positioned absolutely over interactive elements can intercept clicks, making the UI unresponsive. This is a critical usability failure.
 **Action:** Always add `pointer-events-none` to decorative overlays that sit on top of other content.
+## 2025-05-09 - Missing ARIA Labels on Icon Buttons
+**Learning:** Icon-only buttons lacking `aria-label`s were found scattered across components in this app, severely degrading the experience for screen reader users by removing context.
+**Action:** Always add `aria-label` attributes to any icon-only button to ensure semantic and accessible HTML, establishing an accessible foundation for the UI.
