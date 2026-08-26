@@ -303,8 +303,11 @@ export class VerificationEngine {
         let failed = 0;
         let suspicious = 0;
 
-        for (const cred of credentials) {
-            const result = await this.verifyCredential(cred);
+        // ⚡ Bolt: Execute independent verification tasks concurrently to reduce total execution time
+        const verificationPromises = credentials.map(cred => this.verifyCredential(cred));
+        const concurrentResults = await Promise.all(verificationPromises);
+
+        for (const result of concurrentResults) {
             results.push(result);
 
             if (result.status === 'verified') verified++;
