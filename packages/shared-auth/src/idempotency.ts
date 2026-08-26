@@ -11,8 +11,17 @@ const DEFAULT_TTL_MS = 24 * 60 * 60 * 1000;
 const DEFAULT_MAX_ENTRIES = 5000;
 const cache = new Map<string, StoredResponse>();
 
+// 💡 What: Throttle O(N) cache expiration and rely on lazy cleanup.
+// 🎯 Why: Iterating over the entire Map on every request is an O(N) operation that blocks the event loop. We cannot break early as Map iteration order is insertion order, and updates don't change insertion order.
+// 📊 Impact: Significantly reduces event loop blocking and CPU usage during high request volumes.
+const PRUNE_INTERVAL_MS = 60000;
+let lastPruneTime = 0;
+
 function pruneExpired(ttlMs: number): void {
     const now = Date.now();
+    if (now - lastPruneTime < PRUNE_INTERVAL_MS) return;
+    lastPruneTime = now;
+
     for (const [key, value] of cache.entries()) {
         if (now - value.createdAt > ttlMs) {
             cache.delete(key);
@@ -82,8 +91,12 @@ export function idempotencyMiddleware(options?: { ttlMs?: number; maxEntries?: n
         const key = `${idempotencyKey}:${requestFingerprint(req)}`;
         const cached = cache.get(key);
         if (cached) {
-            res.status(cached.statusCode).json(cached.body);
-            return;
+            if (Date.now() - cached.createdAt > ttlMs) {
+                cache.delete(key);
+            } else {
+                res.status(cached.statusCode).json(cached.body);
+                return;
+            }
         }
 
         const originalJson = res.json.bind(res);

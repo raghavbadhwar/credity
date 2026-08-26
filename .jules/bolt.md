@@ -1,0 +1,3 @@
+## 2024-03-19 - Throttle O(N) Idempotency Cache Cleanups
+**Learning:** In `packages/shared-auth/src/idempotency.ts`, the `pruneExpired` function iterates over all items in a `Map`. Because updating an existing key's value in a Map does NOT update its iteration order (which is based on insertion), we cannot break out of the loop early, making it strictly O(N). Running this on every single request blocks the event loop significantly under load.
+**Action:** Throttle the global O(N) pruning loop (e.g., using `lastPruneTime` with a 1-minute interval) and rely on lazy O(1) expiration checks during cache retrieval (`cache.get`) to handle keys that have expired but haven't been swept yet.
