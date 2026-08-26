@@ -386,7 +386,7 @@ export default function Settings() {
                                             readOnly
                                             className="font-mono"
                                         />
-                                        <Button variant="outline" size="icon">
+                                        <Button variant="outline" size="icon" aria-label="Copy test API key">
                                             <Copy className="h-4 w-4" />
                                         </Button>
                                     </div>
