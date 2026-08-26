@@ -176,7 +176,8 @@ router.post("/digilocker/import-all", async (req, res) => {
         const imported: string[] = [];
         const failed: string[] = [];
 
-        for (const doc of documents) {
+        // Using Promise.all for concurrent document import instead of sequential loop
+        const importResults = await Promise.all(documents.map(async (doc) => {
             try {
                 const { document } = await digilockerService.pullDocument(userId, doc.uri);
 
@@ -195,10 +196,15 @@ router.post("/digilocker/import-all", async (req, res) => {
                     category: doc.doctype.includes('CLASS') ? 'academic' : 'government',
                 });
 
-                imported.push(doc.name);
+                return { success: true, name: doc.name };
             } catch (e) {
-                failed.push(doc.name);
+                return { success: false, name: doc.name };
             }
+        }));
+
+        for (const result of importResults) {
+            if (result.success) imported.push(result.name);
+            else failed.push(result.name);
         }
 
         await storage.createActivity({
@@ -261,7 +267,8 @@ router.post("/digilocker/connect", async (req, res) => {
             // Import demo documents
             const documents = await digilockerService.listDocuments(userId);
 
-            for (const doc of documents.slice(0, 3)) { // Import first 3
+            // Using Promise.all to fetch demo documents concurrently
+            await Promise.all(documents.slice(0, 3).map(async (doc) => {
                 const { document } = await digilockerService.pullDocument(userId, doc.uri);
 
                 await walletService.storeCredential(userId, {
@@ -276,7 +283,7 @@ router.post("/digilocker/connect", async (req, res) => {
                     },
                     category: doc.doctype.includes('CLASS') ? 'academic' : 'government',
                 });
-            }
+            }));
 
             await storage.createActivity({
                 userId,
