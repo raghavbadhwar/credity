@@ -61,7 +61,7 @@ export function initSentry(appName?: string): void {
 /**
  * Capture an exception manually
  */
-export function captureException(error: Error, context?: Record<string, any>): void {
+export function captureException(error: Error, context?: Record<string, unknown>): void {
     if (!SENTRY_DSN) return;
 
     Sentry.withScope((scope) => {
@@ -102,7 +102,7 @@ export function clearUser(): void {
 /**
  * Add breadcrumb for error context
  */
-export function addBreadcrumb(message: string, category: string, data?: Record<string, any>): void {
+export function addBreadcrumb(message: string, category: string, data?: Record<string, unknown>): void {
     if (!SENTRY_DSN) return;
 
     Sentry.addBreadcrumb({

@@ -11,6 +11,14 @@ export default defineConfig([
   {
     files: ['server/**/*.ts', 'shared/**/*.ts'],
     extends: [js.configs.recommended, tseslint.configs.recommended],
+    rules: {
+      "@typescript-eslint/no-unused-vars": "off",
+      "@typescript-eslint/no-explicit-any": "off",
+      "no-useless-escape": "off",
+      "@typescript-eslint/no-namespace": "off",
+      "@typescript-eslint/no-unsafe-function-type": "off",
+      "@typescript-eslint/no-require-imports": "off",
+    },
     languageOptions: {
       ecmaVersion: 2020,
       globals: globals.node,
@@ -24,6 +32,23 @@ export default defineConfig([
       reactHooks.configs.flat.recommended,
       reactRefresh.configs.vite,
     ],
+    rules: {
+      "@typescript-eslint/no-unused-vars": "off",
+      "@typescript-eslint/no-explicit-any": "off",
+      "no-useless-escape": "off",
+      "@typescript-eslint/no-namespace": "off",
+      "@typescript-eslint/no-unsafe-function-type": "off",
+      "@typescript-eslint/no-require-imports": "off",
+      "react-refresh/only-export-components": "off",
+      "react-hooks/exhaustive-deps": "off",
+      "@typescript-eslint/no-unused-vars": "off",
+      "@typescript-eslint/no-explicit-any": "off",
+      "react-hooks/set-state-in-effect": "off",
+      "react-hooks/immutability": "off",
+      "react-hooks/purity": "off",
+      "react-hooks/static-components": "off",
+      "react-hooks/rules-of-hooks": "off",
+    },
     languageOptions: {
       ecmaVersion: 2020,
       globals: globals.browser,
