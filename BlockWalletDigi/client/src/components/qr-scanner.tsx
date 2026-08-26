@@ -27,12 +27,26 @@ export function QRScanner({ onScan, onClose, title = "Scan QR Code", description
     const streamRef = useRef<MediaStream | null>(null);
     const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
-    useEffect(() => {
-        startCamera();
-        return () => {
-            stopCamera();
-        };
-    }, [facingMode]);
+    const startScanning = () => {
+        // Simple QR detection using canvas
+        // In production, use html5-qrcode library for better detection
+        intervalRef.current = setInterval(() => {
+            if (videoRef.current && canvasRef.current && !scanned) {
+                const video = videoRef.current;
+                const canvas = canvasRef.current;
+                const ctx = canvas.getContext('2d');
+
+                if (ctx && video.readyState === video.HAVE_ENOUGH_DATA) {
+                    canvas.width = video.videoWidth;
+                    canvas.height = video.videoHeight;
+                    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+                    // In a real implementation, use jsQR or html5-qrcode here
+                    // For demo, we'll simulate scanning after 3 seconds
+                }
+            }
+        }, 100);
+    };
 
     const startCamera = async () => {
         try {
@@ -66,6 +80,13 @@ export function QRScanner({ onScan, onClose, title = "Scan QR Code", description
         }
     };
 
+    useEffect(() => {
+        startCamera();
+        return () => {
+            stopCamera();
+        };
+    }, [facingMode]);
+
     const stopCamera = () => {
         if (intervalRef.current) {
             clearInterval(intervalRef.current);
@@ -80,27 +101,8 @@ export function QRScanner({ onScan, onClose, title = "Scan QR Code", description
         if (videoRef.current) {
             videoRef.current.srcObject = null;
         }
-    };
 
-    const startScanning = () => {
-        // Simple QR detection using canvas
-        // In production, use html5-qrcode library for better detection
-        intervalRef.current = setInterval(() => {
-            if (videoRef.current && canvasRef.current && !scanned) {
-                const video = videoRef.current;
-                const canvas = canvasRef.current;
-                const ctx = canvas.getContext('2d');
-
-                if (ctx && video.readyState === video.HAVE_ENOUGH_DATA) {
-                    canvas.width = video.videoWidth;
-                    canvas.height = video.videoHeight;
-                    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-
-                    // In a real implementation, use jsQR or html5-qrcode here
-                    // For demo, we'll simulate scanning after 3 seconds
-                }
-            }
-        }, 100);
+        setScanning(false);
     };
 
     const handleManualInput = () => {
