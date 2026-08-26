@@ -1,0 +1,3 @@
+## 2024-06-24 - Avoiding O(n) array allocations in Map iteration
+**Learning:** Using `Array.from(map.values())` or `Array.from(map.entries())` just to iterate (e.g. in a `for...of` loop or with `.find()`) forces the JavaScript engine to allocate a temporary array of size O(n). This causes unnecessary memory spikes and garbage collection pauses. Furthermore, `.find()` over an array loses the ability to short-circuit the map iteration, forcing a full map traversal first.
+**Action:** Replace `Array.from(map.values())` and `Array.from(map.entries())` with direct `for...of` iteration over `map.values()` and `map.entries()`. This iterates the iterator lazily with O(1) memory overhead and allows early returns.
