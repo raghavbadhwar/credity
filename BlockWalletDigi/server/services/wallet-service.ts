@@ -261,11 +261,14 @@ async function queuePersist(): Promise<void> {
     if (!stateStore) return;
     persistChain = persistChain
         .then(async () => {
+            // Optimization: Avoid Array.from(wallets.entries()).map() to prevent
+            // allocating a large intermediate array that stresses garbage collection.
+            const serializedWallets: Array<[number, any]> = [];
+            for (const [userId, wallet] of wallets.entries()) {
+                serializedWallets.push([userId, serializeWalletState(wallet)]);
+            }
             const payload: WalletServiceState = {
-                wallets: Array.from(wallets.entries()).map(([userId, wallet]) => [
-                    userId,
-                    serializeWalletState(wallet),
-                ]),
+                wallets: serializedWallets,
                 certInIncidents: Array.from(certInIncidents.entries()),
             };
             await stateStore.save(payload);
@@ -684,10 +687,16 @@ export class WalletService {
     async listCertInIncidents(): Promise<Array<CertInIncidentRecord & { seconds_to_report_due: number }>> {
         await ensureHydrated();
         const now = Date.now();
-        return Array.from(certInIncidents.values()).map((incident) => ({
-            ...incident,
-            seconds_to_report_due: Math.max(0, Math.floor((new Date(incident.report_due_at).getTime() - now) / 1000)),
-        }));
+        const results = [];
+        // Optimization: Avoid Array.from(certInIncidents.values()).map() to prevent
+        // allocating an intermediate array and reduce GC pressure.
+        for (const incident of certInIncidents.values()) {
+            results.push({
+                ...incident,
+                seconds_to_report_due: Math.max(0, Math.floor((new Date(incident.report_due_at).getTime() - now) / 1000)),
+            });
+        }
+        return results;
     }
 
     /**
