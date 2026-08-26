@@ -68,6 +68,7 @@ export function validatePasswordStrength(password: string): PasswordValidationRe
     if (!/[0-9]/.test(password)) {
         errors.push('Password must contain at least one number');
     }
+    // eslint-disable-next-line no-useless-escape
     if (!/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)) {
         errors.push('Password must contain at least one special character');
     }
@@ -220,6 +221,7 @@ export function hashApiKey(apiKey: string): string {
 
 // Express middleware types
 declare global {
+    // eslint-disable-next-line @typescript-eslint/no-namespace
     namespace Express {
         interface Request {
             user?: TokenPayload;
@@ -290,6 +292,21 @@ export function requireRole(...roles: AuthUser['role'][]) {
  * Rate limiting helper
  */
 const rateLimitMap = new Map<string, { count: number; resetAt: number }>();
+
+// Expose for testing
+export const _rateLimitMapForTesting = rateLimitMap;
+
+export function cleanupRateLimits(): void {
+    const now = Date.now();
+    for (const [key, record] of rateLimitMap.entries()) {
+        if (now > record.resetAt) {
+            rateLimitMap.delete(key);
+        }
+    }
+}
+
+// Cleanup every 5 minutes
+setInterval(cleanupRateLimits, 5 * 60 * 1000).unref();
 
 export function checkRateLimit(key: string, maxRequests: number, windowMs: number): boolean {
     const now = Date.now();

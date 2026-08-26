@@ -83,6 +83,7 @@ router.post('/auth/register', async (req, res) => {
                 expiresIn: 900, // 15 minutes
             },
         });
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
         console.error('[Auth] Register error:', error);
         res.status(500).json({ error: 'Registration failed' });
@@ -112,6 +113,7 @@ router.post('/auth/login', async (req, res) => {
         }
 
         // Verify password
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const passwordHash = (user as any).password;
         if (!passwordHash) {
             if (!allowLegacyLoginBypass) {
@@ -151,6 +153,7 @@ router.post('/auth/login', async (req, res) => {
                 expiresIn: 900,
             },
         });
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
         console.error('[Auth] Login error:', error);
         res.status(500).json({ error: 'Login failed' });
@@ -288,6 +291,7 @@ router.post('/auth/change-password', authMiddleware, async (req, res) => {
         }
 
         // Verify current password if exists
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const passwordHash = (user as any).password;
         if (passwordHash && currentPassword) {
             const valid = await comparePassword(currentPassword, passwordHash);
@@ -298,6 +302,7 @@ router.post('/auth/change-password', authMiddleware, async (req, res) => {
 
         // Update password
         const newHash = await hashPassword(newPassword);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         await storage.updateUser(Number(req.user!.userId), { password: newHash } as any);
 
         res.json({ success: true, message: 'Password updated' });
