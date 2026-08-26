@@ -1,0 +1,3 @@
+## 2026-06-06 - Optimized Array.from(map.values()) Iterator Allocations
+**Learning:** In Node.js/TypeScript, using `Array.from(map.values())` inside a `for...of` loop unnecessarily allocates a full array in memory (O(N) space) and incurs significant iteration overhead compared to iterating over the iterator directly (`for (const val of map.values())`). Benchmarks showed a 2x performance penalty.
+**Action:** Replace `Array.from(map.values())` or `Array.from(map.entries())` with direct `for...of` iteration over `map.values()` and `map.entries()` across hot loops in `BlockWalletDigi` and other workspaces to reduce garbage collection pressure and improve CPU efficiency.
