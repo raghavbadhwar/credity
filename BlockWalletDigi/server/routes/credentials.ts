@@ -1,8 +1,12 @@
 import { Router } from 'express';
 import { walletService } from '../services/wallet-service';
 import { storage } from '../storage';
+import { authMiddleware } from '../services/auth-service';
 
 const router = Router();
+
+// Apply authMiddleware to all routes
+router.use(authMiddleware);
 
 // ============== Credential Management ==============
 
@@ -11,7 +15,7 @@ const router = Router();
  */
 router.get('/wallet/credentials', async (req, res) => {
     try {
-        const userId = parseInt(req.query.userId as string) || 1;
+        const userId = Number(req.user?.userId);
         const category = req.query.category as string;
 
         let credentials;
@@ -33,7 +37,7 @@ router.get('/wallet/credentials', async (req, res) => {
  */
 router.get('/wallet/credentials/:id', async (req, res) => {
     try {
-        const userId = parseInt(req.query.userId as string) || 1;
+        const userId = Number(req.user?.userId);
         const { id } = req.params;
 
         const credentials = await walletService.getCredentials(userId);
@@ -64,9 +68,10 @@ router.get('/wallet/credentials/:id', async (req, res) => {
  */
 router.post('/wallet/credentials', async (req, res) => {
     try {
-        const { userId, credential } = req.body;
-        if (!userId || !credential) {
-            return res.status(400).json({ error: 'userId and credential required' });
+        const userId = Number(req.user?.userId);
+        const { credential } = req.body;
+        if (!credential) {
+            return res.status(400).json({ error: 'credential required' });
         }
 
         const stored = await walletService.storeCredential(userId, {
@@ -112,11 +117,8 @@ router.post('/wallet/credentials', async (req, res) => {
  */
 router.post('/credentials/import', async (req, res) => {
     try {
-        const { userId, jwt: vcJwt, type, issuer, data } = req.body;
-
-        if (!userId) {
-            return res.status(400).json({ error: 'userId is required' });
-        }
+        const userId = Number(req.user?.userId);
+        const { jwt: vcJwt, type, issuer, data } = req.body;
 
         // In production, we would decode and validate the VC-JWT
         // For MVP, we accept the credential data directly
@@ -153,9 +155,10 @@ router.post('/credentials/import', async (req, res) => {
  */
 router.post('/wallet/offer/claim', async (req, res) => {
     try {
-        const { userId, url } = req.body;
-        if (!userId || !url) {
-            return res.status(400).json({ error: 'userId and url required' });
+        const userId = Number(req.user?.userId);
+        const { url } = req.body;
+        if (!url) {
+            return res.status(400).json({ error: 'url required' });
         }
 
         console.log(`[Wallet] Claiming offer from: ${url}`);
