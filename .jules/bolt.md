@@ -1,0 +1,3 @@
+## 2025-06-30 - Prevent O(N) network bottlenecks in bulk verification
+**Learning:** The `bulkVerify` method in `CredVerseRecruiter/server/services/verification-engine.ts` was processing credentials sequentially in a `for...of` loop with `await`. This is a classic N+1 bottleneck because each credential verification requires network requests (e.g., blockchain resolution, DID resolution). For N credentials, it takes N times longer.
+**Action:** Use `Promise.all` with `Array.prototype.map` to initiate all independent asynchronous network operations concurrently, significantly reducing total latency for bulk operations.
