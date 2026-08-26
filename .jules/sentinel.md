@@ -1,0 +1,4 @@
+## 2024-05-30 - Insecure Direct Object Reference (IDOR) via Default User ID Fallback
+**Vulnerability:** Systemic IDOR where endpoints default unauthenticated or malformed requests to `userId = 1` via `parseInt(req.query.userId) || 1` or `parseInt(req.body.userId) || 1`. This effectively bypasses authorization and allows accessing User 1's sensitive wallet data.
+**Learning:** Endpoints lacked `authMiddleware` and incorrectly attempted to parse the user ID directly from client-controlled inputs (query/body), falling back to a default active user ID when missing, which constitutes a critical authorization bypass.
+**Prevention:** Always apply `authMiddleware` to protected endpoints, and extract the `userId` exclusively from the verified token payload (`req.user.userId`), never relying on or falling back to untrusted client input.
