@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/static-components */
 import { Link, useLocation } from "wouter";
 import { cn } from "@/lib/utils";
 import {

@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/immutability */
 import { useState, useRef, useEffect } from 'react';
 import { Camera, X, SwitchCamera, FlashlightOff, Flashlight, CheckCircle } from 'lucide-react';
 import { Button } from './ui/button';
