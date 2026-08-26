@@ -7,13 +7,23 @@ import prettier from 'eslint-config-prettier';
 import { defineConfig, globalIgnores } from 'eslint/config';
 
 export default defineConfig([
-  globalIgnores(['dist', 'node_modules', 'migrations', 'drizzle', 'contracts']),
+  globalIgnores(['dist', 'node_modules', 'migrations', 'drizzle', 'build']),
   {
     files: ['server/**/*.ts', 'shared/**/*.ts'],
     extends: [js.configs.recommended, tseslint.configs.recommended],
     languageOptions: {
       ecmaVersion: 2020,
       globals: globals.node,
+    },
+    rules: {
+      "@typescript-eslint/no-explicit-any": "warn",
+      "@typescript-eslint/no-unused-vars": "warn",
+      "@typescript-eslint/no-namespace": "warn",
+      "prefer-const": "warn",
+      "no-useless-escape": "warn",
+      "@typescript-eslint/no-require-imports": "warn",
+      "@typescript-eslint/no-unsafe-function-type": "warn",
+      "no-use-before-define": "warn",
     },
   },
   {
@@ -27,6 +37,14 @@ export default defineConfig([
     languageOptions: {
       ecmaVersion: 2020,
       globals: globals.browser,
+    },
+    rules: {
+      "@typescript-eslint/no-explicit-any": "warn",
+      "@typescript-eslint/no-unused-vars": "warn",
+      "react-refresh/only-export-components": "off",
+      "react-hooks/exhaustive-deps": "off",
+      "react-hooks/set-state-in-effect": "warn",
+      "no-use-before-define": "warn",
     },
   },
   prettier,

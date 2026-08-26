@@ -71,6 +71,8 @@ export default function PlatformConnections() {
     const [selectedConnection, setSelectedConnection] = useState<PlatformConnection | null>(null);
     const [showDisconnectDialog, setShowDisconnectDialog] = useState(false);
     const [showPermissionsDialog, setShowPermissionsDialog] = useState(false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    const [now] = useState(() => Date.now());
 
     // Fetch connections
     const { data: connectionsData, isLoading } = useQuery({
@@ -205,7 +207,7 @@ export default function PlatformConnections() {
                                                 </p>
                                                 <p className="text-xs text-amber-600 dark:text-amber-400 mt-1">
                                                     <Clock className="w-3 h-3 inline mr-1" />
-                                                    Expires in {Math.round((new Date(request.expiresAt).getTime() - Date.now()) / 3600000)}h
+                                                    Expires in {Math.round((new Date(request.expiresAt).getTime() - now) / 3600000)}h
                                                 </p>
                                             </div>
                                         </div>

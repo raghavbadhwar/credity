@@ -7,3 +7,7 @@
 ## 2026-02-22 - Decorative Overlays
 **Learning:** Decorative elements (like blurred backgrounds) positioned absolutely over interactive elements can intercept clicks, making the UI unresponsive. This is a critical usability failure.
 **Action:** Always add `pointer-events-none` to decorative overlays that sit on top of other content.
+
+## 2026-05-21 - Share Modal Accessibility
+**Learning:** Dynamic content like generated QR codes and shareable links often lack semantic labels because they appear after user interaction. Screen reader users need explicit context for these "result" elements.
+**Action:** Always ensure generated images have descriptive alt text (e.g., "QR Code for verifying credential") and read-only inputs have clear labels (e.g., "Share URL"), even if the context seems obvious visually.

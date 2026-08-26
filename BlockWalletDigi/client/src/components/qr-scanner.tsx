@@ -19,52 +19,13 @@ export function QRScanner({ onScan, onClose, title = "Scan QR Code", description
     const videoRef = useRef<HTMLVideoElement>(null);
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const [error, setError] = useState<string | null>(null);
-    const [scanning, setScanning] = useState(false);
+    const [, setScanning] = useState(false);
     const [facingMode, setFacingMode] = useState<'user' | 'environment'>('environment');
     const [flash, setFlash] = useState(false);
     const [scanned, setScanned] = useState(false);
     const { toast } = useToast();
     const streamRef = useRef<MediaStream | null>(null);
     const intervalRef = useRef<NodeJS.Timeout | null>(null);
-
-    useEffect(() => {
-        startCamera();
-        return () => {
-            stopCamera();
-        };
-    }, [facingMode]);
-
-    const startCamera = async () => {
-        try {
-            setError(null);
-            setScanning(true);
-
-            // Stop previous stream
-            stopCamera();
-
-            const stream = await navigator.mediaDevices.getUserMedia({
-                video: {
-                    facingMode,
-                    width: { ideal: 1280 },
-                    height: { ideal: 720 },
-                },
-            });
-
-            streamRef.current = stream;
-
-            if (videoRef.current) {
-                videoRef.current.srcObject = stream;
-                videoRef.current.play();
-            }
-
-            // Start scanning
-            startScanning();
-        } catch (err: any) {
-            console.error('[QRScanner] Camera error:', err);
-            setError('Unable to access camera. Please check permissions.');
-            setScanning(false);
-        }
-    };
 
     const stopCamera = () => {
         if (intervalRef.current) {
@@ -102,6 +63,45 @@ export function QRScanner({ onScan, onClose, title = "Scan QR Code", description
             }
         }, 100);
     };
+
+    const startCamera = async () => {
+        try {
+            setError(null);
+            setScanning(true);
+
+            // Stop previous stream
+            stopCamera();
+
+            const stream = await navigator.mediaDevices.getUserMedia({
+                video: {
+                    facingMode,
+                    width: { ideal: 1280 },
+                    height: { ideal: 720 },
+                },
+            });
+
+            streamRef.current = stream;
+
+            if (videoRef.current) {
+                videoRef.current.srcObject = stream;
+                videoRef.current.play();
+            }
+
+            // Start scanning
+            startScanning();
+        } catch (err: any) {
+            console.error('[QRScanner] Camera error:', err);
+            setError('Unable to access camera. Please check permissions.');
+            setScanning(false);
+        }
+    };
+
+    useEffect(() => {
+        startCamera();
+        return () => {
+            stopCamera();
+        };
+    }, [facingMode]);
 
     const handleManualInput = () => {
         const input = prompt('Enter credential URL or token manually:');

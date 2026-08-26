@@ -7,7 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Copy, QrCode, Link as LinkIcon, Check, Share2, Clock, Mail, MessageCircle, Loader2, Shield, Eye, EyeOff, ExternalLink } from "lucide-react";
+import { Copy, QrCode, Link as LinkIcon, Check, Share2, Clock, Mail, MessageCircle, Loader2, Shield, Eye, ExternalLink } from "lucide-react";
 import { Credential } from "@shared/schema";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
@@ -288,9 +288,9 @@ export function ShareModal({ credential, open, onOpenChange }: ShareModalProps) 
                 {/* QR Code Display */}
                 <div className="flex flex-col items-center justify-center p-6 border rounded-xl bg-white">
                   {qrCodeUrl ? (
-                    <img src={qrCodeUrl} alt="QR Code" className="w-48 h-48" />
+                    <img src={qrCodeUrl} alt="QR Code for verifying credential" className="w-48 h-48" />
                   ) : (
-                    <QrCode className="w-32 h-32 text-gray-400" />
+                    <QrCode className="w-32 h-32 text-gray-400" aria-label="QR Code placeholder" role="img" />
                   )}
                   <p className="text-xs text-muted-foreground mt-3 text-center">
                     Scan to verify credential via W3C VC standard
@@ -307,22 +307,23 @@ export function ShareModal({ credential, open, onOpenChange }: ShareModalProps) 
                     readOnly
                     value={shareResult.shareUrl}
                     className="font-mono text-xs bg-secondary/30"
+                    aria-label="Share URL"
                   />
-                  <Button size="icon" variant="outline" onClick={handleCopy}>
+                  <Button size="icon" variant="outline" onClick={handleCopy} aria-label="Copy share link">
                     {copied ? <Check className="w-4 h-4 text-green-600" /> : <Copy className="w-4 h-4" />}
                   </Button>
                 </div>
 
                 {/* Share Options */}
                 <div className="grid grid-cols-3 gap-2">
-                  <Button variant="outline" size="sm" onClick={() => handleShare('email')}>
-                    <Mail className="w-4 h-4 mr-2" /> Email
+                  <Button variant="outline" size="sm" onClick={() => handleShare('email')} aria-label="Share via Email">
+                    <Mail className="w-4 h-4 mr-2" aria-hidden="true" /> Email
                   </Button>
-                  <Button variant="outline" size="sm" onClick={() => handleShare('whatsapp')}>
-                    <MessageCircle className="w-4 h-4 mr-2" /> WhatsApp
+                  <Button variant="outline" size="sm" onClick={() => handleShare('whatsapp')} aria-label="Share via WhatsApp">
+                    <MessageCircle className="w-4 h-4 mr-2" aria-hidden="true" /> WhatsApp
                   </Button>
-                  <Button variant="outline" size="sm" onClick={() => handleShare('native')}>
-                    <Share2 className="w-4 h-4 mr-2" /> More
+                  <Button variant="outline" size="sm" onClick={() => handleShare('native')} aria-label="Share via native share sheet">
+                    <Share2 className="w-4 h-4 mr-2" aria-hidden="true" /> More
                   </Button>
                 </div>
 
