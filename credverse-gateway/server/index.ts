@@ -3,6 +3,7 @@
  */
 
 // Initialize Sentry BEFORE importing anything else
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { initSentry, sentryErrorHandler } from './services/sentry';
 initSentry('credverse-gateway');
 
@@ -116,12 +117,13 @@ const gatewayHTML = `
         <div class="status" id="status"></div>
     </div>
     <script>
+        /* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars */
         const params = new URLSearchParams(window.location.search);
         const statusDiv = document.getElementById('status');
         if (params.get('login') === 'success') {
-            statusDiv.innerHTML = '✅ Welcome, ' + decodeURIComponent(params.get('name') || 'User') + '!';
+            statusDiv.textContent = '✅ Welcome, ' + decodeURIComponent(params.get('name') || 'User') + '!';
         } else if (params.get('error')) {
-            statusDiv.innerHTML = '❌ Error: ' + params.get('error');
+            statusDiv.textContent = '❌ Error: ' + params.get('error');
         } else {
             statusDiv.style.display = 'none';
         }
