@@ -303,10 +303,13 @@ export class VerificationEngine {
         let failed = 0;
         let suspicious = 0;
 
-        for (const cred of credentials) {
-            const result = await this.verifyCredential(cred);
-            results.push(result);
+        // Execute verifications concurrently rather than sequentially
+        // for better throughput in large bulk requests
+        const verificationPromises = credentials.map(cred => this.verifyCredential(cred));
+        const verificationResults = await Promise.all(verificationPromises);
 
+        for (const result of verificationResults) {
+            results.push(result);
             if (result.status === 'verified') verified++;
             else if (result.status === 'failed') failed++;
             else if (result.status === 'suspicious') suspicious++;
