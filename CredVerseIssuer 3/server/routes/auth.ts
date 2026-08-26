@@ -26,7 +26,8 @@ const pendingTwoFactorTokens = new Map<string, { userId: string; expiresAt: Date
  */
 router.post('/auth/register', async (req, res) => {
     try {
-        const { username, email, password, role } = req.body;
+        // SECURITY: Do not destruct 'role' from body to prevent privilege escalation
+        const { username, email, password } = req.body;
 
         if (!username || !password) {
             return res.status(400).json({ error: 'Username and password required' });
@@ -51,7 +52,7 @@ router.post('/auth/register', async (req, res) => {
         const user = await storage.createUser({
             username,
             password: passwordHash,
-            role: role || 'user',
+            role: 'user', // Force 'user' role for public registration
             // tenantId can be set later or passed if multi-tenant
             // For MVP, allow creating users without tenant or auto-assign
         } as any);

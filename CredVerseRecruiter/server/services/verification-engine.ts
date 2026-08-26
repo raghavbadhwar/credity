@@ -526,6 +526,7 @@ export class VerificationEngine {
         // Hash the credential data to find it on-chain
         // The issuance process hashes the credential content
         let dataToHash = Buffer.isBuffer(credential) ? credential.toString() : credential;
+        void dataToHash; // Prevent unused var error
 
         // If it's a JWT payload, we might need to verify the hash of the original JWT or the payload depending on how issuer anchored it.
         // Assuming issuer anchors hash of the VC Payload/claim

@@ -4,8 +4,11 @@ declare global {
     interface Window {
         ethereum?: {
             isMetaMask?: boolean;
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             request: (args: { method: string; params?: any[] }) => Promise<any>;
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             on: (event: string, callback: (...args: any[]) => void) => void;
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             removeListener: (event: string, callback: (...args: any[]) => void) => void;
             selectedAddress?: string;
         };
@@ -90,12 +93,13 @@ export function useWallet() {
                 localStorage.setItem('walletConnected', 'true');
                 localStorage.setItem('walletAddress', accounts[0]);
             }
-        } catch (error: any) {
+        } catch (error) {
             let errorMessage = 'Failed to connect wallet';
-            if (error.code === 4001) {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            if ((error as any).code === 4001) {
                 errorMessage = 'Connection rejected by user';
-            } else if (error.message) {
-                errorMessage = error.message;
+            } else if ((error as Error).message) {
+                errorMessage = (error as Error).message;
             }
 
             setState(s => ({
