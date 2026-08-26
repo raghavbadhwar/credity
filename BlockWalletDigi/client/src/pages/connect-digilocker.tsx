@@ -1,6 +1,5 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useLocation, useSearch } from "wouter";
-import { motion, AnimatePresence } from "framer-motion";
 import { Sidebar } from "@/components/sidebar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -22,6 +21,7 @@ import {
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { motion } from "framer-motion";
 
 interface DigiLockerDocument {
   uri: string;
@@ -44,9 +44,11 @@ const docTypeIcons: Record<string, any> = {
 export default function ConnectDigiLocker() {
   const [, setLocation] = useLocation();
   const searchString = useSearch();
-  const searchParams = new URLSearchParams(searchString);
   const { toast } = useToast();
   const queryClient = useQueryClient();
+
+  // Wrap searchParams in useMemo to ensure stable dependency for useEffect
+  const searchParams = useMemo(() => new URLSearchParams(searchString), [searchString]);
 
   const [importing, setImporting] = useState<string | null>(null);
 
@@ -71,7 +73,7 @@ export default function ConnectDigiLocker() {
         variant: "destructive",
       });
     }
-  }, [searchParams]);
+  }, [searchParams, toast, queryClient]);
 
   // Check connection status
   const { data: statusData, isLoading: statusLoading } = useQuery({

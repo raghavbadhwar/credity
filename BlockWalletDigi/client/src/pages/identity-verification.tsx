@@ -23,9 +23,7 @@ import {
     ShieldCheck,
     Fingerprint,
     ScanLine,
-    Upload,
     Loader2,
-    AlertTriangle,
     ChevronRight,
     Eye,
     Smile,
@@ -35,7 +33,6 @@ import {
     FileText,
     Smartphone,
     CircleDot,
-    AlertCircle,
     Clock,
     Zap,
     Shield,
@@ -301,7 +298,43 @@ export default function IdentityVerification() {
         setPendingCameraStart(true);
     };
 
+    const completeLiveness = async (frameData?: string | null) => {
+        try {
+            const res = await fetch('/api/identity/liveness/complete', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    userId: '1',
+                    passed: true,
+                    frameData: frameData || undefined
+                })
+            });
+            const data = await res.json();
+
+            if (data.success) {
+                toast({
+                    title: 'Liveness Verified!',
+                    description: data.aiAnalysis ? 'AI confirmed identity and liveness.' : 'Your face has been verified as a real person.'
+                });
+
+                setLivenessSession(null);
+                setCurrentChallenge(null);
+                setLivenessProgress(0);
+                queryClient.invalidateQueries({ queryKey: ['identity-status'] });
+            } else {
+                throw new Error(data.details || data.error);
+            }
+        } catch (error: any) {
+            toast({
+                title: 'Verification Failed',
+                description: error.message || 'Could not complete liveness verification',
+                variant: 'destructive'
+            });
+        }
+    };
+
     // Effect to start camera after video element is rendered
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     useEffect(() => {
         if (!pendingCameraStart || !livenessSession) return;
 
@@ -348,41 +381,6 @@ export default function IdentityVerification() {
 
         initCamera();
     }, [pendingCameraStart, livenessSession]);
-
-    const completeLiveness = async (frameData?: string | null) => {
-        try {
-            const res = await fetch('/api/identity/liveness/complete', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    userId: '1',
-                    passed: true,
-                    frameData: frameData || undefined
-                })
-            });
-            const data = await res.json();
-
-            if (data.success) {
-                toast({
-                    title: 'Liveness Verified!',
-                    description: data.aiAnalysis ? 'AI confirmed identity and liveness.' : 'Your face has been verified as a real person.'
-                });
-
-                setLivenessSession(null);
-                setCurrentChallenge(null);
-                setLivenessProgress(0);
-                queryClient.invalidateQueries({ queryKey: ['identity-status'] });
-            } else {
-                throw new Error(data.details || data.error);
-            }
-        } catch (error: any) {
-            toast({
-                title: 'Verification Failed',
-                description: error.message || 'Could not complete liveness verification',
-                variant: 'destructive'
-            });
-        }
-    };
 
     const cancelLiveness = () => {
         stopDetection();
@@ -682,7 +680,7 @@ export default function IdentityVerification() {
                                                     return (
                                                         <div
                                                             key={c.id}
-                                                            className={`h-1.5 rounded-full transition-all duration-500 ${isCompleted ? 'bg-green-500 shadow-[0_0_10px_rgba(34,197,94,0.5)]' :
+                                                            className={`h-1.5 rounded-full transition-all duration-500 ${isCompleted ? 'bg-green-50 shadow-[0_0_10px_rgba(34,197,94,0.5)]' :
                                                                 isCurrent ? 'bg-primary shadow-[0_0_10px_rgba(59,130,246,0.5)]' :
                                                                     'bg-secondary'
                                                                 }`}

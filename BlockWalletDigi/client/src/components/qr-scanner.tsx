@@ -180,7 +180,7 @@ export function QRScanner({ onScan, onClose, title = "Scan QR Code", description
                             <p className="text-emerald-400">QR Code Scanned Successfully!</p>
                         </div>
                     ) : (
-                        <div className="relative aspect-video bg-black rounded-lg overflow-hidden">
+                        <div className={`relative aspect-video bg-black rounded-lg overflow-hidden ${scanning ? 'ring-2 ring-primary/50' : ''}`}>
                             <video
                                 ref={videoRef}
                                 className="absolute inset-0 w-full h-full object-cover"
