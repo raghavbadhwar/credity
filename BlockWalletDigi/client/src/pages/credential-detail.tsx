@@ -19,7 +19,6 @@ import {
   Eye,
   Loader2,
   Copy,
-  ExternalLink,
   AlertTriangle
 } from "lucide-react";
 import { motion } from "framer-motion";
@@ -32,6 +31,7 @@ interface CredentialData {
   issuer: string;
   issuanceDate: string;
   expirationDate?: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   data: any;
   category: string;
   anchorStatus: string;
@@ -61,8 +61,8 @@ interface ConsentLog {
 }
 
 export default function CredentialDetail() {
-  const [location, setLocation] = useLocation();
-  const [match, params] = useRoute("/credential/:id");
+  const [, setLocation] = useLocation();
+  const [, params] = useRoute("/credential/:id");
   const [shareModalOpen, setShareModalOpen] = useState(false);
   const [copied, setCopied] = useState(false);
 
@@ -157,7 +157,7 @@ export default function CredentialDetail() {
       <div className="flex-1 md:ml-64 flex flex-col h-screen overflow-y-auto bg-secondary/30">
         {/* Header */}
         <div className="sticky top-0 z-10 bg-card/80 backdrop-blur-md border-b border-border px-6 py-4 flex items-center gap-4">
-          <Button variant="ghost" size="icon" onClick={() => setLocation("/")}>
+          <Button variant="ghost" size="icon" onClick={() => setLocation("/")} aria-label="Go back">
             <ArrowLeft className="w-5 h-5" />
           </Button>
           <h1 className="font-semibold text-lg">Credential Details</h1>
@@ -369,6 +369,7 @@ export default function CredentialDetail() {
       </div>
 
       <ShareModal
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         credential={credential as any}
         open={shareModalOpen}
         onOpenChange={setShareModalOpen}

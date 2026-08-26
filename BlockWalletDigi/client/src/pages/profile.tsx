@@ -22,6 +22,7 @@ interface WalletCredential {
   type: string[];
   issuer: string;
   issuanceDate: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   data: any;
   category: string;
   anchorStatus: string;
@@ -111,7 +112,7 @@ export default function ProfilePage() {
                   <Badge variant="outline" className="font-mono text-xs py-1 max-w-[280px] truncate">
                     {did.length > 30 ? `${did.slice(0, 20)}...${did.slice(-8)}` : did}
                   </Badge>
-                  <Button variant="ghost" size="icon" className="h-6 w-6" onClick={copyDid}>
+                  <Button variant="ghost" size="icon" className="h-6 w-6" onClick={copyDid} aria-label="Copy DID">
                     {copied ? <CheckCircle2 className="w-3 h-3 text-green-500" /> : <Copy className="w-3 h-3" />}
                   </Button>
                 </div>

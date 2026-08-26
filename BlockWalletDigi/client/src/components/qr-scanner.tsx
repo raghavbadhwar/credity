@@ -19,7 +19,7 @@ export function QRScanner({ onScan, onClose, title = "Scan QR Code", description
     const videoRef = useRef<HTMLVideoElement>(null);
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const [error, setError] = useState<string | null>(null);
-    const [scanning, setScanning] = useState(false);
+    const [, setScanning] = useState(false);
     const [facingMode, setFacingMode] = useState<'user' | 'environment'>('environment');
     const [flash, setFlash] = useState(false);
     const [scanned, setScanned] = useState(false);
@@ -152,7 +152,7 @@ export function QRScanner({ onScan, onClose, title = "Scan QR Code", description
             <Card className="w-full max-w-lg">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
                     <CardTitle>{title}</CardTitle>
-                    <Button variant="ghost" size="icon" onClick={onClose}>
+                    <Button variant="ghost" size="icon" onClick={onClose} aria-label="Close">
                         <X className="h-5 w-5" />
                     </Button>
                 </CardHeader>

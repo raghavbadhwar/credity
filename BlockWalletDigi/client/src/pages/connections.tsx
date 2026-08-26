@@ -205,6 +205,7 @@ export default function PlatformConnections() {
                                                 </p>
                                                 <p className="text-xs text-amber-600 dark:text-amber-400 mt-1">
                                                     <Clock className="w-3 h-3 inline mr-1" />
+                                                    {/* eslint-disable-next-line react-hooks/purity */}
                                                     Expires in {Math.round((new Date(request.expiresAt).getTime() - Date.now()) / 3600000)}h
                                                 </p>
                                             </div>
@@ -294,7 +295,7 @@ export default function PlatformConnections() {
 
                                             <DropdownMenu>
                                                 <DropdownMenuTrigger asChild>
-                                                    <Button variant="ghost" size="icon">
+                                                    <Button variant="ghost" size="icon" aria-label="More options">
                                                         <MoreVertical className="w-4 h-4" />
                                                     </Button>
                                                 </DropdownMenuTrigger>
