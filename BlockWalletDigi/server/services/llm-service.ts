@@ -359,7 +359,7 @@ function localDeceptionAnalysis(text: string, startTime: number): LLMAnalysisRes
     }
 
     // Detailed descriptions with specifics are more trustworthy
-    if (text.length > 200 && /\d{1,2}[:\-\/]\d{1,2}/i.test(text)) {
+    if (text.length > 200 && /\d{1,2}[:\-/]\d{1,2}/i.test(text)) {
         confidence += 0.1;
     }
 

@@ -68,7 +68,7 @@ export function validatePasswordStrength(password: string): PasswordValidationRe
     if (!/[0-9]/.test(password)) {
         errors.push('Password must contain at least one number');
     }
-    if (!/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)) {
+    if (!/[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/.test(password)) {
         errors.push('Password must contain at least one special character');
     }
 
@@ -90,6 +90,18 @@ export async function hashPassword(password: string): Promise<string> {
  */
 export async function comparePassword(password: string, hash: string): Promise<boolean> {
     return bcrypt.compare(password, hash);
+}
+
+let dummyHash: string | null = null;
+/**
+ * Get a dummy password hash for timing attack mitigation
+ */
+export async function getDummyHash(): Promise<string> {
+    if (!dummyHash) {
+        // Hash a constant string with the same cost factor as real passwords
+        dummyHash = await hashPassword('dummy_security_padding');
+    }
+    return dummyHash;
 }
 
 /**

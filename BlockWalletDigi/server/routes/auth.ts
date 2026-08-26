@@ -3,6 +3,7 @@ import { storage } from '../storage';
 import {
     hashPassword,
     comparePassword,
+    getDummyHash,
     generateAccessToken,
     generateRefreshToken,
     refreshAccessToken,
@@ -107,6 +108,14 @@ router.post('/auth/login', async (req, res) => {
 
         // Find user
         const user = await storage.getUserByUsername(username);
+
+        // Security: Mitigate timing attacks by always performing hash comparison
+        const dummyHash = await getDummyHash();
+        const userPasswordHash = (user as any)?.password || dummyHash;
+
+        // Always compare (slow operation)
+        const isPasswordValid = await comparePassword(password, userPasswordHash);
+
         if (!user) {
             return res.status(401).json({ error: 'Invalid credentials' });
         }
@@ -119,8 +128,7 @@ router.post('/auth/login', async (req, res) => {
             }
             console.warn('[Auth] Allowing legacy no-password login because ALLOW_DEMO_ROUTES=true');
         } else {
-            const valid = await comparePassword(password, passwordHash);
-            if (!valid) {
+            if (!isPasswordValid) {
                 return res.status(401).json({ error: 'Invalid credentials' });
             }
         }
