@@ -176,7 +176,9 @@ router.post("/digilocker/import-all", async (req, res) => {
         const imported: string[] = [];
         const failed: string[] = [];
 
-        for (const doc of documents) {
+        // ⚡ Bolt: Parallelize independent loop operations to reduce total latency.
+        // Expected Impact: Reduces total import time from O(N) sequential requests to O(1) batch requests.
+        const importPromises = documents.map(async (doc) => {
             try {
                 const { document } = await digilockerService.pullDocument(userId, doc.uri);
 
@@ -199,7 +201,8 @@ router.post("/digilocker/import-all", async (req, res) => {
             } catch (e) {
                 failed.push(doc.name);
             }
-        }
+        });
+        await Promise.allSettled(importPromises);
 
         await storage.createActivity({
             userId,
@@ -261,7 +264,9 @@ router.post("/digilocker/connect", async (req, res) => {
             // Import demo documents
             const documents = await digilockerService.listDocuments(userId);
 
-            for (const doc of documents.slice(0, 3)) { // Import first 3
+            // ⚡ Bolt: Parallelize demo document imports to reduce connection latency.
+            // Expected Impact: Reduces total import time from O(N) sequential requests to O(1) batch requests.
+            const importPromises = documents.slice(0, 3).map(async (doc) => {
                 const { document } = await digilockerService.pullDocument(userId, doc.uri);
 
                 await walletService.storeCredential(userId, {
@@ -276,7 +281,8 @@ router.post("/digilocker/connect", async (req, res) => {
                     },
                     category: doc.doctype.includes('CLASS') ? 'academic' : 'government',
                 });
-            }
+            });
+            await Promise.all(importPromises);
 
             await storage.createActivity({
                 userId,
