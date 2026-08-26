@@ -27,12 +27,7 @@ export function QRScanner({ onScan, onClose, title = "Scan QR Code", description
     const streamRef = useRef<MediaStream | null>(null);
     const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
-    useEffect(() => {
-        startCamera();
-        return () => {
-            stopCamera();
-        };
-    }, [facingMode]);
+
 
     const startCamera = async () => {
         try {
@@ -82,6 +77,8 @@ export function QRScanner({ onScan, onClose, title = "Scan QR Code", description
         }
     };
 
+
+
     const startScanning = () => {
         // Simple QR detection using canvas
         // In production, use html5-qrcode library for better detection
@@ -102,6 +99,13 @@ export function QRScanner({ onScan, onClose, title = "Scan QR Code", description
             }
         }, 100);
     };
+
+    useEffect(() => {
+        startCamera();
+        return () => {
+            stopCamera();
+        };
+    }, [facingMode]);
 
     const handleManualInput = () => {
         const input = prompt('Enter credential URL or token manually:');
