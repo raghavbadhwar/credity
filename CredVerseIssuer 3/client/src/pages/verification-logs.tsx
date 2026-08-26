@@ -60,7 +60,8 @@ export default function VerificationLogs() {
             if (!response.ok) throw new Error('Failed to fetch stats');
             return response.json();
         },
-        refetchInterval: 5000,
+        // Performance optimization: increased refetchInterval to reduce unnecessary network requests on non-realtime stats
+        refetchInterval: 60000,
     });
 
     // Export logs
