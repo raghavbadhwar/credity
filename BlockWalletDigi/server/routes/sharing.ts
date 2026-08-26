@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import { authMiddleware } from '@credverse/shared-auth';
 import { walletService } from '../services/wallet-service';
 import { qrService } from '../services/qr-service';
 import { selectiveDisclosureService } from '../services/selective-disclosure';
@@ -201,10 +202,10 @@ router.get('/share/verify/:shareId', async (req, res) => {
 /**
  * Revoke a share
  */
-router.post('/wallet/share/:shareId/revoke', async (req, res) => {
+router.post('/wallet/share/:shareId/revoke', authMiddleware, async (req, res) => {
     try {
         const { shareId } = req.params;
-        const userId = parseInt(req.body.userId) || 1;
+        const userId = Number((req as any).user?.userId);
 
         const revoked = await walletService.revokeShare(userId, shareId);
 
@@ -228,9 +229,9 @@ router.post('/wallet/share/:shareId/revoke', async (req, res) => {
 /**
  * Get share history
  */
-router.get('/wallet/shares', async (req, res) => {
+router.get('/wallet/shares', authMiddleware, async (req, res) => {
     try {
-        const userId = parseInt(req.query.userId as string) || 1;
+        const userId = Number((req as any).user?.userId);
         const credentialId = req.query.credentialId as string;
 
         const shares = await walletService.getShareHistory(userId, credentialId);
@@ -247,9 +248,9 @@ router.get('/wallet/shares', async (req, res) => {
 /**
  * Get available fields for selective disclosure
  */
-router.get('/wallet/credentials/:id/fields', async (req, res) => {
+router.get('/wallet/credentials/:id/fields', authMiddleware, async (req, res) => {
     try {
-        const userId = parseInt(req.query.userId as string) || 1;
+        const userId = Number((req as any).user?.userId);
         const { id } = req.params;
 
         const credentials = await walletService.getCredentials(userId);
@@ -331,9 +332,9 @@ router.post('/credentials/:id/disclose', async (req, res) => {
 /**
  * Get consent logs
  */
-router.get('/wallet/consent-logs', async (req, res) => {
+router.get('/wallet/consent-logs', authMiddleware, async (req, res) => {
     try {
-        const userId = parseInt(req.query.userId as string) || 1;
+        const userId = Number((req as any).user?.userId);
         const credentialId = req.query.credentialId as string;
 
         const logs = await walletService.getConsentLogs(userId, credentialId);
