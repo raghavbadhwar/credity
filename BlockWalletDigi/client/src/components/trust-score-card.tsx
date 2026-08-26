@@ -149,6 +149,7 @@ export function TrustScoreCard() {
                 <button
                     onClick={() => setShowBreakdown(!showBreakdown)}
                     className="w-full flex items-center justify-between text-sm text-muted-foreground hover:text-foreground transition-colors"
+                    aria-expanded={showBreakdown}
                 >
                     <span className="font-medium">Score Breakdown</span>
                     <ChevronRight className={`w-4 h-4 transition-transform ${showBreakdown ? 'rotate-90' : ''}`} />
