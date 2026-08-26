@@ -1,0 +1,3 @@
+## 2024-05-24 - Early Returns in Image Data Array Loops
+**Learning:** Biometric liveness checks like `use-face-detection.ts` iterate over large `ImageData` pixel arrays using nested O(n) loops. Since these run synchronously on the main thread at intervals (e.g., 5fps), iterating the full array unnecessarily can cause significant UI stuttering and high CPU usage.
+**Action:** When performing pixel threshold analysis (e.g., motion detection requiring >2% changed pixels, skin tone >15%), always compute the absolute required pixel count upfront and return or break out of the loop immediately once that threshold is reached.
