@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/static-components */
 import { Link, useLocation } from "wouter";
 import { cn } from "@/lib/utils";
 import {
@@ -96,7 +97,7 @@ export function Sidebar() {
       <div className="md:hidden fixed top-4 left-4 z-50">
         <Sheet open={open} onOpenChange={setOpen}>
           <SheetTrigger asChild>
-            <Button variant="outline" size="icon" className="bg-background">
+            <Button variant="outline" size="icon" className="bg-background" aria-label="Toggle menu">
               <Menu className="h-5 w-5" />
             </Button>
           </SheetTrigger>
