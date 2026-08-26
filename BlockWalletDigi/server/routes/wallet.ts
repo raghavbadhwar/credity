@@ -4,6 +4,7 @@ import { walletService } from '../services/wallet-service';
 import { didService } from '../services/did-service';
 import { storage } from '../storage';
 import { hashPassword } from '../services/auth-service';
+import { authMiddleware } from '@credverse/shared-auth';
 
 const router = Router();
 
@@ -12,10 +13,10 @@ const router = Router();
 /**
  * Initialize wallet for user (creates DID automatically)
  */
-router.post('/wallet/init', async (req, res) => {
+router.post('/wallet/init', authMiddleware, async (req: any, res) => {
     try {
-        const { userId } = req.body;
-        if (!userId) return res.status(400).json({ error: 'userId required' });
+        const userId = Number(req.user?.userId);
+        if (!userId) return res.status(401).json({ error: 'Unauthorized' });
 
         // Get or create user
         let user = await storage.getUser(userId);
@@ -59,9 +60,10 @@ router.post('/wallet/init', async (req, res) => {
 /**
  * Get wallet status
  */
-router.get('/wallet/status', async (req, res) => {
+router.get('/wallet/status', authMiddleware, async (req: any, res) => {
     try {
-        const userId = parseInt(req.query.userId as string) || 1;
+        const userId = Number(req.user?.userId);
+        if (!userId) return res.status(401).json({ error: 'Unauthorized' });
         const wallet = await walletService.getOrCreateWallet(userId);
         const stats = await walletService.getWalletStats(userId);
 
@@ -81,12 +83,12 @@ router.get('/wallet/status', async (req, res) => {
 /**
  * Create a new DID for user (Manual)
  */
-router.post('/did/create', async (req, res) => {
+router.post('/did/create', authMiddleware, async (req: any, res) => {
     try {
-        const { userId } = req.body;
+        const userId = Number(req.user?.userId);
 
         if (!userId) {
-            return res.status(400).json({ error: 'userId is required' });
+            return res.status(401).json({ error: 'Unauthorized' });
         }
 
         // Create new DID
@@ -142,9 +144,10 @@ router.get('/did/resolve/:did', async (req, res) => {
 /**
  * Create wallet backup
  */
-router.post('/wallet/backup', async (req, res) => {
+router.post('/wallet/backup', authMiddleware, async (req: any, res) => {
     try {
-        const userId = parseInt(req.body.userId) || 1;
+        const userId = Number(req.user?.userId);
+        if (!userId) return res.status(401).json({ error: 'Unauthorized' });
         const { backupData, backupKey } = await walletService.createBackup(userId);
 
         await storage.createActivity({
