@@ -429,7 +429,7 @@ function estimateLlmConfidence(description: string): number {
     if (description.length > 500) confidence += 0.1;
 
     // Check for specific details (dates, times, names)
-    const hasSpecificDetails = /\d{1,2}[:\-\/]\d{1,2}|\d{4}[-\/]\d{2}|\d{1,2}(?:am|pm)/i.test(description);
+    const hasSpecificDetails = new RegExp("\\d{1,2}[:\\-/]\\d{1,2}|\\d{4}[-/]\\d{2}|\\d{1,2}(?:am|pm)", "i").test(description);
     if (hasSpecificDetails) confidence += 0.1;
 
     return Math.min(1, confidence);
@@ -494,7 +494,8 @@ function calculateCost(request: ClaimVerifyRequest): ClaimVerifyResponse['costBr
 /**
  * Get claim by ID (for status checking)
  */
-export async function getClaimById(claimId: string): Promise<ClaimVerifyResponse | null> {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export async function getClaimById(_claimId: string): Promise<ClaimVerifyResponse | null> {
     // In production, would fetch from database
     // For now, return null to indicate not found
     return null;

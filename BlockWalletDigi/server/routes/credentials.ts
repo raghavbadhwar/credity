@@ -187,7 +187,8 @@ router.post('/wallet/offer/claim', async (req, res) => {
                     issuerName = issuerData.name || issuerName;
                 }
             } catch (e) {
-                console.log('[Wallet] Could not fetch issuer info');
+                // eslint-disable-next-line no-console
+                console.log('[Wallet] Could not fetch issuer info', e);
             }
         }
 

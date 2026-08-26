@@ -145,7 +145,8 @@ function getLevel(score: number): { level: number; levelLabel: string } {
  */
 export function generateImprovementSuggestions(
     userData: UserTrustData,
-    breakdown: TrustScoreBreakdown
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    _breakdown: TrustScoreBreakdown
 ): ImprovementSuggestion[] {
     const suggestions: ImprovementSuggestion[] = [];
 

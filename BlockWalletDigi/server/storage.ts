@@ -44,6 +44,8 @@ export class MemStorage implements IStorage {
   private users: Map<number, User>;
   private credentials: Map<number, Credential>;
   private activities: Map<number, Activity>;
+  private credentialsByUserId: Map<number, number[]>;
+  private activitiesByUserId: Map<number, number[]>;
   private currentUserId: number;
   private currentCredentialId: number;
   private currentActivityId: number;
@@ -52,6 +54,8 @@ export class MemStorage implements IStorage {
     this.users = new Map();
     this.credentials = new Map();
     this.activities = new Map();
+    this.credentialsByUserId = new Map();
+    this.activitiesByUserId = new Map();
     this.currentUserId = 1;
     this.currentCredentialId = 1;
     this.currentActivityId = 1;
@@ -98,9 +102,10 @@ export class MemStorage implements IStorage {
   }
 
   async listCredentials(userId: number): Promise<Credential[]> {
-    return Array.from(this.credentials.values()).filter(
-      (c) => c.userId === userId && !c.isArchived
-    );
+    const ids = this.credentialsByUserId.get(userId) || [];
+    return ids
+      .map((id) => this.credentials.get(id))
+      .filter((c): c is Credential => c !== undefined && !c.isArchived);
   }
 
   async createCredential(insertCredential: InsertCredential): Promise<Credential> {
@@ -112,14 +117,22 @@ export class MemStorage implements IStorage {
       isArchived: insertCredential.isArchived ?? false
     };
     this.credentials.set(id, credential);
+    if (!this.credentialsByUserId.has(credential.userId)) {
+      this.credentialsByUserId.set(credential.userId, []);
+    }
+    this.credentialsByUserId.get(credential.userId)!.push(id);
     return credential;
   }
 
   // Activities
   async listActivities(userId: number): Promise<Activity[]> {
-    return Array.from(this.activities.values())
-      .filter((a) => a.userId === userId)
-      .sort((a, b) => (b.timestamp?.getTime() ?? 0) - (a.timestamp?.getTime() ?? 0));
+    const ids = this.activitiesByUserId.get(userId) || [];
+    return ids
+      .map((id) => this.activities.get(id))
+      .filter((a): a is Activity => a !== undefined)
+      .sort(
+        (a, b) => (b.timestamp?.getTime() ?? 0) - (a.timestamp?.getTime() ?? 0),
+      );
   }
 
   async createActivity(insertActivity: InsertActivity): Promise<Activity> {
@@ -130,6 +143,10 @@ export class MemStorage implements IStorage {
       timestamp: new Date()
     };
     this.activities.set(id, activity);
+    if (!this.activitiesByUserId.has(activity.userId)) {
+      this.activitiesByUserId.set(activity.userId, []);
+    }
+    this.activitiesByUserId.get(activity.userId)!.push(id);
     return activity;
   }
 
@@ -148,12 +165,32 @@ export class MemStorage implements IStorage {
     this.users = new Map((state.users || []).map(([key, value]) => [key, value]));
     this.credentials = new Map((state.credentials || []).map(([key, value]) => [key, {
       ...value,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       issuanceDate: parseDate((value as any).issuanceDate),
     }]));
     this.activities = new Map((state.activities || []).map(([key, value]) => [key, {
       ...value,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       timestamp: parseDate((value as any).timestamp),
     }]));
+
+    // Rebuild indices
+    this.credentialsByUserId = new Map();
+    for (const credential of this.credentials.values()) {
+      if (!this.credentialsByUserId.has(credential.userId)) {
+        this.credentialsByUserId.set(credential.userId, []);
+      }
+      this.credentialsByUserId.get(credential.userId)!.push(credential.id);
+    }
+
+    this.activitiesByUserId = new Map();
+    for (const activity of this.activities.values()) {
+      if (!this.activitiesByUserId.has(activity.userId)) {
+        this.activitiesByUserId.set(activity.userId, []);
+      }
+      this.activitiesByUserId.get(activity.userId)!.push(activity.id);
+    }
+
     this.currentUserId = state.currentUserId || 1;
     this.currentCredentialId = state.currentCredentialId || 1;
     this.currentActivityId = state.currentActivityId || 1;

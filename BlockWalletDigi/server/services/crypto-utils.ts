@@ -10,6 +10,7 @@ const ALGORITHM = 'aes-256-gcm';
 const KEY_LENGTH = 32; // 256 bits
 const IV_LENGTH = 16;
 const AUTH_TAG_LENGTH = 16;
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 
 export interface EncryptedData {
     ciphertext: string;

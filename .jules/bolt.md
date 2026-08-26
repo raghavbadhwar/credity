@@ -1,0 +1,3 @@
+## 2024-05-22 - In-Memory Storage Scalability
+**Learning:** The `BlockWalletDigi` service uses an in-memory storage pattern (`MemStorage`) wrapped with a persistence layer (`createPersistedStorage`) that loads the *entire* database state into memory on startup. While fast for small datasets, this architecture presents O(N) lookup complexity for relational queries (like "get all items for user X") unless explicit secondary indices are maintained in memory.
+**Action:** When working with `MemStorage` or similar in-memory patterns in this repo, always implement secondary indices (Maps) for frequent lookup patterns (e.g., `userId -> itemIds[]`) to avoid full table scans, and ensure these indices are rebuilt during state hydration/import.

@@ -258,7 +258,7 @@ export function cleanupExpiredOffers(): number {
     const now = new Date();
     let cleaned = 0;
 
-    pendingCredentials.forEach((offer, id) => {
+    pendingCredentials.forEach((offer, _id) => {
         if (offer.status === 'pending' && offer.expiresAt < now) {
             offer.status = 'expired';
             cleaned++;

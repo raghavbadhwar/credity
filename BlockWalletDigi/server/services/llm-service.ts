@@ -297,6 +297,7 @@ async function callOpenAI(prompt: string): Promise<any> {
  */
 function parseJsonResponse(text: string): any {
     // Remove markdown code blocks if present
+    // eslint-disable-next-line no-useless-escape
     const cleaned = text.replace(/```json?\n?/g, '').replace(/```/g, '').trim();
     try {
         return JSON.parse(cleaned);
@@ -359,7 +360,7 @@ function localDeceptionAnalysis(text: string, startTime: number): LLMAnalysisRes
     }
 
     // Detailed descriptions with specifics are more trustworthy
-    if (text.length > 200 && /\d{1,2}[:\-\/]\d{1,2}/i.test(text)) {
+    if (text.length > 200 && /\d{1,2}[:\-/]\d{1,2}/i.test(text)) {
         confidence += 0.1;
     }
 

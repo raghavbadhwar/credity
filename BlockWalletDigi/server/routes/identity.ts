@@ -348,10 +348,10 @@ router.post('/document/scan', async (req: Request, res: Response) => {
             success: result.success,
             documentId: result.documentId,
             documentType: result.documentType,
-            extractedData: result.extractedData,
+            extractedData: enhancedResult.extractedData,
             faceExtracted: result.faceExtracted,
-            overallScore: result.overallScore,
-            warnings: result.warnings,
+            overallScore: enhancedResult.overallScore,
+            warnings: enhancedResult.warnings,
             processingTimeMs: result.processingTimeMs
         });
     } catch (error: any) {
