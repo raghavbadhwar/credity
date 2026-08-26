@@ -1,0 +1,3 @@
+## 2024-06-01 - Early Return Optimization in Image Processing Loops
+**Learning:** Biometric liveness checks process large `ImageData` arrays synchronously on the main thread in BlockWalletDigi. Full O(n) iteration across all pixels causes UI stutter when only a threshold number of matching pixels is required for validation.
+**Action:** Always pre-calculate pixel thresholds for image data operations (like motion or skin detection) and implement early returns in O(n) loops as soon as the condition is met, using boolean flags to break out of nested iterations without relying on prohibited labeled statements.
