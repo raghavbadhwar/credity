@@ -30,7 +30,32 @@ export function Sidebar() {
   const [location] = useLocation();
   const [open, setOpen] = useState(false);
 
-  const SidebarContent = () => (
+  return (
+    <>
+      {/* Desktop Sidebar */}
+      <aside className="hidden md:flex w-64 flex-col fixed inset-y-0 z-50">
+        <SidebarContent location={location} setOpen={setOpen} />
+      </aside>
+
+      {/* Mobile Sidebar */}
+      <div className="md:hidden fixed top-4 left-4 z-50">
+        <Sheet open={open} onOpenChange={setOpen}>
+          <SheetTrigger asChild>
+            <Button variant="outline" size="icon" className="bg-background">
+              <Menu className="h-5 w-5" />
+            </Button>
+          </SheetTrigger>
+          <SheetContent side="left" className="p-0 w-64 border-r-sidebar-border bg-sidebar text-sidebar-foreground">
+            <SidebarContent location={location} setOpen={setOpen} />
+          </SheetContent>
+        </Sheet>
+      </div>
+    </>
+  );
+}
+
+function SidebarContent({ location, setOpen }: { location: string; setOpen: (open: boolean) => void }) {
+  return (
     <div className="flex h-full flex-col bg-gradient-to-b from-sidebar to-sidebar/95 text-sidebar-foreground border-r border-sidebar-border shadow-xl">
       <div className="flex h-16 items-center px-6 border-b border-sidebar-border/50 backdrop-blur-sm">
         <div className="relative group">
@@ -83,28 +108,5 @@ export function Sidebar() {
         </Button>
       </div>
     </div>
-  );
-
-  return (
-    <>
-      {/* Desktop Sidebar */}
-      <aside className="hidden md:flex w-64 flex-col fixed inset-y-0 z-50">
-        <SidebarContent />
-      </aside>
-
-      {/* Mobile Sidebar */}
-      <div className="md:hidden fixed top-4 left-4 z-50">
-        <Sheet open={open} onOpenChange={setOpen}>
-          <SheetTrigger asChild>
-            <Button variant="outline" size="icon" className="bg-background">
-              <Menu className="h-5 w-5" />
-            </Button>
-          </SheetTrigger>
-          <SheetContent side="left" className="p-0 w-64 border-r-sidebar-border bg-sidebar text-sidebar-foreground">
-            <SidebarContent />
-          </SheetContent>
-        </Sheet>
-      </div>
-    </>
   );
 }

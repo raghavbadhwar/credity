@@ -15,8 +15,12 @@ export function Header({ title }: { title: string }) {
   const [theme, setTheme] = useState<"light" | "dark">("light");
 
   useEffect(() => {
+    // Avoid calling setState during render or immediately in effect if possible, but this is a mount check
     const isDark = document.documentElement.classList.contains("dark");
-    setTheme(isDark ? "dark" : "light");
+    if ((isDark && theme !== "dark") || (!isDark && theme !== "light")) {
+      setTheme(isDark ? "dark" : "light");
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const toggleTheme = () => {
