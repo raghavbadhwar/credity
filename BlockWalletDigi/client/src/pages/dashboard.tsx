@@ -194,7 +194,7 @@ export default function Dashboard() {
                 >
                   {action.href ? (
                     <Link href={action.href}>
-                      <button className="flex flex-col items-center gap-2 w-full group">
+                      <button aria-label={action.label} className="flex flex-col items-center gap-2 w-full group rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background">
                         <div className="w-14 h-14 rounded-2xl bg-card border border-border shadow-sm flex items-center justify-center text-primary transition-all duration-300 group-hover:-translate-y-1 group-hover:shadow-md group-active:scale-95">
                           <action.icon className="w-6 h-6" />
                         </div>
@@ -203,8 +203,9 @@ export default function Dashboard() {
                     </Link>
                   ) : (
                     <button
+                      aria-label={action.label}
                       onClick={action.action}
-                      className="flex flex-col items-center gap-2 w-full group"
+                      className="flex flex-col items-center gap-2 w-full group rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                     >
                       <div className="w-14 h-14 rounded-2xl bg-card border border-border shadow-sm flex items-center justify-center text-primary transition-all duration-300 group-hover:-translate-y-1 group-hover:shadow-md group-active:scale-95">
                         <action.icon className="w-6 h-6" />
@@ -224,7 +225,7 @@ export default function Dashboard() {
                   <span className="text-sm font-medium capitalize">Filtering: {categoryFilter}</span>
                 </div>
                 <Link href="/">
-                  <Button variant="ghost" size="sm" className="h-6 w-6 p-0 rounded-full hover:bg-primary/20">
+                  <Button variant="ghost" size="sm" aria-label="Clear filter" className="h-6 w-6 p-0 rounded-full hover:bg-primary/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2">
                     <X className="w-3 h-3" />
                   </Button>
                 </Link>
