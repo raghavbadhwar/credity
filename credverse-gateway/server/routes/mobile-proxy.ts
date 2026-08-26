@@ -214,6 +214,8 @@ router.all('/:target/*', async (req, res) => {
         }
 
         return res.status(upstreamResponse.status).send(responseBuffer);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
         const isAbort = error?.name === 'AbortError';
         const statusCode = isAbort ? 504 : 502;
