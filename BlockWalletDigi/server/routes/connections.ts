@@ -3,7 +3,13 @@
  * Manages platform connections as defined in PRD Section 5.1 Feature 5
  */
 
-import { Router, Request, Response } from 'express';
+import { Router, Request, Response, NextFunction } from 'express';
+import { authMiddleware } from '@credverse/shared-auth';
+import type { TokenPayload } from '@credverse/shared-auth';
+
+interface AuthenticatedRequest extends Request {
+    user?: TokenPayload;
+}
 
 const router = Router();
 
@@ -100,9 +106,9 @@ initDemoData();
  * GET /api/connections
  * List all platform connections
  */
-router.get('/', async (req: Request, res: Response) => {
+router.get('/', authMiddleware, async (req: AuthenticatedRequest, res: Response) => {
     try {
-        const userId = parseInt(req.query.userId as string) || 1;
+        const userId = Number(req.user!.userId);
 
         const userConnections = Array.from(connections.values())
             .filter(c => c.userId === userId && c.status !== 'revoked')
@@ -132,9 +138,9 @@ router.get('/', async (req: Request, res: Response) => {
  * GET /api/connections/requests
  * List pending connection requests
  */
-router.get('/requests', async (req: Request, res: Response) => {
+router.get('/requests', authMiddleware, async (req: AuthenticatedRequest, res: Response) => {
     try {
-        const userId = parseInt(req.query.userId as string) || 1;
+        const userId = Number(req.user!.userId);
 
         const userRequests = Array.from(pendingRequests.values())
             .filter(r => r.userId === userId && r.status === 'pending')
