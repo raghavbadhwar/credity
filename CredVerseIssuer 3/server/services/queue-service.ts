@@ -245,21 +245,23 @@ export function startIssuanceWorker(
             jobResults.set(jobId, result);
             void queuePersist();
 
-            // Process each credential
-            for (let i = 0; i < recipients.length; i++) {
-                const { recipient, data } = recipients[i];
-
-                try {
-                    await processCredential(tenantId, templateId, issuerId, recipient, data);
-                    result.success++;
-                } catch (error: any) {
-                    result.failed++;
-                    result.errors.push(`Recipient ${i + 1}: ${error.message}`);
-                    console.error(`[Queue] Job ${jobId} failed for recipient ${i + 1}:`, error);
-                }
-
-                result.processed++;
-
+            // ⚡ Bolt Optimization: Process credentials concurrently in batches
+            // Impact: Significantly reduces overall processing time for large bulk issuance jobs by parallelizing database and async operations.
+            const batchSize = 10;
+            for (let i = 0; i < recipients.length; i += batchSize) {
+                const batch = recipients.slice(i, i + batchSize);
+                await Promise.all(batch.map(async ({ recipient, data }, index) => {
+                    const globalIndex = i + index;
+                    try {
+                        await processCredential(tenantId, templateId, issuerId, recipient, data);
+                        result.success++;
+                    } catch (error: any) {
+                        result.failed++;
+                        result.errors.push(`Recipient ${globalIndex + 1}: ${error.message}`);
+                        console.error(`[Queue] Job ${jobId} failed for recipient ${globalIndex + 1}:`, error);
+                    }
+                    result.processed++;
+                }));
                 // Update job progress
                 await job.updateProgress(Math.round((result.processed / result.total) * 100));
             }
