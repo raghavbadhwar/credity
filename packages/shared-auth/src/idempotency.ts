@@ -13,9 +13,14 @@ const cache = new Map<string, StoredResponse>();
 
 function pruneExpired(ttlMs: number): void {
     const now = Date.now();
+    // Leveraging Map insertion order: oldest items are first.
+    // Once we hit an item that is NOT expired, we can safely break
+    // out of the loop (O(1) amortized) rather than scanning the whole map (O(N)).
     for (const [key, value] of cache.entries()) {
         if (now - value.createdAt > ttlMs) {
             cache.delete(key);
+        } else {
+            break;
         }
     }
 }

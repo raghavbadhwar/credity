@@ -73,19 +73,25 @@ class GatewaySessionStore {
 
     private prunePendingStates(): void {
         const expiredBefore = Date.now() - STATE_TTL_SECONDS * 1000;
+        // O(1) amortized: Map preserves insertion order. Break early.
         for (const [key, value] of this.pendingStates.entries()) {
             if (value.createdAt.getTime() < expiredBefore) {
                 this.pendingStates.delete(key);
+            } else {
+                break;
             }
         }
     }
 
     private pruneSessions(): void {
         const expiredBefore = Date.now() - SESSION_TTL_SECONDS * 1000;
+        // O(1) amortized: Map preserves insertion order. Break early.
         for (const [key, value] of this.sessions.entries()) {
             const createdAtMs = Date.parse(value.createdAt);
             if (Number.isFinite(createdAtMs) && createdAtMs < expiredBefore) {
                 this.sessions.delete(key);
+            } else if (Number.isFinite(createdAtMs)) {
+                break;
             }
         }
     }
