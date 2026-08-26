@@ -12,8 +12,8 @@ const JWT_ALGORITHM = 'HS256' as const;
 // For global logout/token revocation use a shared session store or JWT denylist service.
 
 let config: AuthConfig = {
-    jwtSecret: 'dev-only-secret-not-for-production',
-    jwtRefreshSecret: 'dev-only-refresh-secret-not-for-production',
+    jwtSecret: '',
+    jwtRefreshSecret: '',
     accessTokenExpiry: DEFAULT_ACCESS_EXPIRY,
     refreshTokenExpiry: DEFAULT_REFRESH_EXPIRY,
     app: 'unknown',
@@ -29,15 +29,15 @@ export function initAuth(authConfig: Partial<AuthConfig>): void {
     };
 
     if (process.env.NODE_ENV === 'production') {
-        if (!config.jwtSecret || config.jwtSecret === 'dev-only-secret-not-for-production') {
+        if (!config.jwtSecret) {
             throw new Error('SECURITY CRITICAL: JWT_SECRET must be set to a strong value in production.');
         }
-        if (!config.jwtRefreshSecret || config.jwtRefreshSecret === 'dev-only-refresh-secret-not-for-production') {
+        if (!config.jwtRefreshSecret) {
             throw new Error('SECURITY CRITICAL: JWT_REFRESH_SECRET must be set to a strong value in production.');
         }
     } else {
-        if (!authConfig.jwtSecret) {
-            console.warn('WARNING: Using development JWT secrets. Set JWT_SECRET for production.');
+        if (!config.jwtSecret || !config.jwtRefreshSecret) {
+            console.warn('WARNING: Missing JWT secrets. Set JWT_SECRET and JWT_REFRESH_SECRET.');
         }
     }
 }
