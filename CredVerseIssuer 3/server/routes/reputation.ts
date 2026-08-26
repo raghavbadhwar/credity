@@ -429,17 +429,20 @@ router.get("/reputation/safedate", apiKeyOrAuthMiddleware, async (req, res) => {
     return res.status(400).json({ error: "Missing subjectDid/userId query parameter" });
   }
 
-  const [latestScore] = await db
-    .select()
-    .from(reputationScores)
-    .where(eq(reputationScores.subjectDid, subjectDid))
-    .orderBy(desc(reputationScores.computedAt))
-    .limit(1);
-
-  const events = await db
-    .select()
-    .from(reputationEvents)
-    .where(eq(reputationEvents.subjectDid, subjectDid));
+  // ⚡ Bolt Optimization: Execute independent database queries concurrently using Promise.all
+  // Impact: Reduces route latency by running reputationScores and reputationEvents fetches in parallel
+  const [[latestScore], events] = await Promise.all([
+    db
+      .select()
+      .from(reputationScores)
+      .where(eq(reputationScores.subjectDid, subjectDid))
+      .orderBy(desc(reputationScores.computedAt))
+      .limit(1),
+    db
+      .select()
+      .from(reputationEvents)
+      .where(eq(reputationEvents.subjectDid, subjectDid))
+  ]);
 
   const score1000 = latestScore?.score
     ?? Math.max(
@@ -487,18 +490,21 @@ router.get("/reputation/profiles/:subjectDid", apiKeyOrAuthMiddleware, async (re
   if (!db) return;
 
   const subjectDid = req.params.subjectDid;
-  const scores = await db
-    .select()
-    .from(reputationScores)
-    .where(eq(reputationScores.subjectDid, subjectDid))
-    .orderBy(desc(reputationScores.computedAt));
-
-  const [signals] = await db
-    .select()
-    .from(reputationSignalSnapshots)
-    .where(eq(reputationSignalSnapshots.subjectDid, subjectDid))
-    .orderBy(desc(reputationSignalSnapshots.computedAt))
-    .limit(1);
+  // ⚡ Bolt Optimization: Execute independent database queries concurrently using Promise.all
+  // Impact: Reduces route latency by running reputationScores and reputationSignalSnapshots fetches in parallel
+  const [scores, [signals]] = await Promise.all([
+    db
+      .select()
+      .from(reputationScores)
+      .where(eq(reputationScores.subjectDid, subjectDid))
+      .orderBy(desc(reputationScores.computedAt)),
+    db
+      .select()
+      .from(reputationSignalSnapshots)
+      .where(eq(reputationSignalSnapshots.subjectDid, subjectDid))
+      .orderBy(desc(reputationSignalSnapshots.computedAt))
+      .limit(1)
+  ]);
 
   return res.status(200).json({
     success: true,
