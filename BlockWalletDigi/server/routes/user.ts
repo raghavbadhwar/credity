@@ -1,13 +1,22 @@
-import { Router } from "express";
+import { Request, Response, Router } from "express";
 import { storage } from "../storage";
 import { insertUserSchema } from "@shared/schema";
+import { authMiddleware } from "../services/auth-service";
+import { AuthUser } from "@credverse/shared-auth";
+
+// Create custom Request type for the authenticated user
+interface AuthenticatedRequest extends Request {
+    user?: AuthUser;
+}
 
 const router = Router();
 
 // Get current user profile
-router.get("/user", async (req, res) => {
-    // TODO: Get userId from session/auth
-    const userId = 1;
+router.get("/user", authMiddleware as any, async (req: AuthenticatedRequest, res: Response) => {
+    const userId = Number(req.user?.id);
+    if (!userId) {
+        return res.status(401).json({ message: "Unauthorized" });
+    }
     const user = await storage.getUser(userId);
 
     if (!user) {
@@ -18,10 +27,12 @@ router.get("/user", async (req, res) => {
 });
 
 // Update user profile
-router.patch("/user", async (req, res) => {
+router.patch("/user", authMiddleware as any, async (req: AuthenticatedRequest, res: Response) => {
     try {
-        // TODO: Get userId from session/auth
-        const userId = 1;
+        const userId = Number(req.user?.id);
+        if (!userId) {
+            return res.status(401).json({ message: "Unauthorized" });
+        }
 
         const parseResult = insertUserSchema.partial().safeParse(req.body);
 
@@ -37,9 +48,11 @@ router.patch("/user", async (req, res) => {
 });
 
 // Get user activity
-router.get("/activity", async (req, res) => {
-    // TODO: Get userId from session/auth
-    const userId = 1;
+router.get("/activity", authMiddleware as any, async (req: AuthenticatedRequest, res: Response) => {
+    const userId = Number(req.user?.id);
+    if (!userId) {
+        return res.status(401).json({ message: "Unauthorized" });
+    }
     const activities = await storage.listActivities(userId);
     res.json(activities);
 });

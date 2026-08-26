@@ -1,0 +1,4 @@
+## 2024-05-10 - Fix Systemic IDOR Vulnerability via Auth Bypass
+**Vulnerability:** Widespread use of `parseInt(req.query.userId) || 1` and hardcoded `const userId = 1;` defaults unauthenticated or malicious requests to user ID 1 across many routes, enabling systemic authorization bypasses and Insecure Direct Object References (IDOR).
+**Learning:** Routes failed to enforce authentication middleware and extract the user identity reliably from the verified token payload (`req.user.userId`), relying instead on user-supplied inputs with unsafe fallbacks.
+**Prevention:** Always apply authentication middleware (`authMiddleware`) to protected routes. Extract user IDs strictly from the validated token (`req.user?.userId`). Do not allow client-supplied IDs to dictate the operating context without explicit authorization checks.
