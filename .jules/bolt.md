@@ -1,0 +1,3 @@
+## 2025-05-01 - Early Returns in Synchronous Pixel Processing Loops
+**Learning:** Synchronous pixel-by-pixel comparisons on `ImageData` arrays (e.g., motion detection and skin detection) on the main thread at 5 FPS are a massive performance bottleneck. The `detectMotion` loop in `use-face-detection.ts` evaluates all pixels unnecessarily even after the target threshold (2%) is met.
+**Action:** Always implement early returns (`break` or returning a value immediately) inside intensive `O(n)` pixel iteration loops as soon as the threshold for truthiness is satisfied, significantly reducing operations.
