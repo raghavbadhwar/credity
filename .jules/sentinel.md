@@ -1,0 +1,4 @@
+## 2025-05-15 - Reflected XSS in Gateway Fallback HTML
+**Vulnerability:** A reflected XSS vulnerability existed in the CredVerse Gateway fallback HTML template. URL query parameters (`name` and `error`) were read via `URLSearchParams` and directly injected into the DOM using `statusDiv.innerHTML`.
+**Learning:** Even simple fallback HTML served by Express must treat URL parameters as untrusted input. The XSS sanitization middleware (`packages/shared-auth/src/security.ts`) only covers Express request properties (like `req.body`, `req.query`), not client-side DOM manipulation where `window.location.search` is parsed.
+**Prevention:** Always use `textContent` (or `innerText`) instead of `innerHTML` when rendering user-supplied or URL-derived data into the DOM to ensure characters are safely escaped.
