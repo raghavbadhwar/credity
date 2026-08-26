@@ -26,11 +26,9 @@ const sidebarItems = [
   { icon: Settings, label: "Admin Console", href: "/admin" },
 ];
 
-export function Sidebar() {
+const SidebarContent = ({ setOpen }: { setOpen?: (open: boolean) => void }) => {
   const [location] = useLocation();
-  const [open, setOpen] = useState(false);
-
-  const SidebarContent = () => (
+  return (
     <div className="flex h-full flex-col bg-gradient-to-b from-sidebar to-sidebar/95 text-sidebar-foreground border-r border-sidebar-border shadow-xl">
       <div className="flex h-16 items-center px-6 border-b border-sidebar-border/50 backdrop-blur-sm">
         <div className="relative group">
@@ -84,12 +82,19 @@ export function Sidebar() {
       </div>
     </div>
   );
+};
+
+export function Sidebar() {
+  const [location] = useLocation();
+  const [open, setOpen] = useState(false);
+
+
 
   return (
     <>
       {/* Desktop Sidebar */}
       <aside className="hidden md:flex w-64 flex-col fixed inset-y-0 z-50">
-        <SidebarContent />
+        <SidebarContent setOpen={setOpen} />
       </aside>
 
       {/* Mobile Sidebar */}
@@ -101,7 +106,7 @@ export function Sidebar() {
             </Button>
           </SheetTrigger>
           <SheetContent side="left" className="p-0 w-64 border-r-sidebar-border bg-sidebar text-sidebar-foreground">
-            <SidebarContent />
+            <SidebarContent setOpen={setOpen} />
           </SheetContent>
         </Sheet>
       </div>

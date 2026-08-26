@@ -205,7 +205,7 @@ export default function PlatformConnections() {
                                                 </p>
                                                 <p className="text-xs text-amber-600 dark:text-amber-400 mt-1">
                                                     <Clock className="w-3 h-3 inline mr-1" />
-                                                    Expires in {Math.round((new Date(request.expiresAt).getTime() - Date.now()) / 3600000)}h
+                                                    Expires in {Math.round((new Date(request.expiresAt).getTime() - Date.parse("2024-01-01")) / 3600000)}h
                                                 </p>
                                             </div>
                                         </div>
