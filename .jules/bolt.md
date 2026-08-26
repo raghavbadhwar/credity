@@ -1,0 +1,3 @@
+## 2025-05-07 - Face Detection Synchronous Processing Optimization
+**Learning:** Biometric liveness checks process ImageData arrays synchronously on the main thread via large nested loops and O(n) traversal. While the UI stutter might not be severe on powerful machines, on low-end devices evaluating full 640x480 resolution image frames synchronously will freeze the UI thread.
+**Action:** Always employ early returns (`break` or `return`) as soon as the biometric thresholds are met. Processing 100% of an array when a 2% or 15% threshold is the only requirement wastes cycles and exacerbates UI stuttering.
