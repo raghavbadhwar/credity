@@ -65,7 +65,7 @@ export default function Dashboard() {
       if (!response.ok) throw new Error('Failed to fetch stats');
       return response.json();
     },
-    refetchInterval: 10000,
+    refetchInterval: 60000,
   });
 
   // Fetch recent verifications
@@ -76,7 +76,7 @@ export default function Dashboard() {
       if (!response.ok) throw new Error('Failed to fetch verifications');
       return response.json();
     },
-    refetchInterval: 5000,
+    refetchInterval: 30000,
   });
 
   const handleRefresh = () => {
