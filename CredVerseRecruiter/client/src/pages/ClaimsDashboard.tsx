@@ -69,7 +69,7 @@ export default function ClaimsDashboard() {
             }
             return res.json();
         },
-        refetchInterval: 30000,
+        refetchInterval: 60000, // ⚡ Bolt: Reduced polling interval to improve performance
     });
 
     const claims: ClaimSummary[] = claimsData?.claims || [];

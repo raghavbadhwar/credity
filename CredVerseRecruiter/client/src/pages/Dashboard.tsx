@@ -65,7 +65,7 @@ export default function Dashboard() {
       if (!response.ok) throw new Error('Failed to fetch stats');
       return response.json();
     },
-    refetchInterval: 10000,
+    refetchInterval: 30000, // ⚡ Bolt: Reduced polling interval to improve performance
   });
 
   // Fetch recent verifications
