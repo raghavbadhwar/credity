@@ -3,6 +3,7 @@ import { cva, type VariantProps } from "class-variance-authority"
 
 import { cn } from "@/lib/utils"
 
+// eslint-disable-next-line react-refresh/only-export-components
 const badgeVariants = cva(
   // @replit
   // Whitespace-nowrap: Badges should never wrap.

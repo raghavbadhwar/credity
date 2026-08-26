@@ -28,6 +28,7 @@ function EmptyHeader({ className, ...props }: React.ComponentProps<"div">) {
   )
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 const emptyMediaVariants = cva(
   "mb-2 flex shrink-0 items-center justify-center [&_svg]:pointer-events-none [&_svg]:shrink-0",
   {

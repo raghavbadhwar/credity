@@ -54,6 +54,7 @@ function FieldGroup({ className, ...props }: React.ComponentProps<"div">) {
   )
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 const fieldVariants = cva(
   "group/field data-[invalid=true]:text-destructive flex w-full gap-3",
   {
