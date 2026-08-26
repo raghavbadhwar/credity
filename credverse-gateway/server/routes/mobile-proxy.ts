@@ -214,8 +214,9 @@ router.all('/:target/*', async (req, res) => {
         }
 
         return res.status(upstreamResponse.status).send(responseBuffer);
-    } catch (error: any) {
-        const isAbort = error?.name === 'AbortError';
+    } catch (error: unknown) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const isAbort = (error as any)?.name === 'AbortError';
         const statusCode = isAbort ? 504 : 502;
         return res.status(statusCode).json({
             error: isAbort ? 'Upstream timeout' : 'Upstream request failed',
