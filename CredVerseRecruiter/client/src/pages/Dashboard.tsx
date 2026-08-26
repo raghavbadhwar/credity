@@ -65,7 +65,8 @@ export default function Dashboard() {
       if (!response.ok) throw new Error('Failed to fetch stats');
       return response.json();
     },
-    refetchInterval: 10000,
+    // Bolt: Extended polling interval to 60s to reduce unnecessary API load
+    refetchInterval: 60000,
   });
 
   // Fetch recent verifications
@@ -76,7 +77,8 @@ export default function Dashboard() {
       if (!response.ok) throw new Error('Failed to fetch verifications');
       return response.json();
     },
-    refetchInterval: 5000,
+    // Bolt: Extended polling interval to 30s to reduce re-renders and backend load
+    refetchInterval: 30000,
   });
 
   const handleRefresh = () => {
