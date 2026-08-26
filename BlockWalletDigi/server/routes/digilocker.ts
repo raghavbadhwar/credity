@@ -176,7 +176,9 @@ router.post("/digilocker/import-all", async (req, res) => {
         const imported: string[] = [];
         const failed: string[] = [];
 
-        for (const doc of documents) {
+        // ⚡ Bolt Optimization: Use Promise.all to fetch and store documents concurrently.
+        // Impact: Reduces total request time from O(N) to roughly O(1) network round trips for N documents.
+        await Promise.all(documents.map(async (doc) => {
             try {
                 const { document } = await digilockerService.pullDocument(userId, doc.uri);
 
@@ -199,7 +201,7 @@ router.post("/digilocker/import-all", async (req, res) => {
             } catch (e) {
                 failed.push(doc.name);
             }
-        }
+        }));
 
         await storage.createActivity({
             userId,
