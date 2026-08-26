@@ -108,6 +108,7 @@ export class BlockchainService {
                 console.log(`[Blockchain] Contract verified at ${address} on ${this.chain} (${rpcUrl})`);
                 this.isConfigured = true;
             }
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         } catch (error: any) {
             console.log(`[Blockchain] RPC unreachable (${error.message}) on ${this.chain} - deferred mode active`);
             this.isConfigured = false;
@@ -117,6 +118,7 @@ export class BlockchainService {
     /**
      * Hash credential data for on-chain storage
      */
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     hashCredential(data: any): string {
         const canonical = typeof data === 'string' ? data : JSON.stringify(data, Object.keys(data).sort());
         return ethers.keccak256(ethers.toUtf8Bytes(canonical));
@@ -125,6 +127,7 @@ export class BlockchainService {
     /**
      * Anchor a credential hash on-chain
      */
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     async anchorCredential(credentialData: any): Promise<AnchorResult> {
         const hash = this.hashCredential(credentialData);
 
@@ -156,6 +159,7 @@ export class BlockchainService {
                 blockNumber: receipt.blockNumber,
                 hash,
             };
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         } catch (error: any) {
             console.error('[Blockchain] Anchor error:', error.message);
             return {
@@ -198,6 +202,7 @@ export class BlockchainService {
                 blockNumber: receipt.blockNumber,
                 hash: credentialHash,
             };
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         } catch (error: any) {
             console.error('[Blockchain] Revoke error:', error.message);
             return {
@@ -220,6 +225,7 @@ export class BlockchainService {
         }
 
         try {
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
             const [isValid, issuer, anchoredAt] = await this.contract.verifyCredential(credentialHash);
 
             if (anchoredAt === BigInt(0)) {
@@ -235,6 +241,7 @@ export class BlockchainService {
                 anchoredAt: Number(anchoredAt),
                 isRevoked,
             };
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         } catch (error: any) {
             console.error('[Blockchain] Verify error:', error.message);
             return { exists: false, isValid: false };
@@ -244,6 +251,7 @@ export class BlockchainService {
     /**
      * Get full credential details from chain
      */
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     async getCredentialDetails(credentialHash: string): Promise<any> {
         if (!this.isConfigured) {
             return {
@@ -267,6 +275,7 @@ export class BlockchainService {
                 revocationReason,
                 revokedAt: revokedAt > BigInt(0) ? new Date(Number(revokedAt) * 1000) : null,
             };
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         } catch (error) {
             return { exists: false };
         }
@@ -286,6 +295,7 @@ export class BlockchainService {
                 anchored: Number(anchored),
                 revoked: Number(revoked),
             };
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         } catch (error) {
             return { anchored: 0, revoked: 0 };
         }

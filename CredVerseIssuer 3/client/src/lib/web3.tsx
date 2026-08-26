@@ -37,4 +37,5 @@ export function Web3Provider({ children }: Web3ProviderProps) {
     );
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export { config };

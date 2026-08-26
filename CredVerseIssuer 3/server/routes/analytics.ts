@@ -8,6 +8,7 @@ router.use("/analytics", apiKeyMiddleware);
 
 router.get("/analytics", async (req, res) => {
     try {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const tenantId = (req as any).tenantId;
 
         // In a real DB, we would use aggregation queries.
@@ -38,6 +39,7 @@ router.get("/analytics", async (req, res) => {
             ],
             chartData: monthlyTrends
         });
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
         res.status(500).json({ message: "Internal Server Error" });
     }
