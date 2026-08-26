@@ -27,12 +27,6 @@ export function QRScanner({ onScan, onClose, title = "Scan QR Code", description
     const streamRef = useRef<MediaStream | null>(null);
     const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
-    useEffect(() => {
-        startCamera();
-        return () => {
-            stopCamera();
-        };
-    }, [facingMode]);
 
     const startCamera = async () => {
         try {
