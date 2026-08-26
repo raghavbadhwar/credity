@@ -68,6 +68,7 @@ export function validatePasswordStrength(password: string): PasswordValidationRe
     if (!/[0-9]/.test(password)) {
         errors.push('Password must contain at least one number');
     }
+    // eslint-disable-next-line no-useless-escape
     if (!/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)) {
         errors.push('Password must contain at least one special character');
     }
@@ -220,6 +221,7 @@ export function hashApiKey(apiKey: string): string {
 
 // Express middleware types
 declare global {
+    // eslint-disable-next-line @typescript-eslint/no-namespace
     namespace Express {
         interface Request {
             user?: TokenPayload;
@@ -306,4 +308,32 @@ export function checkRateLimit(key: string, maxRequests: number, windowMs: numbe
 
     record.count++;
     return true;
+}
+
+/**
+ * Periodic cleanup of expired entries to prevent memory leaks
+ */
+function cleanupExpiredEntries() {
+    const now = Date.now();
+
+    // Cleanup rate limits
+    for (const [key, record] of rateLimitMap.entries()) {
+        if (now > record.resetAt) {
+            rateLimitMap.delete(key);
+        }
+    }
+
+    // Cleanup refresh tokens
+    for (const [token, record] of refreshTokens.entries()) {
+        if (now > record.expiresAt.getTime()) {
+            refreshTokens.delete(token);
+        }
+    }
+}
+
+// Run cleanup every 5 minutes
+const cleanupInterval = setInterval(cleanupExpiredEntries, 5 * 60 * 1000);
+// Ensure the interval doesn't prevent the process from exiting
+if (cleanupInterval.unref) {
+    cleanupInterval.unref();
 }
