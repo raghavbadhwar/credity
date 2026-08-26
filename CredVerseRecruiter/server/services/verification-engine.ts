@@ -303,8 +303,13 @@ export class VerificationEngine {
         let failed = 0;
         let suspicious = 0;
 
-        for (const cred of credentials) {
-            const result = await this.verifyCredential(cred);
+        // ⚡ Bolt Optimization: Use Promise.all for concurrent bulk credential verification
+        // Impact: Reduces overall verification time for bulk operations significantly by running I/O operations concurrently instead of sequentially
+        const verificationResults = await Promise.all(
+            credentials.map(cred => this.verifyCredential(cred))
+        );
+
+        for (const result of verificationResults) {
             results.push(result);
 
             if (result.status === 'verified') verified++;
