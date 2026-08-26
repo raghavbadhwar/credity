@@ -1,0 +1,4 @@
+## 2024-05-24 - Cryptographically Secure Randomness for 2FA Backup Codes
+**Vulnerability:** The `generateBackupCodes()` function in `CredVerseIssuer 3/server/services/two-factor.ts` was using `Math.random()` to generate authentication backup codes. `Math.random()` is not cryptographically secure and can be predicted, potentially allowing an attacker to guess backup codes and bypass 2FA.
+**Learning:** Even for seemingly simple string generation (like backup codes), any value used for authentication or authorization must be generated using a cryptographically secure pseudo-random number generator (CSPRNG).
+**Prevention:** Use `crypto.randomInt()` or `crypto.randomBytes()` from Node's native `crypto` module (imported as `import * as crypto from 'crypto'`) instead of `Math.random()` for any security-sensitive random value generation.
