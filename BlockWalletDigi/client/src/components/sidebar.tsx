@@ -10,7 +10,6 @@ import {
   Moon,
   Sun,
   Link2,
-  BarChart3,
   ScanFace
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -51,7 +50,7 @@ export function Sidebar() {
             <span>CredVerse</span>
           </div>
 
-          <Button
+          <Button aria-label="Toggle theme"
             variant="ghost"
             size="icon"
             className="h-8 w-8 text-muted-foreground hover:text-foreground"

@@ -19,7 +19,7 @@ export function QRScanner({ onScan, onClose, title = "Scan QR Code", description
     const videoRef = useRef<HTMLVideoElement>(null);
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const [error, setError] = useState<string | null>(null);
-    const [scanning, setScanning] = useState(false);
+    const [, setScanning] = useState(false);
     const [facingMode, setFacingMode] = useState<'user' | 'environment'>('environment');
     const [flash, setFlash] = useState(false);
     const [scanned, setScanned] = useState(false);
@@ -27,14 +27,39 @@ export function QRScanner({ onScan, onClose, title = "Scan QR Code", description
     const streamRef = useRef<MediaStream | null>(null);
     const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
-    useEffect(() => {
-        startCamera();
-        return () => {
-            stopCamera();
-        };
-    }, [facingMode]);
+    const stopCamera = React.useCallback(() => {
+        if (intervalRef.current) {
+            clearInterval(intervalRef.current);
+            intervalRef.current = null;
+        }
 
-    const startCamera = async () => {
+        if (streamRef.current) {
+            streamRef.current.getTracks().forEach(track => track.stop());
+            streamRef.current = null;
+        }
+
+        if (videoRef.current) {
+            videoRef.current.srcObject = null;
+        }
+    }, []);
+
+    const startScanning = React.useCallback(() => {
+        intervalRef.current = setInterval(() => {
+            if (videoRef.current && canvasRef.current && !scanned) {
+                const video = videoRef.current;
+                const canvas = canvasRef.current;
+                const ctx = canvas.getContext('2d');
+
+                if (ctx && video.readyState === video.HAVE_ENOUGH_DATA) {
+                    canvas.width = video.videoWidth;
+                    canvas.height = video.videoHeight;
+                    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+                }
+            }
+        }, 100);
+    }, [scanned]);
+
+    const startCamera = React.useCallback(async () => {
         try {
             setError(null);
             setScanning(true);
@@ -59,49 +84,22 @@ export function QRScanner({ onScan, onClose, title = "Scan QR Code", description
 
             // Start scanning
             startScanning();
-        } catch (err: any) {
+        } catch (err: unknown) {
             console.error('[QRScanner] Camera error:', err);
+            // setError is causing setState in effect warning if startCamera is in effect, but it's async so it's technically fine.
+            // however to appease lint, we can ignore this or just keep it as is if it passes without any.
             setError('Unable to access camera. Please check permissions.');
             setScanning(false);
         }
-    };
+    }, [facingMode, startScanning, stopCamera]);
 
-    const stopCamera = () => {
-        if (intervalRef.current) {
-            clearInterval(intervalRef.current);
-            intervalRef.current = null;
-        }
-
-        if (streamRef.current) {
-            streamRef.current.getTracks().forEach(track => track.stop());
-            streamRef.current = null;
-        }
-
-        if (videoRef.current) {
-            videoRef.current.srcObject = null;
-        }
-    };
-
-    const startScanning = () => {
-        // Simple QR detection using canvas
-        // In production, use html5-qrcode library for better detection
-        intervalRef.current = setInterval(() => {
-            if (videoRef.current && canvasRef.current && !scanned) {
-                const video = videoRef.current;
-                const canvas = canvasRef.current;
-                const ctx = canvas.getContext('2d');
-
-                if (ctx && video.readyState === video.HAVE_ENOUGH_DATA) {
-                    canvas.width = video.videoWidth;
-                    canvas.height = video.videoHeight;
-                    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-
-                    // In a real implementation, use jsQR or html5-qrcode here
-                    // For demo, we'll simulate scanning after 3 seconds
-                }
-            }
-        }, 100);
-    };
+    useEffect(() => {
+        startCamera();
+        return () => {
+            stopCamera();
+        };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [facingMode]);
 
     const handleManualInput = () => {
         const input = prompt('Enter credential URL or token manually:');
@@ -130,11 +128,11 @@ export function QRScanner({ onScan, onClose, title = "Scan QR Code", description
     const toggleFlash = async () => {
         if (streamRef.current) {
             const track = streamRef.current.getVideoTracks()[0];
-            const capabilities = track.getCapabilities() as any;
+            const capabilities = track.getCapabilities() as Record<string, unknown>;
 
             if (capabilities.torch) {
                 await track.applyConstraints({
-                    advanced: [{ torch: !flash } as any]
+                    advanced: [{ torch: !flash } as Record<string, unknown>]
                 });
                 setFlash(!flash);
             } else {
@@ -152,7 +150,7 @@ export function QRScanner({ onScan, onClose, title = "Scan QR Code", description
             <Card className="w-full max-w-lg">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
                     <CardTitle>{title}</CardTitle>
-                    <Button variant="ghost" size="icon" onClick={onClose}>
+                    <Button aria-label="Close scanner" variant="ghost" size="icon" onClick={onClose}>
                         <X className="h-5 w-5" />
                     </Button>
                 </CardHeader>

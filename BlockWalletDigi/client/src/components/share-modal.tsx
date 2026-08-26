@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -7,7 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Copy, QrCode, Link as LinkIcon, Check, Share2, Clock, Mail, MessageCircle, Loader2, Shield, Eye, EyeOff, ExternalLink } from "lucide-react";
+import { Copy, QrCode, Link as LinkIcon, Check, Share2, Clock, Mail, MessageCircle, Loader2, Shield, Eye, ExternalLink } from "lucide-react";
 import { Credential } from "@shared/schema";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
@@ -46,22 +46,13 @@ export function ShareModal({ credential, open, onOpenChange }: ShareModalProps) 
     enabled: !!credential?.id && open,
   });
 
-  // Reset state when modal opens/closes
-  useEffect(() => {
-    if (!open) {
-      setShareResult(null);
-      setQrCodeUrl(null);
-      setSelectedFields([]);
-    }
-  }, [open]);
-
   // Biometrics hook
   const { verifyBiometrics } = useBiometrics();
 
   const handleShareClick = async () => {
     try {
       // PROMPT BIOMETRIC AUTH
-      const verification = await verifyBiometrics('1');
+      const verification = await verifyBiometrics();
       if (!verification.success) {
         toast({ title: 'Authentication Failed', description: 'Biometric verification required to share credentials', variant: 'destructive' });
         return;
@@ -130,7 +121,7 @@ export function ShareModal({ credential, open, onOpenChange }: ShareModalProps) 
   const handleShare = async (type: 'email' | 'whatsapp' | 'native') => {
     if (!shareResult?.shareUrl) return;
 
-    const title = `Credential Verification: ${(credential.data as any)?.name || 'Credential'}`;
+    const title = `Credential Verification: ${(credential.data as Record<string, unknown>)?.name || 'Credential'}`;
     const text = `Verify my ${credential.issuer} credential: ${shareResult.shareUrl}`;
 
     if (type === 'email') {
@@ -151,7 +142,14 @@ export function ShareModal({ credential, open, onOpenChange }: ShareModalProps) 
   ];
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={(v) => {
+        if (!v) {
+            setShareResult(null);
+            setQrCodeUrl(null);
+            setSelectedFields([]);
+        }
+        onOpenChange(v);
+    }}>
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
@@ -256,7 +254,7 @@ export function ShareModal({ credential, open, onOpenChange }: ShareModalProps) 
                       {field.replace(/_/g, " ").replace(/([A-Z])/g, " $1")}
                     </Label>
                     <span className="text-xs text-muted-foreground truncate max-w-[100px]">
-                      {String((credential.data as any)?.[field] || '').slice(0, 20)}
+                      {String((credential.data as Record<string, unknown>)?.[field] || '').slice(0, 20)}
                     </span>
                   </div>
                 ))}
@@ -308,7 +306,7 @@ export function ShareModal({ credential, open, onOpenChange }: ShareModalProps) 
                     value={shareResult.shareUrl}
                     className="font-mono text-xs bg-secondary/30"
                   />
-                  <Button size="icon" variant="outline" onClick={handleCopy}>
+                  <Button aria-label={copied ? "Copied" : "Copy link"} size="icon" variant="outline" onClick={handleCopy}>
                     {copied ? <Check className="w-4 h-4 text-green-600" /> : <Copy className="w-4 h-4" />}
                   </Button>
                 </div>
