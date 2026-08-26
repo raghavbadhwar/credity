@@ -297,20 +297,24 @@ export class VerificationEngine {
     async bulkVerify(credentials: CredentialPayload[]): Promise<BulkVerificationResult> {
         await ensureHydrated();
         const jobId = `bulk-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
-        const results: VerificationResult[] = [];
 
         let verified = 0;
         let failed = 0;
         let suspicious = 0;
 
-        for (const cred of credentials) {
-            const result = await this.verifyCredential(cred);
-            results.push(result);
+        // ⚡ Bolt Optimization: Use Promise.all to verify credentials concurrently instead of sequentially
+        // Impact: Reduces overall verification time for N credentials from O(N * T) to roughly O(T) (bounded by concurrency limits)
+        const results: VerificationResult[] = await Promise.all(
+            credentials.map(async (cred) => {
+                const result = await this.verifyCredential(cred);
 
-            if (result.status === 'verified') verified++;
-            else if (result.status === 'failed') failed++;
-            else if (result.status === 'suspicious') suspicious++;
-        }
+                if (result.status === 'verified') verified++;
+                else if (result.status === 'failed') failed++;
+                else if (result.status === 'suspicious') suspicious++;
+
+                return result;
+            })
+        );
 
         const bulkResult: BulkVerificationResult = {
             id: jobId,
