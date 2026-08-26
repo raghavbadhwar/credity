@@ -27,6 +27,6 @@ export function errorHandler(err: any, req: Request, res: Response, next: NextFu
 }
 
 // Wrapper for async route handlers
-export const asyncHandler = (fn: Function) => (req: Request, res: Response, next: NextFunction) => {
+export const asyncHandler = (fn: (...args: any[]) => any) => (req: Request, res: Response, next: NextFunction) => {
     Promise.resolve(fn(req, res, next)).catch(next);
 };
