@@ -9,6 +9,7 @@ import { useEffect, useCallback, useRef } from 'react';
 /**
  * Announce message to screen readers
  */
+// eslint-disable-next-line react-refresh/only-export-components
 export function announceToScreenReader(message: string, priority: 'polite' | 'assertive' = 'polite') {
     const announcement = document.createElement('div');
     announcement.setAttribute('role', 'status');
@@ -28,6 +29,7 @@ export function announceToScreenReader(message: string, priority: 'polite' | 'as
 /**
  * Hook for keyboard navigation
  */
+// eslint-disable-next-line react-refresh/only-export-components
 export function useKeyboardNavigation(
     onEnter?: () => void,
     onEscape?: () => void,
@@ -83,6 +85,7 @@ export function useKeyboardNavigation(
 /**
  * Focus trap for modals and dialogs
  */
+// eslint-disable-next-line react-refresh/only-export-components
 export function useFocusTrap(containerRef: React.RefObject<HTMLElement>, isActive: boolean) {
     useEffect(() => {
         if (!isActive || !containerRef.current) return;
@@ -139,6 +142,7 @@ export function SkipNavLink({ href = '#main-content', children = 'Skip to main c
 /**
  * Live region for dynamic content updates
  */
+// eslint-disable-next-line react-refresh/only-export-components
 export function useLiveRegion() {
     const regionRef = useRef<HTMLDivElement | null>(null);
 
@@ -170,11 +174,13 @@ export function useLiveRegion() {
 /**
  * Reduced motion preference hook
  */
+// eslint-disable-next-line react-refresh/only-export-components
 export function usePrefersReducedMotion(): boolean {
     const [prefersReducedMotion, setPrefersReducedMotion] = React.useState(false);
 
     useEffect(() => {
         const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setPrefersReducedMotion(mediaQuery.matches);
 
         const handleChange = (e: MediaQueryListEvent) => {

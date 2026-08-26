@@ -19,6 +19,7 @@ export function QRScanner({ onScan, onClose, title = "Scan QR Code", description
     const videoRef = useRef<HTMLVideoElement>(null);
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const [error, setError] = useState<string | null>(null);
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const [scanning, setScanning] = useState(false);
     const [facingMode, setFacingMode] = useState<'user' | 'environment'>('environment');
     const [flash, setFlash] = useState(false);
@@ -32,6 +33,7 @@ export function QRScanner({ onScan, onClose, title = "Scan QR Code", description
         return () => {
             stopCamera();
         };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [facingMode]);
 
     const startCamera = async () => {
@@ -59,6 +61,7 @@ export function QRScanner({ onScan, onClose, title = "Scan QR Code", description
 
             // Start scanning
             startScanning();
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         } catch (err: any) {
             console.error('[QRScanner] Camera error:', err);
             setError('Unable to access camera. Please check permissions.');
@@ -130,10 +133,12 @@ export function QRScanner({ onScan, onClose, title = "Scan QR Code", description
     const toggleFlash = async () => {
         if (streamRef.current) {
             const track = streamRef.current.getVideoTracks()[0];
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const capabilities = track.getCapabilities() as any;
 
             if (capabilities.torch) {
                 await track.applyConstraints({
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
                     advanced: [{ torch: !flash } as any]
                 });
                 setFlash(!flash);

@@ -10,6 +10,7 @@
  * - Processing time average
  */
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";

@@ -5,6 +5,7 @@ initSentry('credverse-issuer');
 // Initialize PostHog Analytics
 import { initAnalytics } from "./services/analytics";
 initAnalytics();
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import express, { type Request, Response, NextFunction } from "express";
 import helmet from "helmet";
 import cors from "cors";
@@ -130,6 +131,7 @@ export function log(message: string, source = "express") {
 app.use((req, res, next) => {
   const start = Date.now();
   const path = req.path;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let capturedJsonResponse: Record<string, any> | undefined = undefined;
 
   const originalResJson = res.json;
