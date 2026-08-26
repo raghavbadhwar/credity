@@ -124,7 +124,8 @@ export async function getStatusList(listId: string): Promise<{
     let revokedCount = 0;
     let updatedAt = new Date(0).toISOString();
 
-    for (const entry of Array.from(credentialToStatus.values())) {
+    // ⚡ Bolt: Using values() directly instead of Array.from() to avoid O(n) array allocation
+    for (const entry of credentialToStatus.values()) {
         if (entry.listId !== listId || !entry.revoked) continue;
         const byteOffset = Math.floor(entry.index / 8);
         const bitOffset = entry.index % 8;

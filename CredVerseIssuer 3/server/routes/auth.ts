@@ -124,11 +124,12 @@ router.post('/auth/login', async (req, res) => {
             });
 
             // Clean up expired tokens
-            Array.from(pendingTwoFactorTokens.entries()).forEach(([token, data]) => {
+            // ⚡ Bolt: Iterating directly on entries to avoid O(n) array allocation
+            for (const [token, data] of pendingTwoFactorTokens.entries()) {
                 if (data.expiresAt < new Date()) {
                     pendingTwoFactorTokens.delete(token);
                 }
-            });
+            }
 
             return res.json({
                 success: true,
