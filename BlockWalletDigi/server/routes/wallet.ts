@@ -3,7 +3,7 @@ import crypto from 'crypto';
 import { walletService } from '../services/wallet-service';
 import { didService } from '../services/did-service';
 import { storage } from '../storage';
-import { hashPassword } from '../services/auth-service';
+import { hashPassword, authMiddleware } from '../services/auth-service';
 
 const router = Router();
 
@@ -142,9 +142,9 @@ router.get('/did/resolve/:did', async (req, res) => {
 /**
  * Create wallet backup
  */
-router.post('/wallet/backup', async (req, res) => {
+router.post('/wallet/backup', authMiddleware, async (req, res) => {
     try {
-        const userId = parseInt(req.body.userId) || 1;
+        const userId = Number(req.user!.userId);
         const { backupData, backupKey } = await walletService.createBackup(userId);
 
         await storage.createActivity({
