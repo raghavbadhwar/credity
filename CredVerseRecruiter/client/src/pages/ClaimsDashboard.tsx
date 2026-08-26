@@ -115,6 +115,8 @@ export default function ClaimsDashboard() {
                                 <button
                                     key={period}
                                     onClick={() => setSelectedPeriod(period)}
+                                    aria-label={`Show ${period} claims`}
+                                    aria-pressed={selectedPeriod === period}
                                     className={`px-3 py-1 text-sm rounded-md transition-colors ${selectedPeriod === period
                                             ? 'bg-cyan-500 text-white shadow-sm'
                                             : 'text-white/60 hover:text-white'
