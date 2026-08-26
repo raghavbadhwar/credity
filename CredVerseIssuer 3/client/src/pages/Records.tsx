@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Layout } from "@/components/layout/Layout";
 import {
   Table,
@@ -10,7 +11,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Search, Filter, Download, MoreHorizontal, ShieldCheck, AlertCircle, ExternalLink, Send, Copy, Loader2 } from "lucide-react";
+import { Search, Filter, Download, MoreHorizontal, ShieldCheck, AlertCircle, ExternalLink, Send,  Loader2 } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -19,7 +20,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery,  useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
 
 interface CredentialRecord {
