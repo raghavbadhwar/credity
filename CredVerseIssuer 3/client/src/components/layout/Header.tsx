@@ -91,6 +91,7 @@ export function Header() {
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input
               type="search"
+              aria-label="Search students, credentials, or batches"
               placeholder="Search students, credentials, or batches..."
               className="pl-9 bg-secondary/50 border-transparent focus:bg-background focus:border-input transition-all"
             />
@@ -131,6 +132,7 @@ export function Header() {
           <Button
             variant="ghost"
             size="icon"
+            aria-label="Help"
             className="text-muted-foreground hover:text-foreground"
             onClick={() => navigate('/help')}
           >
@@ -139,6 +141,7 @@ export function Header() {
           <Button
             variant="ghost"
             size="icon"
+            aria-label="Notifications"
             className="text-muted-foreground hover:text-foreground relative"
             onClick={() => navigate('/verification-logs')}
           >
@@ -151,7 +154,7 @@ export function Header() {
           {/* User Menu */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="relative h-9 w-9 rounded-full">
+              <Button variant="ghost" aria-label="User menu" className="relative h-9 w-9 rounded-full">
                 <Avatar className="h-9 w-9 border border-border">
                   <AvatarImage src="https://github.com/shadcn.png" alt="@admin" />
                   <AvatarFallback>AD</AvatarFallback>
@@ -218,7 +221,7 @@ export function Header() {
                 <code className="flex-1 text-sm font-mono truncate">
                   {address}
                 </code>
-                <Button size="icon" variant="ghost" onClick={handleCopyAddress}>
+                <Button size="icon" variant="ghost" aria-label="Copy wallet address" onClick={handleCopyAddress}>
                   {copied ? <Check className="h-4 w-4 text-green-600" /> : <Copy className="h-4 w-4" />}
                 </Button>
               </div>
