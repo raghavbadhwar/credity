@@ -1,0 +1,3 @@
+## 2024-07-07 - Use Promise.all for concurrent bulk credential verification
+**Learning:** Found sequential processing inside `bulkVerify` where each `verifyCredential` blocks the next (`for (const cred of credentials) { const result = await this.verifyCredential(cred); ... }`). Given `verifyCredential` involves potential network requests or complex processing, this causes O(n) delay for n credentials instead of concurrent execution.
+**Action:** When performing independent async tasks over an array, use `Promise.all` with `Array.prototype.map` instead of a sequential `for...of` loop with `await` to process them concurrently.
