@@ -149,13 +149,17 @@ export function TrustScoreCard() {
                 <button
                     onClick={() => setShowBreakdown(!showBreakdown)}
                     className="w-full flex items-center justify-between text-sm text-muted-foreground hover:text-foreground transition-colors"
+                    aria-expanded={showBreakdown}
+                    aria-controls="score-breakdown-content"
+                    aria-label="Toggle score breakdown details"
                 >
                     <span className="font-medium">Score Breakdown</span>
-                    <ChevronRight className={`w-4 h-4 transition-transform ${showBreakdown ? 'rotate-90' : ''}`} />
+                    <ChevronRight className={`w-4 h-4 transition-transform ${showBreakdown ? 'rotate-90' : ''}`} aria-hidden="true" />
                 </button>
 
                 {showBreakdown && (
                     <motion.div
+                        id="score-breakdown-content"
                         initial={{ opacity: 0, height: 0 }}
                         animate={{ opacity: 1, height: 'auto' }}
                         className="space-y-3"
