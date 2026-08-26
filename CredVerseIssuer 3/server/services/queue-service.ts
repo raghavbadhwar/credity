@@ -245,20 +245,27 @@ export function startIssuanceWorker(
             jobResults.set(jobId, result);
             void queuePersist();
 
-            // Process each credential
-            for (let i = 0; i < recipients.length; i++) {
-                const { recipient, data } = recipients[i];
+            // ⚡ Bolt Optimization: Batch process credentials concurrently to improve bulk issuance speed
+            // Impact: Significantly reduces overall processing time for large bulk jobs by utilizing bounded concurrency
+            const CHUNK_SIZE = 10;
+            for (let i = 0; i < recipients.length; i += CHUNK_SIZE) {
+                const chunk = recipients.slice(i, i + CHUNK_SIZE);
 
-                try {
-                    await processCredential(tenantId, templateId, issuerId, recipient, data);
-                    result.success++;
-                } catch (error: any) {
-                    result.failed++;
-                    result.errors.push(`Recipient ${i + 1}: ${error.message}`);
-                    console.error(`[Queue] Job ${jobId} failed for recipient ${i + 1}:`, error);
-                }
+                await Promise.all(chunk.map(async (recipientData, index) => {
+                    const actualIndex = i + index;
+                    const { recipient, data } = recipientData;
 
-                result.processed++;
+                    try {
+                        await processCredential(tenantId, templateId, issuerId, recipient, data);
+                        result.success++;
+                    } catch (error: any) {
+                        result.failed++;
+                        result.errors.push(`Recipient ${actualIndex + 1}: ${error.message}`);
+                        console.error(`[Queue] Job ${jobId} failed for recipient ${actualIndex + 1}:`, error);
+                    }
+                }));
+
+                result.processed += chunk.length;
 
                 // Update job progress
                 await job.updateProgress(Math.round((result.processed / result.total) * 100));
