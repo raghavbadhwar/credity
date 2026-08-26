@@ -7,3 +7,7 @@
 ## 2026-02-22 - Decorative Overlays
 **Learning:** Decorative elements (like blurred backgrounds) positioned absolutely over interactive elements can intercept clicks, making the UI unresponsive. This is a critical usability failure.
 **Action:** Always add `pointer-events-none` to decorative overlays that sit on top of other content.
+
+## 2026-02-22 - Accessible Disclosure Components
+**Learning:** Collapsible "accordion" style content sections often miss proper ARIA wiring, making them invisible or confusing to screen readers. Focus styles on the trigger button are also frequently omitted, breaking keyboard navigation.
+**Action:** Always ensure disclosure buttons have `aria-expanded`, `aria-controls`, and strong `focus-visible` styles to guarantee they are discoverable and usable by everyone.
