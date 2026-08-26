@@ -303,13 +303,21 @@ export class VerificationEngine {
         let failed = 0;
         let suspicious = 0;
 
-        for (const cred of credentials) {
-            const result = await this.verifyCredential(cred);
-            results.push(result);
+        // ⚡ Bolt Optimization: Use Promise.all with chunking to bulk verify credentials concurrently
+        // Impact: Reduces overall verification time for large lists by resolving multiple verifications simultaneously
+        const chunkSize = 10;
+        for (let i = 0; i < credentials.length; i += chunkSize) {
+            const chunk = credentials.slice(i, i + chunkSize);
+            const chunkResults = await Promise.all(
+                chunk.map(cred => this.verifyCredential(cred))
+            );
 
-            if (result.status === 'verified') verified++;
-            else if (result.status === 'failed') failed++;
-            else if (result.status === 'suspicious') suspicious++;
+            for (const result of chunkResults) {
+                results.push(result);
+                if (result.status === 'verified') verified++;
+                else if (result.status === 'failed') failed++;
+                else if (result.status === 'suspicious') suspicious++;
+            }
         }
 
         const bulkResult: BulkVerificationResult = {
