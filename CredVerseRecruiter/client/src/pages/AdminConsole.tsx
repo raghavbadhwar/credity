@@ -1,14 +1,13 @@
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Shield, Users, Lock, Key, Activity, Save, Download, Trash2 } from "lucide-react";
+import { Shield, Users, Key, Activity, Download, Trash2 } from "lucide-react";
 
 export default function AdminConsole() {
   return (
@@ -151,7 +150,7 @@ export default function AdminConsole() {
                   </div>
                   <div className="flex gap-2">
                     <Button variant="outline" size="sm">Roll Key</Button>
-                    <Button variant="ghost" size="sm" className="text-destructive hover:text-destructive hover:bg-destructive/10">
+                    <Button aria-label="Delete API Key" variant="ghost" size="sm" className="text-destructive hover:text-destructive hover:bg-destructive/10">
                       <Trash2 className="h-4 w-4" />
                     </Button>
                   </div>
