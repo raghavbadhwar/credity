@@ -119,7 +119,7 @@ router.get('/', async (req: Request, res: Response) => {
                 totalAccessCount: userConnections.reduce((sum, c) => sum + c.accessCount, 0)
             }
         });
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error('Connections list error:', error);
         res.status(500).json({
             success: false,
@@ -145,7 +145,7 @@ router.get('/requests', async (req: Request, res: Response) => {
             requests: userRequests,
             pendingCount: userRequests.length
         });
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error('Requests list error:', error);
         res.status(500).json({
             success: false,
@@ -199,7 +199,7 @@ router.post('/requests/:id/approve', async (req: Request, res: Response) => {
             connection,
             message: `Connected to ${request.platformName}`
         });
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error('Approve request error:', error);
         res.status(500).json({
             success: false,
@@ -231,7 +231,7 @@ router.post('/requests/:id/deny', async (req: Request, res: Response) => {
             success: true,
             message: `Denied request from ${request.platformName}`
         });
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error('Deny request error:', error);
         res.status(500).json({
             success: false,
@@ -268,7 +268,7 @@ router.put('/:id/permissions', async (req: Request, res: Response) => {
             connection,
             message: 'Permissions updated'
         });
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error('Update permissions error:', error);
         res.status(500).json({
             success: false,
@@ -300,7 +300,7 @@ router.delete('/:id', async (req: Request, res: Response) => {
             success: true,
             message: `Disconnected from ${connection.platformName}`
         });
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error('Disconnect error:', error);
         res.status(500).json({
             success: false,
@@ -340,7 +340,7 @@ router.get('/:id/activity', async (req: Request, res: Response) => {
             },
             activity
         });
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error('Activity log error:', error);
         res.status(500).json({
             success: false,

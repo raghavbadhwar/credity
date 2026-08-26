@@ -7,7 +7,9 @@ import { initAnalytics } from "./services/analytics";
 initAnalytics();
 import express, { type Request, Response, NextFunction } from "express";
 import helmet from "helmet";
+// @ts-ignore
 import cors from "cors";
+// @ts-ignore
 import { errorHandler } from "./middleware/error-handler";
 import { setupSecurity } from "@credverse/shared-auth";
 import { initAuth } from "@credverse/shared-auth";

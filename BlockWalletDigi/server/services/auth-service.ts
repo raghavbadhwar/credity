@@ -68,7 +68,7 @@ export function validatePasswordStrength(password: string): PasswordValidationRe
     if (!/[0-9]/.test(password)) {
         errors.push('Password must contain at least one number');
     }
-    if (!/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)) {
+    if (!/[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/.test(password)) {
         errors.push('Password must contain at least one special character');
     }
 
@@ -230,7 +230,7 @@ declare global {
 /**
  * JWT Authentication Middleware
  */
-export function authMiddleware(req: Request, res: Response, next: NextFunction): void {
+export function authMiddleware(req: Request, res: Response, _next: NextFunction): void {
     const authHeader = req.headers.authorization;
 
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
@@ -253,7 +253,7 @@ export function authMiddleware(req: Request, res: Response, next: NextFunction):
 /**
  * Optional auth middleware - doesn't fail if no token
  */
-export function optionalAuthMiddleware(req: Request, res: Response, next: NextFunction): void {
+export function optionalAuthMiddleware(req: Request, res: Response, _next: NextFunction): void {
     const authHeader = req.headers.authorization;
 
     if (authHeader && authHeader.startsWith('Bearer ')) {
@@ -271,7 +271,7 @@ export function optionalAuthMiddleware(req: Request, res: Response, next: NextFu
  * Role-based access control middleware
  */
 export function requireRole(...roles: AuthUser['role'][]) {
-    return (req: Request, res: Response, next: NextFunction): void => {
+    return (req: Request, res: Response, _next: NextFunction): void => {
         if (!req.user) {
             res.status(401).json({ error: 'Authentication required' });
             return;

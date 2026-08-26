@@ -50,7 +50,7 @@ export class SelectiveDisclosureService {
     /**
      * Check if a field path exists in an object
      */
-    private getFieldValue(obj: any, path: string): any {
+    private getFieldValue(obj: unknown, path: string): unknown {
         const parts = path.split('.');
         let current = obj;
 
@@ -65,7 +65,7 @@ export class SelectiveDisclosureService {
     /**
      * Set a field value in an object using dot notation path
      */
-    private setFieldValue(obj: any, path: string, value: any): void {
+    private setFieldValue(obj: unknown, path: string, value: unknown): void {
         const parts = path.split('.');
         let current = obj;
 
@@ -82,10 +82,10 @@ export class SelectiveDisclosureService {
     /**
      * Get all field paths from a credential
      */
-    getCredentialFields(credentialData: any): string[] {
+    getCredentialFields(credentialData: unknown): string[] {
         const fields: string[] = [];
 
-        const traverse = (obj: any, prefix: string = '') => {
+        const traverse = (obj: unknown, prefix: string = '') => {
             for (const key in obj) {
                 const path = prefix ? `${prefix}.${key}` : key;
 
@@ -106,7 +106,7 @@ export class SelectiveDisclosureService {
      */
     createDisclosureToken(
         credentialId: string,
-        fullCredentialData: any,
+        fullCredentialData: unknown,
         request: SelectiveDisclosureRequest
     ): DisclosureToken {
         const allFields = this.getCredentialFields(fullCredentialData);
@@ -141,7 +141,7 @@ export class SelectiveDisclosureService {
             purpose: request.purpose,
         };
 
-        disclosureTokens.set(token.id, token);
+        disclosureTokens.set(token.token);
         return token;
     }
 
@@ -218,8 +218,8 @@ export class SelectiveDisclosureService {
     /**
      * Hash the disclosed data for integrity verification
      */
-    private hashDisclosure(data: any): string {
-        const crypto = require('crypto');
+    private hashDisclosure(data: unknown): string {
+        import crypto from 'crypto';
         const canonical = JSON.stringify(data, Object.keys(data).sort());
         return crypto.createHash('sha256').update(canonical).digest('hex');
     }

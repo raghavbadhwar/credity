@@ -81,7 +81,7 @@ router.get('/events', async (req: Request, res: Response) => {
             events,
             count: events.length,
         });
-    } catch (error: any) {
+    } catch (error: unknown) {
         return res.status(400).json({
             success: false,
             error: error?.message || 'Failed to list reputation events',
@@ -131,7 +131,7 @@ router.post('/events', async (req: Request, res: Response) => {
             reputation: reputationScore,
             safe_date: safeDate,
         });
-    } catch (error: any) {
+    } catch (error: unknown) {
         return res.status(400).json({
             success: false,
             error: error?.message || 'Failed to ingest reputation event',
@@ -152,7 +152,7 @@ router.get('/score', async (req: Request, res: Response) => {
             success: true,
             reputation: reputationScore,
         });
-    } catch (error: any) {
+    } catch (error: unknown) {
         return res.status(400).json({
             success: false,
             error: error?.message || 'Failed to calculate reputation score',
@@ -173,7 +173,7 @@ router.get('/safedate', async (req: Request, res: Response) => {
             success: true,
             safe_date: safeDate,
         });
-    } catch (error: any) {
+    } catch (error: unknown) {
         return res.status(400).json({
             success: false,
             error: error?.message || 'Failed to calculate SafeDate score',

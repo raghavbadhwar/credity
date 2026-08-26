@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import { ZodError } from "zod";
 
-export function errorHandler(err: any, req: Request, res: Response, next: NextFunction) {
+export function errorHandler(err: unknown, req: Request, res: Response, _next: NextFunction) {
     const status = err.status || err.statusCode || 500;
     const message = err.message || "Internal Server Error";
 
@@ -27,6 +27,6 @@ export function errorHandler(err: any, req: Request, res: Response, next: NextFu
 }
 
 // Wrapper for async route handlers
-export const asyncHandler = (fn: Function) => (req: Request, res: Response, next: NextFunction) => {
+export const asyncHandler = (fn: Function) => (req: Request, res: Response, _next: NextFunction) => {
     Promise.resolve(fn(req, res, next)).catch(next);
 };

@@ -22,7 +22,7 @@ router.get('/wallet/credentials', async (req, res) => {
         }
 
         res.json({ credentials });
-    } catch (error) {
+    } catch (_error) {
         console.error('Get credentials error:', error);
         res.status(500).json({ error: 'Failed to get credentials' });
     }
@@ -53,7 +53,7 @@ router.get('/wallet/credentials/:id', async (req, res) => {
             consentLogs,
             verificationCount: credential.verificationCount,
         });
-    } catch (error) {
+    } catch (_error) {
         console.error('Get credential error:', error);
         res.status(500).json({ error: 'Failed to get credential' });
     }
@@ -89,7 +89,7 @@ router.post('/wallet/credentials', async (req, res) => {
                 data: stored.data,
                 jwt: stored.jwt,
             });
-        } catch (e) {
+        } catch (_e) {
             // Ignore duplication error if any
         }
 
@@ -101,7 +101,7 @@ router.post('/wallet/credentials', async (req, res) => {
         });
 
         res.json({ success: true, credential: stored });
-    } catch (error) {
+    } catch (_error) {
         console.error('Store credential error:', error);
         res.status(500).json({ error: 'Failed to store credential' });
     }
@@ -141,7 +141,7 @@ router.post('/credentials/import', async (req, res) => {
             credential,
             message: 'Credential imported successfully',
         });
-    } catch (error) {
+    } catch (_error) {
         console.error('Error importing credential:', error);
         res.status(500).json({ error: 'Failed to import credential' });
     }
@@ -186,7 +186,7 @@ router.post('/wallet/offer/claim', async (req, res) => {
                     const issuerData = await issuerRes.json();
                     issuerName = issuerData.name || issuerName;
                 }
-            } catch (e) {
+            } catch (_e) {
                 console.log('[Wallet] Could not fetch issuer info');
             }
         }
@@ -223,7 +223,7 @@ router.post('/wallet/offer/claim', async (req, res) => {
             message: 'Credential claimed successfully'
         });
 
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error('[Wallet] Claim offer error:', error);
         res.status(500).json({ error: error.message || 'Failed to claim offer' });
     }

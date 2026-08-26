@@ -89,7 +89,7 @@ export function sanitizeInput(input: string): string {
         .replace(/>/g, '&gt;')
         .replace(/"/g, '&quot;')
         .replace(/'/g, '&#x27;')
-        .replace(/\//g, '&#x2F;')
+        .replace(///g, '&#x2F;')
         .replace(/`/g, '&#96;')
         .replace(/=/g, '&#x3D;');
 }
@@ -117,7 +117,7 @@ export function deepSanitize<T>(obj: T): T {
 /**
  * Middleware to sanitize request body, query, and params
  */
-export function sanitizationMiddleware(req: Request, _res: Response, next: NextFunction): void {
+export function sanitizationMiddleware(req: Request, _res: Response, _next: NextFunction): void {
     // Whitelist paths that need to accept URLs (don't sanitize these)
     const whitelistedPaths = [
         '/api/wallet/offer/claim',
@@ -149,7 +149,7 @@ export function sanitizationMiddleware(req: Request, _res: Response, next: NextF
 /**
  * Add unique request ID for audit logging
  */
-export function requestIdMiddleware(req: Request, res: Response, next: NextFunction): void {
+export function requestIdMiddleware(req: Request, res: Response, _next: NextFunction): void {
     const requestId = req.headers['x-request-id'] as string || crypto.randomUUID();
     req.headers['x-request-id'] = requestId;
     res.setHeader('X-Request-ID', requestId);
@@ -163,7 +163,7 @@ export function requestIdMiddleware(req: Request, res: Response, next: NextFunct
 /**
  * Additional security headers not covered by helmet defaults
  */
-export function additionalSecurityHeaders(_req: Request, res: Response, next: NextFunction): void {
+export function additionalSecurityHeaders(_req: Request, res: Response, _next: NextFunction): void {
     // Prevent browsers from caching sensitive data
     res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
     res.setHeader('Pragma', 'no-cache');
@@ -181,19 +181,19 @@ export function additionalSecurityHeaders(_req: Request, res: Response, next: Ne
 // =============================================================================
 
 const SUSPICIOUS_PATTERNS = [
-    /(\%27)|(\')|(\\-\\-)|(\\%23)|(#)/i,     // SQL injection
-    /<script\b[^>]*>([\s\S]*?)<\/script>/gi, // XSS script tags
+    /(%27)|(')|(\\-\\-)|(%23)|(#)/i,     // SQL injection
+    /<script\b[^>]*>([\s\S]*?)</script>/gi, // XSS script tags
     /javascript:/gi,                         // JavaScript protocol
     /on\w+\s*=/gi,                          // Event handlers
     /eval\s*\(/gi,                           // eval() calls
     /expression\s*\(/gi,                     // CSS expression
-    /\.\.\//g,                               // Path traversal
+    /\.\.//g,                               // Path traversal
 ];
 
 /**
  * Detect and block suspicious requests
  */
-export function suspiciousRequestDetector(req: Request, res: Response, next: NextFunction): void {
+export function suspiciousRequestDetector(req: Request, res: Response, _next: NextFunction): void {
     // Whitelist certain paths that need URLs in body
     const whitelistedPaths = [
         '/api/wallet/offer/claim',
@@ -266,7 +266,7 @@ export function unblockIP(ip: string): void {
 /**
  * Middleware to block requests from blocked IPs
  */
-export function ipBlocklistMiddleware(req: Request, res: Response, next: NextFunction): void {
+export function ipBlocklistMiddleware(req: Request, res: Response, _next: NextFunction): void {
     const clientIP = (req.headers['x-forwarded-for'] as string)?.split(',')[0] || req.ip || '';
 
     if (blockedIPs.has(clientIP)) {

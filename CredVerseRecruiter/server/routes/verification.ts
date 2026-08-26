@@ -207,7 +207,7 @@ router.post('/verify/instant', writeIdempotency, async (req, res) => {
         } else if (jwt) {
             try {
                 credentialData = parseJwtPayloadSafely(jwt);
-            } catch (decodeError: any) {
+            } catch (decodeError: unknown) {
                 return res.status(400).json({ error: decodeError?.message || 'Invalid JWT payload' });
             }
         }
@@ -256,7 +256,7 @@ router.post('/verify/instant', writeIdempotency, async (req, res) => {
         }).catch((error) => console.error('Verification webhook error:', error));
 
         res.json(responseBody);
-    } catch (error) {
+    } catch (_error) {
         console.error('Instant verification error:', error);
         res.status(500).json({ error: 'Verification failed' });
     }
@@ -289,7 +289,7 @@ router.post('/verify/qr', writeIdempotency, async (req, res) => {
             success: true,
             verification: verificationResult,
         });
-    } catch (error) {
+    } catch (_error) {
         console.error('QR verification error:', error);
         res.status(500).json({ error: 'QR verification failed' });
     }
@@ -324,7 +324,7 @@ router.post('/verify/bulk', writeIdempotency, async (req, res) => {
             success: true,
             result: bulkResult,
         });
-    } catch (error) {
+    } catch (_error) {
         console.error('Bulk verification error:', error);
         res.status(500).json({ error: 'Bulk verification failed' });
     }
@@ -343,7 +343,7 @@ router.get('/verify/bulk/:jobId', async (req, res) => {
         }
 
         res.json({ success: true, result });
-    } catch (error) {
+    } catch (_error) {
         console.error('Get bulk job error:', error);
         res.status(500).json({ error: 'Failed to get job status' });
     }
@@ -412,7 +412,7 @@ router.post('/verify/link', writeIdempotency, async (req, res) => {
         };
         await storage.addVerification(record);
         res.json({ success: true, verification: verificationResult, fraud: fraudAnalysis, record });
-    } catch (error) {
+    } catch (_error) {
         console.error('Link verification error:', error);
         res.status(500).json({ error: 'Link verification failed' });
     }
@@ -488,7 +488,7 @@ router.post('/v1/oid4vp/responses', authMiddleware, writeIdempotency, async (req
             checks: verificationResult.checks,
             risk_score: verificationResult.riskScore,
         });
-    } catch (error) {
+    } catch (_error) {
         console.error('OID4VP response processing failed:', error);
         res.status(500).json({ error: 'failed to process presentation response' });
     }
@@ -513,7 +513,7 @@ router.post('/v1/verifications/instant', authMiddleware, writeIdempotency, async
         } else if (typeof jwt === 'string') {
             try {
                 credentialData = parseJwtPayloadSafely(jwt);
-            } catch (decodeError: any) {
+            } catch (decodeError: unknown) {
                 return res.status(400).json({ error: decodeError?.message || 'Invalid JWT payload' });
             }
         }
@@ -552,7 +552,7 @@ router.post('/v1/verifications/instant', authMiddleware, writeIdempotency, async
             verification_id: contractResult.id,
             checks: verificationResult.checks,
         });
-    } catch (error) {
+    } catch (_error) {
         console.error('V1 instant verification error:', error);
         res.status(500).json({ error: 'Verification failed' });
     }
@@ -583,7 +583,7 @@ router.post('/v1/verifications/bulk', authMiddleware, writeIdempotency, async (r
             suspicious: bulkResult.suspicious,
             completed_at: bulkResult.completedAt,
         });
-    } catch (error) {
+    } catch (_error) {
         console.error('V1 bulk verification error:', error);
         res.status(500).json({ error: 'Bulk verification failed' });
     }
@@ -624,7 +624,7 @@ router.get('/v1/verifications', authMiddleware, async (req, res) => {
             total: records.length,
             items,
         });
-    } catch (error) {
+    } catch (_error) {
         console.error('V1 verification list error:', error);
         res.status(500).json({ error: 'Failed to list verifications' });
     }

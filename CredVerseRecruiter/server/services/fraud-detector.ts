@@ -51,7 +51,7 @@ class FraudDetector {
     /**
      * Analyze a credential for fraud indicators
      */
-    async analyzeCredential(credential: any): Promise<FraudAnalysisResult> {
+    async analyzeCredential(credential: unknown): Promise<FraudAnalysisResult> {
         const flags: string[] = [];
         const details: FraudDetail[] = [];
         let score = 0;
@@ -126,7 +126,7 @@ class FraudDetector {
     /**
      * Check issuer for fraud indicators
      */
-    private checkIssuer(credential: any): FraudDetail {
+    private checkIssuer(credential: unknown): FraudDetail {
         const issuer = credential.issuer?.id || credential.issuer || credential.iss;
 
         if (!issuer) {
@@ -166,7 +166,7 @@ class FraudDetector {
     /**
      * Check for temporal anomalies
      */
-    private checkTemporalAnomalies(credential: any): FraudDetail {
+    private checkTemporalAnomalies(credential: unknown): FraudDetail {
         const issuanceDate = credential.issuanceDate || credential.iat;
         const expirationDate = credential.expirationDate || credential.exp;
 
@@ -212,7 +212,7 @@ class FraudDetector {
     /**
      * Check content for suspicious patterns
      */
-    private checkContentPatterns(credential: any): FraudDetail {
+    private checkContentPatterns(credential: unknown): FraudDetail {
         const content = JSON.stringify(credential);
         const suspiciousFound: string[] = [];
 
@@ -248,7 +248,7 @@ class FraudDetector {
     /**
      * Check format consistency
      */
-    private checkFormatConsistency(credential: any): FraudDetail {
+    private checkFormatConsistency(credential: unknown): FraudDetail {
         // Check for W3C VC format compliance
         const hasContext = credential['@context'] || credential.context;
         const hasType = credential.type;
@@ -280,7 +280,7 @@ class FraudDetector {
     /**
      * Check subject information
      */
-    private checkSubjectInfo(credential: any): FraudDetail {
+    private checkSubjectInfo(credential: unknown): FraudDetail {
         const subject = credential.credentialSubject || credential.sub;
 
         if (!subject) {

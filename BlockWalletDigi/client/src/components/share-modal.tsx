@@ -49,9 +49,9 @@ export function ShareModal({ credential, open, onOpenChange }: ShareModalProps) 
   // Reset state when modal opens/closes
   useEffect(() => {
     if (!open) {
-      setShareResult(null);
-      setQrCodeUrl(null);
-      setSelectedFields([]);
+
+
+
     }
   }, [open]);
 

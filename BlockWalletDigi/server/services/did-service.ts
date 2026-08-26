@@ -144,7 +144,7 @@ export class DIDService {
      * Create a Verifiable Presentation
      */
     async createPresentation(
-        credentials: any[],
+        credentials: unknown[],
         didKeyPair: DIDKeyPair,
         domain?: string,
         challenge?: string
@@ -191,7 +191,7 @@ export class DIDService {
     /**
      * Hash credential for on-chain anchoring
      */
-    hashCredential(credential: any): string {
+    hashCredential(credential: unknown): string {
         const canonical = JSON.stringify(credential, Object.keys(credential).sort());
         return sha256(canonical);
     }

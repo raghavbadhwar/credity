@@ -39,7 +39,7 @@ router.get('/inbox', async (req, res) => {
             })),
             count: pending.length,
         });
-    } catch (error: any) {
+    } catch (error: unknown) {
         res.status(500).json({ error: error.message });
     }
 });
@@ -81,7 +81,7 @@ router.post('/inbox/:offerId/accept', async (req, res) => {
                 issuer: credential.issuer,
             },
         });
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error('Accept offer error:', error);
         res.status(500).json({ error: error.message });
     }
@@ -103,7 +103,7 @@ router.post('/inbox/:offerId/reject', async (req, res) => {
         const success = rejectCredentialOffer(offerId, wallet.did);
 
         res.json({ success });
-    } catch (error: any) {
+    } catch (error: unknown) {
         res.status(500).json({ error: error.message });
     }
 });
@@ -135,7 +135,7 @@ router.get('/inbox/:offerId', async (req, res) => {
             createdAt: offer.createdAt,
             expiresAt: offer.expiresAt,
         });
-    } catch (error: any) {
+    } catch (error: unknown) {
         res.status(500).json({ error: error.message });
     }
 });
@@ -152,14 +152,14 @@ router.post('/webhook/register', async (req, res) => {
             return res.status(400).json({ error: 'Wallet not initialized' });
         }
 
-        const secret = registerWebhook(wallet.did, webhookUrl, events);
+        const secret = registerWebhook(wallet.dwebhookUrl, events);
 
         res.json({
             success: true,
             secret,
             message: 'Webhook registered. Include X-CredVerse-Signature header with HMAC-SHA256 verification.',
         });
-    } catch (error: any) {
+    } catch (error: unknown) {
         res.status(500).json({ error: error.message });
     }
 });
@@ -196,7 +196,7 @@ router.post('/push', async (req, res) => {
             status: result.status,
             message: 'Credential offer sent to wallet',
         });
-    } catch (error: any) {
+    } catch (error: unknown) {
         res.status(500).json({ error: error.message });
     }
 });
@@ -215,7 +215,7 @@ router.get('/wallet/notifications', async (req, res) => {
             notifications,
             unreadCount: notifications.filter(n => !n.read).length,
         });
-    } catch (error) {
+    } catch (_error) {
         console.error('Get notifications error:', error);
         res.status(500).json({ error: 'Failed to get notifications' });
     }
@@ -232,7 +232,7 @@ router.post('/wallet/notifications/:id/read', async (req, res) => {
         await walletService.markNotificationRead(userId, id);
 
         res.json({ success: true });
-    } catch (error) {
+    } catch (_error) {
         console.error('Mark notification error:', error);
         res.status(500).json({ error: 'Failed to mark notification' });
     }
@@ -246,7 +246,7 @@ router.get('/activity', async (req, res) => {
         const userId = parseInt(req.query.userId as string) || 1;
         const activities = await storage.listActivities(userId);
         res.json(activities);
-    } catch (error) {
+    } catch (_error) {
         console.error('Error listing activities:', error);
         res.status(500).json({ error: 'Failed to list activities' });
     }

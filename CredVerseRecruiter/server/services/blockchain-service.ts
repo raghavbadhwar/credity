@@ -11,7 +11,7 @@ import {
 const REGISTRY_ABI = [
     "function anchorCredential(bytes32 _credentialHash) external",
     "function revokeCredential(bytes32 _credentialHash, string calldata _reason) external",
-    "function verifyCredential(bytes32 _credentialHash) external view returns (bool isValid, address issuer, uint256 anchoredAt)",
+    "function verifyCredential(bytes32 _credentialHash) external view returns (bool address issuer, uint256 anchoredAt)",
     "function isRevoked(bytes32 _credentialHash) external view returns (bool)",
     "function getCredential(bytes32 _credentialHash) external view returns (address issuer, uint256 anchoredAt, bool revoked, string memory revocationReason, uint256 revokedAt)",
     "function getStats() external view returns (uint256 anchored, uint256 revoked)",
@@ -108,7 +108,7 @@ export class BlockchainService {
                 console.log(`[Blockchain] Contract verified at ${address} on ${this.chain} (${rpcUrl})`);
                 this.isConfigured = true;
             }
-        } catch (error: any) {
+        } catch (error: unknown) {
             console.log(`[Blockchain] RPC unreachable (${error.message}) on ${this.chain} - deferred mode active`);
             this.isConfigured = false;
         }
@@ -117,7 +117,7 @@ export class BlockchainService {
     /**
      * Hash credential data for on-chain storage
      */
-    hashCredential(data: any): string {
+    hashCredential(data: unknown): string {
         const canonical = typeof data === 'string' ? data : JSON.stringify(data, Object.keys(data).sort());
         return ethers.keccak256(ethers.toUtf8Bytes(canonical));
     }
@@ -125,7 +125,7 @@ export class BlockchainService {
     /**
      * Anchor a credential hash on-chain
      */
-    async anchorCredential(credentialData: any): Promise<AnchorResult> {
+    async anchorCredential(credentialData: unknown): Promise<AnchorResult> {
         const hash = this.hashCredential(credentialData);
 
         if (!this.writesAllowed) {
@@ -156,7 +156,7 @@ export class BlockchainService {
                 blockNumber: receipt.blockNumber,
                 hash,
             };
-        } catch (error: any) {
+        } catch (error: unknown) {
             console.error('[Blockchain] Anchor error:', error.message);
             return {
                 success: false,
@@ -198,7 +198,7 @@ export class BlockchainService {
                 blockNumber: receipt.blockNumber,
                 hash: credentialHash,
             };
-        } catch (error: any) {
+        } catch (error: unknown) {
             console.error('[Blockchain] Revoke error:', error.message);
             return {
                 success: false,
@@ -220,7 +220,7 @@ export class BlockchainService {
         }
 
         try {
-            const [isValid, issuer, anchoredAt] = await this.contract.verifyCredential(credentialHash);
+            const [issuer, anchoredAt] = await this.contract.verifyCredential(credentialHash);
 
             if (anchoredAt === BigInt(0)) {
                 return { exists: false, isValid: false };
@@ -235,7 +235,7 @@ export class BlockchainService {
                 anchoredAt: Number(anchoredAt),
                 isRevoked,
             };
-        } catch (error: any) {
+        } catch (error: unknown) {
             console.error('[Blockchain] Verify error:', error.message);
             return { exists: false, isValid: false };
         }
@@ -267,7 +267,7 @@ export class BlockchainService {
                 revocationReason,
                 revokedAt: revokedAt > BigInt(0) ? new Date(Number(revokedAt) * 1000) : null,
             };
-        } catch (error) {
+        } catch (_error) {
             return { exists: false };
         }
     }
@@ -286,7 +286,7 @@ export class BlockchainService {
                 anchored: Number(anchored),
                 revoked: Number(revoked),
             };
-        } catch (error) {
+        } catch (_error) {
             return { anchored: 0, revoked: 0 };
         }
     }

@@ -155,7 +155,7 @@ export default function InstantVerify() {
     setLinkInput("");
   };
 
-  const getStatusColor = (status: string) => {
+  const _getStatusColor = (status: string) => {
     switch (status) {
       case 'verified': return 'emerald';
       case 'failed': return 'red';

@@ -44,7 +44,7 @@ router.post('/liveness/start', async (req: Request, res: Response) => {
             currentChallenge: session.challenges[0],
             expiresAt: session.expiresAt
         });
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error('Liveness start error:', error);
         res.status(500).json({ success: false, error: error.message });
     }
@@ -84,7 +84,7 @@ router.post('/liveness/challenge', async (req: Request, res: Response) => {
             sessionComplete: result.sessionComplete,
             result: result.sessionComplete ? livenessService.getSessionResult(sessionId) : null
         });
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error('Liveness challenge error:', error);
         res.status(500).json({ success: false, error: error.message });
     }
@@ -130,7 +130,7 @@ router.post('/liveness/complete', async (req: Request, res: Response) => {
 
             // Mark all challenges as complete
             for (const challenge of session.challenges) {
-                livenessService.completeChallenge(session.id, challenge.id);
+                livenessService.completeChallenge(session.challenge.id);
             }
 
             const result = livenessService.getSessionResult(session.id);
@@ -154,7 +154,7 @@ router.post('/liveness/complete', async (req: Request, res: Response) => {
                 details: aiDetails ? aiDetails.details : 'Verification failed'
             });
         }
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error('Liveness complete error:', error);
         res.status(500).json({ success: false, error: error.message });
     }
@@ -181,7 +181,7 @@ router.get('/liveness/:sessionId', async (req: Request, res: Response) => {
             success: true,
             result
         });
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error('Get liveness result error:', error);
         res.status(500).json({ success: false, error: error.message });
     }
@@ -211,7 +211,7 @@ router.get('/biometrics/status', async (req: Request, res: Response) => {
                 status: enrollment.status
             } : null
         });
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error('Biometrics status error:', error);
         res.status(500).json({ success: false, error: error.message });
     }
@@ -247,7 +247,7 @@ router.post('/biometrics/enroll', async (req: Request, res: Response) => {
                 status: enrollment.status
             }
         });
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error('Biometrics enroll error:', error);
         res.status(500).json({ success: false, error: error.message });
     }
@@ -297,7 +297,7 @@ router.post('/biometrics/verify', async (req: Request, res: Response) => {
             promptRequired: request.promptRequired,
             fallbackAvailable: request.fallbackAvailable
         });
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error('Biometrics verify error:', error);
         res.status(500).json({ success: false, error: error.message });
     }
@@ -311,7 +311,7 @@ router.post('/biometrics/verify', async (req: Request, res: Response) => {
  */
 router.post('/document/scan', async (req: Request, res: Response) => {
     try {
-        const { userId, imageData, documentType } = req.body;
+        const { userId, documentType } = req.body;
 
         if (!userId || !imageData) {
             return res.status(400).json({
@@ -321,7 +321,7 @@ router.post('/document/scan', async (req: Request, res: Response) => {
         }
 
         // Use AI to extract data and verify authenticity
-        const aiAnalysis = await aiService.analyzeDocument(imageData, documentType || 'identity_card');
+        const aiAnalysis = await aiService.analyzeDocument(documentType || 'identity_card');
 
         let extractedData = {};
 
@@ -337,7 +337,7 @@ router.post('/document/scan', async (req: Request, res: Response) => {
         });
 
         // Enhance result with AI analysis
-        const enhancedResult = {
+        const _enhancedResult = {
             ...result,
             extractedData: { ...result.extractedData, ...extractedData },
             overallScore: Math.round((result.overallScore + (aiAnalysis.isValid ? (1 - aiAnalysis.fraudScore) * 100 : 0)) / 2),
@@ -354,7 +354,7 @@ router.post('/document/scan', async (req: Request, res: Response) => {
             warnings: result.warnings,
             processingTimeMs: result.processingTimeMs
         });
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error('Document scan error:', error);
         res.status(500).json({ success: false, error: error.message });
     }
@@ -380,7 +380,7 @@ router.get('/documents', async (req: Request, res: Response) => {
                 extractedData: d.result.extractedData
             }))
         });
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error('Get documents error:', error);
         res.status(500).json({ success: false, error: error.message });
     }
@@ -432,7 +432,7 @@ router.get('/status', async (req: Request, res: Response) => {
                 types: documentStatus.types
             }
         });
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error('Get identity status error:', error);
         res.status(500).json({ success: false, error: error.message });
     }

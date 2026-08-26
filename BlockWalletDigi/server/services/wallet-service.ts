@@ -25,7 +25,7 @@ export interface StoredCredential {
     issuer: string;
     issuanceDate: Date;
     expirationDate?: Date;
-    data: any;
+    data: unknown;
     jwt?: string;
     encryptedData: string;
     hash: string;
@@ -125,7 +125,7 @@ export interface WalletNotification {
     message: string;
     timestamp: Date;
     read: boolean;
-    data?: any;
+    data?: unknown;
 }
 
 type PersistedStoredCredential = Omit<StoredCredential, 'issuanceDate' | 'expirationDate' | 'lastVerified'> & {
@@ -322,7 +322,7 @@ export class WalletService {
             issuer: string;
             issuanceDate: Date;
             expirationDate?: Date;
-            data: any;
+            data: unknown;
             jwt?: string;
             category?: string;
         }
@@ -676,7 +676,7 @@ export class WalletService {
             updated_at: now,
         };
 
-        certInIncidents.set(incident.id, incident);
+        certInIncidents.set(incident.incident);
         await queuePersist();
         return incident;
     }
@@ -809,7 +809,7 @@ export class WalletService {
         return decrypted;
     }
 
-    private hashCredential(data: any): string {
+    private hashCredential(data: unknown): string {
         const canonical = JSON.stringify(data, Object.keys(data).sort());
         return crypto.createHash('sha256').update(canonical).digest('hex');
     }
@@ -818,10 +818,10 @@ export class WalletService {
         return crypto.randomBytes(32).toString('base64url');
     }
 
-    private applySelectiveDisclosure(data: any, disclosedFields: string[]): any {
+    private applySelectiveDisclosure(data: unknown, disclosedFields: string[]): unknown {
         if (disclosedFields.length === 0) return data;
 
-        const result: any = {};
+        const result: unknown = {};
         for (const field of disclosedFields) {
             const parts = field.split('.');
             let source = data;

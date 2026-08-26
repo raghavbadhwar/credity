@@ -89,7 +89,7 @@ export function sanitizeInput(input: string): string {
         .replace(/>/g, '&gt;')
         .replace(/"/g, '&quot;')
         .replace(/'/g, '&#x27;')
-        .replace(/\//g, '&#x2F;')
+        .replace(///g, '&#x2F;')
         .replace(/`/g, '&#96;')
         .replace(/=/g, '&#x3D;');
 }
@@ -169,13 +169,13 @@ export function additionalSecurityHeaders(_req: Request, res: Response, next: Ne
 // =============================================================================
 
 const SUSPICIOUS_PATTERNS = [
-    /(\%27)|(\')|(\\-\\-)|(\\%23)|(#)/i,     // SQL injection
-    /<script\b[^>]*>([\s\S]*?)<\/script>/gi, // XSS script tags
+    /(%27)|(')|(\\-\\-)|(\%23)|(#)/i,     // SQL injection
+    /<script\b[^>]*>([\s\S]*?)</script>/gi, // XSS script tags
     /javascript:/gi,                         // JavaScript protocol
     /on\w+\s*=/gi,                          // Event handlers
     /eval\s*\(/gi,                           // eval() calls
     /expression\s*\(/gi,                     // CSS expression
-    /\.\.\//g,                               // Path traversal
+    /\.\.//g,                               // Path traversal
 ];
 
 /**

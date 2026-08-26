@@ -393,8 +393,8 @@ function checkFraudPatterns(request: ClaimVerifyRequest): number {
     // Common fraud indicators
     const fraudIndicators = [
         'urgent', 'emergency', 'immediately', 'asap',
-        'no receipt', 'lost documentation', 'can\'t provide',
-        'third party', 'someone else', 'friend\'s',
+        'no receipt', 'lost documentation', 'can't provide',
+        'third party', 'someone else', 'friend's',
     ];
 
     for (const indicator of fraudIndicators) {
@@ -429,7 +429,7 @@ function estimateLlmConfidence(description: string): number {
     if (description.length > 500) confidence += 0.1;
 
     // Check for specific details (dates, times, names)
-    const hasSpecificDetails = /\d{1,2}[:\-\/]\d{1,2}|\d{4}[-\/]\d{2}|\d{1,2}(?:am|pm)/i.test(description);
+    const hasSpecificDetails = /\d{1,2}[:\-/]\d{1,2}|\d{4}[-/]\d{2}|\d{1,2}(?:am|pm)/i.test(description);
     if (hasSpecificDetails) confidence += 0.1;
 
     return Math.min(1, confidence);

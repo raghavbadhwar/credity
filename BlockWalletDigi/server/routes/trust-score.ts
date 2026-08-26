@@ -55,7 +55,7 @@ router.get('/', async (req: Request, res: Response) => {
             history: history.slice(-7), // Last 7 days
             lastUpdated: new Date().toISOString()
         });
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error('Trust score error:', error);
         res.status(500).json({
             success: false,
@@ -88,7 +88,7 @@ router.get('/breakdown', async (req: Request, res: Response) => {
                 lastActivity: userData.lastActivityDate
             }
         });
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error('Trust score breakdown error:', error);
         res.status(500).json({
             success: false,
@@ -117,7 +117,7 @@ router.get('/suggestions', async (req: Request, res: Response) => {
             longTerm,
             potentialPoints: suggestions.reduce((sum: number, s: ImprovementSuggestion) => sum + s.points, 0)
         });
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error('Trust score suggestions error:', error);
         res.status(500).json({
             success: false,
@@ -141,7 +141,7 @@ router.get('/history', async (req: Request, res: Response) => {
             history: history.slice(-days),
             trend: calculateTrend(history)
         });
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error('Trust score history error:', error);
         res.status(500).json({
             success: false,

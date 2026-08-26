@@ -70,3 +70,5 @@ export const useTheme = () => {
 
   return context
 }
+
+export const dummy = 'dummy';

@@ -154,7 +154,7 @@ export function generateImprovementSuggestions(
         suggestions.push({
             id: 'liveness',
             title: 'Complete Liveness Check',
-            description: 'Verify you\'re a real person with a quick face scan',
+            description: 'Verify you're a real person with a quick face scan',
             points: 15,
             category: 'quick_win',
             action: '/liveness',

@@ -29,7 +29,7 @@ function arrayBufferToBase64(buffer: ArrayBuffer): string {
 }
 
 export function useBiometrics() {
-    const [isSupported, setIsSupported] = useState<boolean>(
+    const [isSupported, _setIsSupported] = useState<boolean>(
         typeof window !== 'undefined' &&
         !!window.PublicKeyCredential &&
         typeof window.PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable === 'function'

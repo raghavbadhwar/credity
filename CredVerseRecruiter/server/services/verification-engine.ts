@@ -21,14 +21,14 @@ export interface VerificationCheck {
     name: string;
     status: 'passed' | 'failed' | 'warning' | 'skipped';
     message: string;
-    details?: any;
+    details?: unknown;
 }
 
 export interface CredentialPayload {
     jwt?: string;
     qrData?: string;
     credentialId?: string;
-    raw?: any;
+    raw?: unknown;
 }
 
 export interface BulkVerificationResult {
@@ -186,7 +186,7 @@ export class VerificationEngine {
 
         try {
             // Parse credential
-            let credential: any;
+            let credential: unknown;
             if (payload.jwt) {
                 credential = this.parseJWT(payload.jwt);
                 checks.push({
@@ -285,7 +285,7 @@ export class VerificationEngine {
             await queuePersist();
 
             return result;
-        } catch (error) {
+        } catch (_error) {
             console.error('Verification error:', error);
             return this.createFailedResult(verificationId, 'Verification process failed');
         }
@@ -330,7 +330,7 @@ export class VerificationEngine {
     /**
      * Parse JWT credential
      */
-    private parseJWT(jwt: string): any {
+    private parseJWT(jwt: string): unknown {
         try {
             const parts = jwt.split('.');
             if (parts.length !== 3) return null;
@@ -345,7 +345,7 @@ export class VerificationEngine {
     /**
      * Parse QR data
      */
-    private parseQRData(qrData: string): any {
+    private parseQRData(qrData: string): unknown {
         try {
             return JSON.parse(qrData);
         } catch {
@@ -360,7 +360,7 @@ export class VerificationEngine {
     /**
      * Verify credential signature
      */
-    private async verifySignature(credential: any): Promise<VerificationCheck> {
+    private async verifySignature(credential: unknown): Promise<VerificationCheck> {
         // Get issuer identifier (could be DID or plain name)
         const issuer = credential.issuer?.id || credential.iss || credential.issuer;
         const isValidDid = typeof issuer === 'string' && issuer.startsWith('did:');
@@ -379,7 +379,7 @@ export class VerificationEngine {
     /**
      * Verify issuer with remote registry fallback
      */
-    private async verifyIssuer(credential: any): Promise<VerificationCheck> {
+    private async verifyIssuer(credential: unknown): Promise<VerificationCheck> {
         // Handle different credential formats (VC vs raw)
         const issuerDid = typeof credential.issuer === 'string'
             ? credential.issuer
@@ -419,7 +419,7 @@ export class VerificationEngine {
                 } else {
                     console.warn(`[Verification] Issuer lookup failed for ${issuerDid}: ${res.status}`);
                 }
-            } catch (e) {
+            } catch (_e) {
                 console.error(`[Verification] Failed to resolve issuer ${issuerDid} remotely:`, e);
             }
         }
@@ -450,7 +450,7 @@ export class VerificationEngine {
     /**
      * Check credential expiration
      */
-    private checkExpiration(credential: any): VerificationCheck {
+    private checkExpiration(credential: unknown): VerificationCheck {
         const expDate = credential.expirationDate || credential.exp;
 
         if (!expDate) {
@@ -477,7 +477,7 @@ export class VerificationEngine {
     /**
      * Check revocation status - REAL CHECK
      */
-    private async checkRevocation(credential: any): Promise<VerificationCheck> {
+    private async checkRevocation(credential: unknown): Promise<VerificationCheck> {
         const credentialId = credential.id || credential.jti;
 
         if (!credentialId) {
@@ -506,7 +506,7 @@ export class VerificationEngine {
                     details: { revoked: isRevoked, checkedAt: new Date().toISOString() },
                 };
             }
-        } catch (e) {
+        } catch (_e) {
             console.error("Revocation check failed", e);
         }
 
@@ -522,10 +522,10 @@ export class VerificationEngine {
     /**
      * Check on-chain anchor
      */
-    private async checkOnChainAnchor(credential: any): Promise<VerificationCheck> {
+    private async checkOnChainAnchor(credential: unknown): Promise<VerificationCheck> {
         // Hash the credential data to find it on-chain
         // The issuance process hashes the credential content
-        let dataToHash = Buffer.isBuffer(credential) ? credential.toString() : credential;
+        let const _dataToHash = Buffer.isBuffer(credential) ? credential.toString() : credential;
 
         // If it's a JWT payload, we might need to verify the hash of the original JWT or the payload depending on how issuer anchored it.
         // Assuming issuer anchors hash of the VC Payload/claim
@@ -565,7 +565,7 @@ export class VerificationEngine {
     /**
      * Resolve DID Document
      */
-    private async resolveDID(credential: any): Promise<VerificationCheck> {
+    private async resolveDID(credential: unknown): Promise<VerificationCheck> {
         const did = credential.issuer?.id || credential.iss || credential.holder || credential.sub;
 
         if (!did || !did.startsWith?.('did:')) {
@@ -626,7 +626,7 @@ export class VerificationEngine {
     /**
      * Hash credential for verification
      */
-    private hashCredential(credential: any): string {
+    private hashCredential(credential: unknown): string {
         const canonical = JSON.stringify(credential, Object.keys(credential).sort());
         return crypto.createHash('sha256').update(canonical).digest('hex');
     }

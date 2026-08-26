@@ -61,8 +61,8 @@ interface ConsentLog {
 }
 
 export default function CredentialDetail() {
-  const [location, setLocation] = useLocation();
-  const [match, params] = useRoute("/credential/:id");
+  const [_location, _setLocation] = useLocation();
+  const [_match, params] = useRoute("/credential/:id");
   const [shareModalOpen, setShareModalOpen] = useState(false);
   const [copied, setCopied] = useState(false);
 
