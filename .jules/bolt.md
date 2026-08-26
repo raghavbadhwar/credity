@@ -1,0 +1,3 @@
+## 2024-05-18 - Idempotency Middleware Cache Expiration Bottleneck
+**Learning:** In `packages/shared-auth/src/idempotency.ts`, the `pruneExpired` function performed an O(N) traversal of the entire cache Map on *every single request* to find and remove expired entries. For a high-traffic endpoint with thousands of cached entries, this causes a severe CPU bottleneck and drastically increases response times.
+**Action:** When implementing cache expiration strategies that require full iteration (O(N)), ensure the cleanup process is either deferred (e.g., using `setTimeout` or a background job) or aggressively throttled (e.g., executing at most once per minute using a `lastPruneTime` check) rather than running synchronously on every request.
